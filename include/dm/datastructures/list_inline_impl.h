@@ -69,26 +69,26 @@ public:
 
 Ty* getObjAt(uint16_t _idx)
 {
-    Base* base = const_cast<Base*>(this);
-    return base->getObjAtImpl(_idx);
+    This* list = const_cast<This*>(this);
+    return list->getObjAtImpl(_idx);
 }
 
 const Ty* getObjAt(uint16_t _idx) const
 {
-    Base* base = const_cast<Base*>(this);
-    return base->getObjAtImpl(_idx);
+    This* list = const_cast<This*>(this);
+    return list->getObjAtImpl(_idx);
 }
 
 Ty& operator[](uint16_t _idx)
 {
-    Base* base = const_cast<Base*>(this);
-    return *base->getObjAtImpl(_idx);
+    This* list = const_cast<This*>(this);
+    return *list->getObjAtImpl(_idx);
 }
 
 const Ty& operator[](uint16_t _idx) const
 {
-    Base* base = const_cast<Base*>(this);
-    return *base->getObjAtImpl(_idx);
+    This* list = const_cast<This*>(this);
+    return *list->getObjAtImpl(_idx);
 }
 
 void remove(uint16_t _handle)

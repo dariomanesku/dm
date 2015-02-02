@@ -20,7 +20,7 @@ namespace dm
     template <typename Ty/*obj type*/, uint16_t MaxT>
     struct ListT
     {
-        typedef typename ListT<Ty,MaxT> Base;
+        typedef typename ListT<Ty,MaxT> This;
 
         ListT()
         {
@@ -46,7 +46,7 @@ namespace dm
     template <typename Ty/*obj type*/>
     struct List
     {
-        typedef typename List<Ty> Base;
+        typedef typename List<Ty> This;
 
         // Uninitialized state, init() needs to be called !
         List()
