@@ -285,7 +285,7 @@ namespace dm
     }
 
     /// Notice: do NOT use return value of this function for memory deallocation!
-    char* trim(char* _str)
+    DM_INLINE char* trim(char* _str)
     {
         // Advance ptr until a non-space character is reached.
         while (isspace(*_str))
