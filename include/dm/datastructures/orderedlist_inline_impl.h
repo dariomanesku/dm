@@ -15,7 +15,7 @@ Ty* getObjFromIdx(uint16_t _idx)
 {
     DM_CHECK(_idx < max(), "olGetObjFromIdx | %d, %d", _idx, max());
 
-    const uint16_t handle = m_handleArray.getVal(_idx);
+    const uint16_t handle = m_handleArray.get(_idx);
     return this->getObjFromHandle(handle);
 }
 
@@ -24,7 +24,7 @@ uint16_t getIdxFromHandle(uint16_t _handle)
 {
     for (uint16_t ii = 0, end = this->count(); ii < end; ++ii)
     {
-        if (m_handleArray.getVal(ii) == _handle)
+        if (m_handleArray.get(ii) == _handle)
         {
             return ii;
         }
@@ -37,14 +37,14 @@ uint16_t getHandleFromIdx(uint16_t _idx)
 {
     DM_CHECK(_idx < max(), "olGetHandleFromIdx | %d, %d", _idx, max());
 
-    return m_handleArray.getVal(_idx);
+    return m_handleArray.get(_idx);
 }
 
 void remove(uint16_t _idx)
 {
     DM_CHECK(_idx < max(), "olRemove | %d, %d", _idx, max());
 
-    const uint16_t handle = m_handleArray.getVal(_idx);
+    const uint16_t handle = m_handleArray.get(_idx);
     Base::remove(handle);
     m_handleArray.remove(_idx);
 }

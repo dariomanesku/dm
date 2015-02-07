@@ -14,6 +14,7 @@
 #include "../check.h" // DM_CHECK
 
 #include "list.h"
+#include "array.h"
 
 namespace dm
 {

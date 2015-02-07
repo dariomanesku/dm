@@ -7,6 +7,7 @@
 #define DM_DATASTRUCTURES_H_HEADER_GUARD
 
 #include "datastructures/array.h"
+#include "datastructures/objarray.h"
 #include "datastructures/bitarray.h"
 #include "datastructures/handlealloc.h"
 #include "datastructures/list.h"

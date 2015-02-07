@@ -10,23 +10,6 @@ void add(Ty _value)
     m_values[m_count++] = _value;
 }
 
-uint32_t addObj(const Ty& _obj)
-{
-    DM_CHECK(m_count < max(), "arrayAddObj | %d, %d", m_count, max());
-
-    Ty* dst = &m_values[m_count++];
-    dst = ::new (dst) Ty(_obj);
-
-    return (m_count-1);
-}
-
-Ty* addNew()
-{
-    DM_CHECK(m_count < max(), "arrayAddNew | %d, %d", m_count, max());
-
-    return &m_values[m_count++];
-}
-
 void remove(uint32_t _idx)
 {
     DM_CHECK(m_count <= max(), "arrayRemove - 0 | %d, %d", m_count, max());
@@ -35,7 +18,6 @@ void remove(uint32_t _idx)
     Ty* elem = &m_values[_idx];
     Ty* next = &m_values[_idx+1];
 
-    elem->~Ty();
     memmove(elem, next, (m_count-_idx-1)*sizeof(Ty));
 
     m_count--;
@@ -47,46 +29,26 @@ void removeSwap(uint32_t _idx)
     DM_CHECK(m_count <= max(), "arrayRemoveSwap - 0 | %d, %d", m_count, max());
     DM_CHECK(_idx < max(), "arrayRemoveSwap - 1 | %d, %d", _idx, max());
 
-    Ty* elem = &m_values[_idx];
-    Ty* last = &m_values[m_count-1];
-
-    elem->~Ty();
-    elem->Ty(*last);
-
-    m_count--;
+    m_values[_idx] = m_values[--m_count];
 }
 
-Ty getVal(uint32_t _idx) const
+Ty get(uint32_t _idx) const
 {
-    DM_CHECK(_idx < max(), "arrayGetVal | %d, %d", _idx, max());
+    DM_CHECK(_idx < max(), "arrayGet | %d, %d", _idx, max());
 
     return m_values[_idx];
 }
 
 Ty operator[](uint32_t _idx) const
 {
-    DM_CHECK(_idx < max(), "arrayGetVal | %d, %d", _idx, max());
+    DM_CHECK(_idx < max(), "array[] const | %d, %d", _idx, max());
 
     return m_values[_idx];
 }
 
-Ty* getPtr(uint32_t _idx)
-{
-    DM_CHECK(_idx < max(), "arrayGetRef | %d, %d", _idx, max());
-
-    return &m_values[_idx];
-}
-
-const Ty* getPtr(uint32_t _idx) const
-{
-    DM_CHECK(_idx < max(), "arrayGetRef | %d, %d", _idx, max());
-
-    return &m_values[_idx];
-}
-
 Ty& operator[](uint32_t _idx)
 {
-    DM_CHECK(_idx < max(), "arrayGetRef | %d, %d", _idx, max());
+    DM_CHECK(_idx < max(), "array[] ref | %d, %d", _idx, max());
 
     return m_values[_idx];
 }
