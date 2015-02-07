@@ -11,7 +11,7 @@
 #include "datastructures/bitarray.h"
 #include "datastructures/handlealloc.h"
 #include "datastructures/list.h"
-#include "datastructures/orderedlist.h"
+#include "datastructures/oplist.h"
 #include "datastructures/linkedlist.h"
 #include "datastructures/set.h"
 #include "datastructures/kvmap.h"
