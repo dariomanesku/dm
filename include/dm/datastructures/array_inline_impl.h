@@ -12,7 +12,7 @@ void add(Ty _value)
 
 void remove(uint32_t _idx)
 {
-    DM_CHECK(m_count <= max(), "arrayRemove - 0 | %d, %d", m_count, max());
+    DM_CHECK(0 < m_count && m_count <= max(), "arrayRemove - 0 | %d, %d", m_count, max());
     DM_CHECK(_idx < max(), "arrayRemove - 1 | %d, %d", _idx, max());
 
     Ty* elem = &m_values[_idx];
@@ -26,7 +26,7 @@ void remove(uint32_t _idx)
 // Uses swap instead of memmove. Order is not preserved!
 void removeSwap(uint32_t _idx)
 {
-    DM_CHECK(m_count <= max(), "arrayRemoveSwap - 0 | %d, %d", m_count, max());
+    DM_CHECK(0 < m_count && m_count <= max(), "arrayRemoveSwap - 0 | %d, %d", m_count, max());
     DM_CHECK(_idx < max(), "arrayRemoveSwap - 1 | %d, %d", _idx, max());
 
     m_values[_idx] = m_values[--m_count];

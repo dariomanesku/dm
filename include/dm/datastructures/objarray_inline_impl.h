@@ -22,7 +22,7 @@ uint32_t addObj(const Ty& _obj)
 
 void remove(uint32_t _idx)
 {
-    DM_CHECK(m_count <= max(), "objarrayRemove - 0 | %d, %d", m_count, max());
+    DM_CHECK(0 < m_count && m_count <= max(), "objarrayRemove - 0 | %d, %d", m_count, max());
     DM_CHECK(_idx < max(), "objarrayRemove - 1 | %d, %d", _idx, max());
 
     Ty* elem = &m_values[_idx];
@@ -37,16 +37,17 @@ void remove(uint32_t _idx)
 // Uses swap instead of memmove. Order is not preserved!
 void removeSwap(uint32_t _idx)
 {
-    DM_CHECK(m_count <= max(), "objarrayRemoveSwap - 0 | %d, %d", m_count, max());
+    DM_CHECK(0 < m_count && m_count <= max(), "objarrayRemoveSwap - 0 | %d, %d", m_count, max());
     DM_CHECK(_idx < max(), "objarrayRemoveSwap - 1 | %d, %d", _idx, max());
 
     Ty* elem = &m_values[_idx];
-    Ty* last = &m_values[m_count-1];
-
     elem->~Ty();
-    elem->Ty(*last);
 
-    m_count--;
+    if (_idx != --m_count)
+    {
+        Ty* last = &m_values[m_count];
+        elem->Ty(*last);
+    }
 }
 
 void removeAll()
