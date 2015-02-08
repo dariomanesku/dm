@@ -116,4 +116,9 @@ void removeAll()
     }
 }
 
+void reset()
+{
+    m_handles.reset();
+}
+
 /* vim: set sw=4 ts=4 expandtab: */
