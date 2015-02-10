@@ -23,6 +23,13 @@ void remove(uint32_t _idx)
     m_count--;
 }
 
+Ty pop()
+{
+    DM_CHECK(0 < m_count, "arrayPop | %d", m_count);
+
+    return m_values[--m_count];
+}
+
 // Uses swap instead of memmove. Order is not preserved!
 void removeSwap(uint32_t _idx)
 {
