@@ -127,6 +127,11 @@ namespace dm
     #define U_UKB(_size) asKBInt(_size), asKBDec(_size)
     #define U_UMB(_size) asMBInt(_size), asMBDec(_size)
 
+    DM_INLINE bool toBool(int32_t _v)
+    {
+        return (0 != _v);
+    }
+
     DM_INLINE bool inside(int32_t _px, int32_t _py, int32_t _minx, int32_t _miny, int32_t _width, int32_t _height)
     {
         return (_px > _minx)
@@ -211,6 +216,11 @@ namespace dm
     DM_INLINE float decimalPart(float _val)
     {
         return _val - integerPart(_val);
+    }
+
+    DM_INLINE bool set(float _flag)
+    {
+        return (0.0f != _flag);
     }
 
     DM_INLINE float signf(float _val)
