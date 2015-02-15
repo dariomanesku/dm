@@ -7,13 +7,14 @@
 #define DM_MISC_H_HEADER_GUARD
 
 #include <stdint.h>
-#include <math.h> // logf()
-#include <stdio.h> // FILE
-#include <float.h> // FLT_EPSILON
-#include <malloc.h> //alloca
+#include <ctype.h>  // toupper()
+#include <math.h>   // logf()
+#include <stdio.h>  // FILE
+#include <float.h>  // FLT_EPSILON
+#include <malloc.h> // alloca()
 
 #include "common/common.h" // DM_INLINE()
-#include "check.h" // DM_CHECK()
+#include "check.h"         // DM_CHECK()
 
 #include "../../3rdparty/bx/os.h" //bx::pwd()
 
@@ -233,7 +234,6 @@ namespace dm
         return _x*_x;
     }
 
-    #if defined(_MSC_VER)
     DM_INLINE float fminf(float _a, float _b)
     {
         return _a < _b ? _a : _b;
@@ -244,10 +244,16 @@ namespace dm
         return _a > _b ? _a : _b;
     }
 
+    #if defined(_MSC_VER)
     DM_INLINE float log2f(float _val)
     {
         static const float invLog2 = 1.4426950408889634f;
         return logf(_val)*invLog2;
+    }
+    #else
+    DM_INLINE float log2f(float _val)
+    {
+        return ::log2f(_val);
     }
     #endif //defined(_MSC_VER)
 
@@ -330,8 +336,8 @@ namespace dm
     DM_INLINE void realpath(char _abs[DM_PATH_LEN], const char _rel[DM_PATH_LEN])
     {
         // TODO:
-        //realpath(_state.m_directory, path); //Linux
-        //_fullpath(path, _state.m_directory, DM_PATH_LEN); //Windows
+        //realpath(_dir, path); //Linux
+        //_fullpath(path, _dir, DM_PATH_LEN); //Windows
         char currentDir[DM_PATH_LEN];
         bx::pwd(currentDir, DM_PATH_LEN);
 
