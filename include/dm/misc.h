@@ -125,8 +125,8 @@ namespace dm
     }
 
     /// Used for formatted print. Example: printf("Size: %u.%uMB", U_UMB(size));
-    #define U_UKB(_size) asKBInt(_size), asKBDec(_size)
-    #define U_UMB(_size) asMBInt(_size), asMBDec(_size)
+    #define U_UKB(_size) dm::asKBInt(_size), dm::asKBDec(_size)
+    #define U_UMB(_size) dm::asMBInt(_size), dm::asMBDec(_size)
 
     DM_INLINE bool toBool(int32_t _v)
     {
