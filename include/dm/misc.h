@@ -16,7 +16,8 @@
 #include "common/common.h" // DM_INLINE()
 #include "check.h"         // DM_CHECK()
 
-#include "../../3rdparty/bx/os.h" //bx::pwd()
+#include "../../3rdparty/bx/os.h"       // bx::pwd()
+#include "../../3rdparty/bx/uint32_t.h" // bx::uint32_cntlz(), bx::uint64_cntlz()
 
 namespace dm
 {
@@ -97,6 +98,40 @@ namespace dm
     #define DM_MEGABYTES(_MB)     (_MB##ul<<20ul)
     #define DM_GIGABYTES(_GB)     (_GB##ul<<30ul)
     #define DM_GIGABYTES_ULL(_GB) (_GB##ull<<30ull)
+
+    DM_INLINE uint32_t log2floor(uint32_t _u32)
+    {
+        return (31 - bx::uint32_cntlz(_u32));
+    }
+
+    DM_INLINE uint64_t log2floor(uint64_t _u64)
+    {
+        return (63 - bx::uint64_cntlz(_u64));
+    }
+
+    DM_INLINE uint32_t log2ceil(uint32_t _u32)
+    {
+        const uint32_t floor = log2floor(_u32);
+        const uint32_t mask = (UINT32_C(1)<<floor)-1;
+        return floor + (0 != (_u32&mask));
+    }
+
+    DM_INLINE uint64_t log2ceil(uint64_t _u64)
+    {
+        const uint64_t floor = log2floor(_u64);
+        const uint64_t mask = (UINT64_C(1)<<floor)-1;
+        return floor + (0 != (_u64&mask));
+    }
+
+    DM_INLINE uint32_t log2(uint32_t _u32)
+    {
+        return log2floor(_u32);
+    }
+
+    DM_INLINE uint64_t log2(uint64_t _u64)
+    {
+        return log2floor(_u64);
+    }
 
     /// Example: for input 12780 (12.492KB) returns 12.
     DM_INLINE uint64_t asKBInt(uint64_t _dataSize)
