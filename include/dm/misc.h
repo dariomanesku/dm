@@ -133,6 +133,26 @@ namespace dm
         return log2floor(_u64);
     }
 
+    /// Usage:
+    ///   270 -> 256 /* For a non-power-of-two input, returns expected value. */
+    ///   256 -> 256 /* For a power-of-two input, returns the same value. */
+    ///     0 ->   1 /* For 0 input, returns invalid value! BEWARE! */
+    DM_INLINE uint32_t prevPowTwo(uint32_t _u32)
+    {
+        const uint32_t floor = log2floor(_u32);
+        return (UINT32_C(1)<<floor);
+    }
+
+    /// Usage:
+    ///   270 -> 512 /* For a non-power-of-two input, returns expected value. */
+    ///   256 -> 256 /* For a power-of-two input, returns the same value. */
+    ///     0 ->   1 /* For 0 input, returns invalid value! BEWARE! */
+    DM_INLINE uint32_t nextPowTwo(uint32_t _u32)
+    {
+        const uint32_t ceil = log2ceil(_u32);
+        return (UINT32_C(1)<<ceil);
+    }
+
     /// Example: for input 12780 (12.492KB) returns 12.
     DM_INLINE uint64_t asKBInt(uint64_t _dataSize)
     {
