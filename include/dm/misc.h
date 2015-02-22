@@ -202,6 +202,11 @@ namespace dm
         return float(int32_t(_u32));
     }
 
+    DM_INLINE uint32_t ftou(float _f)
+    {
+        return uint32_t(int32_t(_f));
+    }
+
     DM_INLINE bool equals(float _a, float _b, float _epsilon = FLT_EPSILON)
     {
         return fabsf(_a - _b) < _epsilon;
