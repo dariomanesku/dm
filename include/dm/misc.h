@@ -136,7 +136,7 @@ namespace dm
     /// Usage:
     ///   270 -> 256 /* For a non-power-of-two input, returns expected value. */
     ///   256 -> 256 /* For a power-of-two input, returns the same value. */
-    ///     0 ->   1 /* For 0 input, returns invalid value! BEWARE! */
+    ///     0 ->   1 /* For 0 input, returns invalid value! */
     DM_INLINE uint32_t prevPowTwo(uint32_t _u32)
     {
         const uint32_t floor = log2floor(_u32);
@@ -146,7 +146,7 @@ namespace dm
     /// Usage:
     ///   270 -> 512 /* For a non-power-of-two input, returns expected value. */
     ///   256 -> 256 /* For a power-of-two input, returns the same value. */
-    ///     0 ->   1 /* For 0 input, returns invalid value! BEWARE! */
+    ///     0 ->   1 /* For 0 input, returns 1. */
     DM_INLINE uint32_t nextPowTwo(uint32_t _u32)
     {
         const uint32_t ceil = log2ceil(_u32);
