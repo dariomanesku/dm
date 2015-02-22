@@ -48,6 +48,7 @@ namespace dm
 
     private:
         enum { NumSlots = ((MaxT-1)>>6)+1 };
+        uint16_t m_last;
         uint64_t m_bits[NumSlots];
     };
 
@@ -130,6 +131,7 @@ namespace dm
         }
 
     private:
+        uint16_t m_last;
         uint16_t m_max;
         uint16_t m_numSlots;
         uint64_t* m_bits;

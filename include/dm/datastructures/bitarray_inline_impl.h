@@ -39,21 +39,63 @@ bool isSet(uint16_t _bit)
     return (0 != (m_bits[bucket] & bit));
 }
 
+private:
+inline uint16_t setRightmostBit(uint16_t _slot)
+{
+    const uint64_t rightmost = m_bits[_slot]+1;
+    m_bits[_slot] |= rightmost;
+
+    const uint16_t pos = uint16_t(bx::uint64_cnttz(rightmost));
+    const uint16_t idx = (_slot<<6)+pos;
+    const uint16_t max = this->max();
+    return idx < max ? idx : max;
+}
+public:
+
 uint16_t setFirst()
 {
-    for (uint16_t ii = 0, end = numSlots(); ii < end; ++ii)
+    for (uint16_t slot = 0, end = numSlots(); slot < end; ++slot)
     {
-        const bool hasUnsetBits = (m_bits[ii] != UINT64_MAX);
+        const bool hasUnsetBits = (m_bits[slot] != UINT64_MAX);
         if (hasUnsetBits)
         {
-            // Set the rightmost bit.
-            const uint64_t rightmost = m_bits[ii]+1;
-            m_bits[ii] |= rightmost;
+            return setRightmostBit(slot);
+        }
+    }
 
-            const uint16_t pos = uint16_t(bx::uint64_cnttz(rightmost));
-            const uint16_t idx = (ii<<6)+pos;
-            const uint16_t max = this->max();
-            return idx < max ? idx : max;
+    return max();
+}
+
+uint16_t setAny()
+{
+    const uint16_t begin = m_last;
+    const uint16_t count = numSlots();
+
+    for (uint16_t slot = begin, end = numSlots(); slot < end; ++slot)
+    {
+        const bool hasUnsetBits = (m_bits[slot] != UINT64_MAX);
+        if (hasUnsetBits)
+        {
+            return setRightmostBit(slot);
+        }
+        else
+        {
+            m_last = slot+1;
+        }
+    }
+
+    m_last = (m_last >= count) ? 0 : m_last;
+
+    for (uint16_t slot = 0, end = begin; slot < end; ++slot)
+    {
+        const bool hasUnsetBits = (m_bits[slot] != UINT64_MAX);
+        if (hasUnsetBits)
+        {
+            return setRightmostBit(slot);
+        }
+        else
+        {
+            m_last = slot+1;
         }
     }
 
@@ -148,6 +190,7 @@ uint16_t count()
 
 void reset()
 {
+    m_last = 0;
     memset(m_bits, 0, sizeof(m_bits));
 }
 
