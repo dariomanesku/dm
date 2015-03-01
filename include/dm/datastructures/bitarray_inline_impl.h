@@ -5,7 +5,7 @@
 
 void set(uint32_t _bit)
 {
-    DM_CHECK(_bit < m_max, "bitArraySet | %d, %d", _bit, m_max);
+    DM_CHECK(_bit < max(), "bitArraySet | %d, %d", _bit, max());
 
     const uint32_t bucket = _bit>>6;
     const uint64_t bit    = UINT64_C(1)<<(_bit&63);
@@ -191,7 +191,7 @@ uint32_t count()
 void reset()
 {
     m_last = 0;
-    memset(m_bits, 0, sizeof(m_bits));
+    memset(m_bits, 0, numSlots()*sizeof(uint64_t));
 }
 
 /* vim: set sw=4 ts=4 expandtab: */
