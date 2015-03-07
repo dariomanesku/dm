@@ -17,6 +17,7 @@
 #include "check.h"         // DM_CHECK()
 
 #include "../../3rdparty/bx/os.h"       // bx::pwd()
+#include "../../3rdparty/bx/string.h"   // bx::strlcat()
 #include "../../3rdparty/bx/uint32_t.h" // bx::uint32_cntlz(), bx::uint64_cntlz()
 
 namespace dm
@@ -395,16 +396,52 @@ namespace dm
 
     DM_INLINE void realpath(char _abs[DM_PATH_LEN], const char _rel[DM_PATH_LEN])
     {
-        // TODO:
-        //realpath(_dir, path); //Linux
-        //_fullpath(path, _dir, DM_PATH_LEN); //Windows
-        char currentDir[DM_PATH_LEN];
-        bx::pwd(currentDir, DM_PATH_LEN);
+        #if BX_PLATFORM_OSX
+            ::realpath(_rel, _abs);
+        #else
+            // TODO:
+            //realpath(_dir, path); //Linux
+            //_fullpath(path, _dir, DM_PATH_LEN); //Windows
+            char currentDir[DM_PATH_LEN];
+            bx::pwd(currentDir, DM_PATH_LEN);
 
-        bx::chdir(_rel);
-        bx::pwd(_abs, DM_PATH_LEN);
+            bx::chdir(_rel);
+            bx::pwd(_abs, DM_PATH_LEN);
 
-        bx::chdir(currentDir);
+            bx::chdir(currentDir);
+        #endif
+    }
+
+    DM_INLINE void homeDir(char _home[DM_PATH_LEN])
+    {
+        #if BX_PLATFORM_WINDOWS
+        #elif BX_PLATFORM_LINUX
+        #elif BX_PLATFORM_OSX
+            strscpy(_home, getenv("HOME"), DM_PATH_LEN);
+        #else
+        #endif
+    }
+
+    DM_INLINE void desktopDir(char _home[DM_PATH_LEN])
+    {
+        #if BX_PLATFORM_WINDOWS
+        #elif BX_PLATFORM_LINUX
+        #elif BX_PLATFORM_OSX
+            strscpy(_home, getenv("HOME"), DM_PATH_LEN);
+            bx::strlcat(_home, "/Desktop/", DM_PATH_LEN);
+        #else
+        #endif
+    }
+
+    DM_INLINE void rootDir(char _home[DM_PATH_LEN])
+    {
+        #if BX_PLATFORM_WINDOWS
+        #elif BX_PLATFORM_LINUX
+        #elif BX_PLATFORM_OSX
+            _home[0] = '/';
+            _home[1] = '\0';
+        #else
+        #endif
     }
 
     /// Gets file name without extension from file path. Examples:
