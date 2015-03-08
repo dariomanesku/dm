@@ -7,6 +7,7 @@
 #define DM_MISC_H_HEADER_GUARD
 
 #include <stdint.h>
+#include <stdlib.h> // _fullpath
 #include <ctype.h>  // toupper()
 #include <math.h>   // logf()
 #include <stdio.h>  // FILE, fopen()
@@ -398,10 +399,11 @@ namespace dm
     {
         #if BX_PLATFORM_OSX
             ::realpath(_rel, _abs);
+        #elif BX_PLATFORM_WINDOWS
+            _fullpath(_abs, _rel, DM_PATH_LEN);
         #else
             // TODO:
             //realpath(_dir, path); //Linux
-            //_fullpath(path, _dir, DM_PATH_LEN); //Windows
             char currentDir[DM_PATH_LEN];
             bx::pwd(currentDir, DM_PATH_LEN);
 
@@ -415,11 +417,14 @@ namespace dm
     DM_INLINE void homeDir(char _path[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
-            strscpy(_path, "C:\\", DM_PATH_LEN);
+            strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
+            bx::strlcat(_path, "\\", DM_PATH_LEN);
         #elif BX_PLATFORM_LINUX
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
+            bx::strlcat(_path, "/", DM_PATH_LEN);
         #elif BX_PLATFORM_OSX
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
+            bx::strlcat(_path, "/", DM_PATH_LEN);
         #else
         #endif
     }
@@ -427,7 +432,8 @@ namespace dm
     DM_INLINE void desktopDir(char _path[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
-            strscpy(_path, "C:\\", DM_PATH_LEN);
+            strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
+            bx::strlcat(_path, "\\Desktop\\", DM_PATH_LEN);
         #elif BX_PLATFORM_LINUX
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
             bx::strlcat(_path, "/Desktop/", DM_PATH_LEN);
@@ -441,7 +447,9 @@ namespace dm
     DM_INLINE void rootDir(char _path[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
-            strscpy(_path, "C:\\", DM_PATH_LEN);
+            char currentDir[DM_PATH_LEN];
+            bx::pwd(currentDir, DM_PATH_LEN);
+            strscpy(_path, currentDir, 4);
         #elif BX_PLATFORM_LINUX
             _path[0] = '/';
             _path[1] = '\0';
