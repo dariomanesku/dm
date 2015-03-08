@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <ctype.h>  // toupper()
 #include <math.h>   // logf()
-#include <stdio.h>  // FILE
+#include <stdio.h>  // FILE, fopen()
 #include <float.h>  // FLT_EPSILON
 #include <malloc.h> // alloca()
 
@@ -412,34 +412,42 @@ namespace dm
         #endif
     }
 
-    DM_INLINE void homeDir(char _home[DM_PATH_LEN])
+    DM_INLINE void homeDir(char _path[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
+            strscpy(_path, "C:\\", DM_PATH_LEN);
         #elif BX_PLATFORM_LINUX
+            strscpy(_path, getenv("HOME"), DM_PATH_LEN);
         #elif BX_PLATFORM_OSX
-            strscpy(_home, getenv("HOME"), DM_PATH_LEN);
+            strscpy(_path, getenv("HOME"), DM_PATH_LEN);
         #else
         #endif
     }
 
-    DM_INLINE void desktopDir(char _home[DM_PATH_LEN])
+    DM_INLINE void desktopDir(char _path[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
+            strscpy(_path, "C:\\", DM_PATH_LEN);
         #elif BX_PLATFORM_LINUX
+            strscpy(_path, getenv("HOME"), DM_PATH_LEN);
+            bx::strlcat(_path, "/Desktop/", DM_PATH_LEN);
         #elif BX_PLATFORM_OSX
-            strscpy(_home, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_home, "/Desktop/", DM_PATH_LEN);
+            strscpy(_path, getenv("HOME"), DM_PATH_LEN);
+            bx::strlcat(_path, "/Desktop/", DM_PATH_LEN);
         #else
         #endif
     }
 
-    DM_INLINE void rootDir(char _home[DM_PATH_LEN])
+    DM_INLINE void rootDir(char _path[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
+            strscpy(_path, "C:\\", DM_PATH_LEN);
         #elif BX_PLATFORM_LINUX
+            _path[0] = '/';
+            _path[1] = '\0';
         #elif BX_PLATFORM_OSX
-            _home[0] = '/';
-            _home[1] = '\0';
+            _path[0] = '/';
+            _path[1] = '\0';
         #else
         #endif
     }
@@ -468,6 +476,20 @@ namespace dm
        }
 
        return false;
+    }
+
+    DM_INLINE long int fileExists(const char* _file)
+    {
+        FILE* file = fopen(_file, "rb");
+        if (NULL == file)
+        {
+            return false;
+        }
+        else
+        {
+            fclose(file);
+            return true;
+        }
     }
 
     DM_INLINE long int fsize(FILE* _file)
