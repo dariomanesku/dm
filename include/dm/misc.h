@@ -397,21 +397,11 @@ namespace dm
 
     DM_INLINE void realpath(char _abs[DM_PATH_LEN], const char _rel[DM_PATH_LEN])
     {
-        #if BX_PLATFORM_OSX
-            ::realpath(_rel, _abs);
-        #elif BX_PLATFORM_WINDOWS
+        #if BX_PLATFORM_WINDOWS
             _fullpath(_abs, _rel, DM_PATH_LEN);
-        #else
-            // TODO:
-            //realpath(_dir, path); //Linux
-            char currentDir[DM_PATH_LEN];
-            bx::pwd(currentDir, DM_PATH_LEN);
-
-            bx::chdir(_rel);
-            bx::pwd(_abs, DM_PATH_LEN);
-
-            bx::chdir(currentDir);
-        #endif
+        #else // OSX and Linux.
+            ::realpath(_rel, _abs);
+        #endif // BX_PLATFORM_WINDOWS
     }
 
     DM_INLINE void homeDir(char _path[DM_PATH_LEN])
@@ -419,13 +409,9 @@ namespace dm
         #if BX_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
             bx::strlcat(_path, "\\", DM_PATH_LEN);
-        #elif BX_PLATFORM_LINUX
+        #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
             bx::strlcat(_path, "/", DM_PATH_LEN);
-        #elif BX_PLATFORM_OSX
-            strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, "/", DM_PATH_LEN);
-        #else
         #endif
     }
 
@@ -434,13 +420,9 @@ namespace dm
         #if BX_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
             bx::strlcat(_path, "\\Desktop\\", DM_PATH_LEN);
-        #elif BX_PLATFORM_LINUX
+        #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
             bx::strlcat(_path, "/Desktop/", DM_PATH_LEN);
-        #elif BX_PLATFORM_OSX
-            strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, "/Desktop/", DM_PATH_LEN);
-        #else
         #endif
     }
 
@@ -450,13 +432,9 @@ namespace dm
             char currentDir[DM_PATH_LEN];
             bx::pwd(currentDir, DM_PATH_LEN);
             strscpy(_path, currentDir, 4);
-        #elif BX_PLATFORM_LINUX
+        #else // OSX and Linux.
             _path[0] = '/';
             _path[1] = '\0';
-        #elif BX_PLATFORM_OSX
-            _path[0] = '/';
-            _path[1] = '\0';
-        #else
         #endif
     }
 
