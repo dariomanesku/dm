@@ -414,10 +414,8 @@ namespace dm
     {
         #if BX_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
-            bx::strlcat(_path, DM_DIRSLASH, DM_PATH_LEN);
         #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, DM_DIRSLASH, DM_PATH_LEN);
         #endif
     }
 
@@ -425,10 +423,10 @@ namespace dm
     {
         #if BX_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
-            bx::strlcat(_path, DM_DIRSLASH"Desktop"DM_DIRSLASH, DM_PATH_LEN);
+            bx::strlcat(_path, DM_DIRSLASH"Desktop", DM_PATH_LEN);
         #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, DM_DIRSLASH"Desktop"DM_DIRSLASH, DM_PATH_LEN);
+            bx::strlcat(_path, DM_DIRSLASH"Desktop", DM_PATH_LEN);
         #endif
     }
 
@@ -442,6 +440,24 @@ namespace dm
             _path[0] = '/';
             _path[1] = '\0';
         #endif
+    }
+
+    /// '/foo/bar/ ' -> '/foo/bar'. Modifies input string.
+    DM_INLINE char* trimDirPath(char _path[DM_PATH_LEN])
+    {
+        size_t end = strlen(_path);
+        while (--end)
+        {
+            if (_path[end] != ' '
+            &&  _path[end] != '/'
+            &&  _path[end] != '\\'
+            )
+            {
+                _path[end+1] = '\0';
+                break;
+            }
+        }
+        return _path;
     }
 
     #if BX_PLATFORM_WINDOWS
