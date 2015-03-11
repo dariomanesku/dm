@@ -395,6 +395,12 @@ namespace dm
 
     #define DM_PATH_LEN 4096
 
+    #if BX_PLATFORM_WINDOWS
+    #   define DM_DIRSLASH "\\"
+    #else
+    #   define DM_DIRSLASH "/"
+    #endif
+
     DM_INLINE void realpath(char _abs[DM_PATH_LEN], const char _rel[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
@@ -408,10 +414,10 @@ namespace dm
     {
         #if BX_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
-            bx::strlcat(_path, "\\", DM_PATH_LEN);
+            bx::strlcat(_path, DM_DIRSLASH, DM_PATH_LEN);
         #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, "/", DM_PATH_LEN);
+            bx::strlcat(_path, DM_DIRSLASH, DM_PATH_LEN);
         #endif
     }
 
@@ -419,10 +425,10 @@ namespace dm
     {
         #if BX_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
-            bx::strlcat(_path, "\\Desktop\\", DM_PATH_LEN);
+            bx::strlcat(_path, DM_DIRSLASH"Desktop"DM_DIRSLASH, DM_PATH_LEN);
         #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, "/Desktop/", DM_PATH_LEN);
+            bx::strlcat(_path, DM_DIRSLASH"Desktop"DM_DIRSLASH, DM_PATH_LEN);
         #endif
     }
 
@@ -437,6 +443,14 @@ namespace dm
             _path[1] = '\0';
         #endif
     }
+
+    #if BX_PLATFORM_WINDOWS
+    #include <windows.h>
+    DM_INLINE uint32_t windowsDrives()
+    {
+        return GetLogicalDrives();
+    }
+    #endif // BX_PLATFORM_WINDOWS
 
     /// Gets file name without extension from file path. Examples:
     ///     /tmp/foo.c -> foo
