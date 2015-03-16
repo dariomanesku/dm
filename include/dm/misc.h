@@ -460,13 +460,14 @@ namespace dm
         return _path;
     }
 
-    #if BX_PLATFORM_WINDOWS
-    #include <windows.h>
     DM_INLINE uint32_t windowsDrives()
     {
+    #if BX_PLATFORM_WINDOWS
         return GetLogicalDrives();
-    }
+    #else
+        return 0;
     #endif // BX_PLATFORM_WINDOWS
+    }
 
     /// Gets file name without extension from file path. Examples:
     ///     /tmp/foo.c -> foo
