@@ -495,6 +495,12 @@ namespace dm
         return false;
     }
 
+    DM_INLINE const char* fileExtension(const char* _filePath)
+    {
+        const char* ext = NULL != (ext = strrchr(_filePath, '.')) ? ++ext : _filePath;
+        return ext;
+    }
+
     DM_INLINE long int fileExists(const char* _file)
     {
         FILE* file = fopen(_file, "rb");
