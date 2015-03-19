@@ -360,7 +360,7 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
         }
         buildoptions
         {
-            "/Ob2", -- The Inline Function Expansion
+            "/Ob2",    -- The Inline Function Expansion
         }
         linkoptions
         {
