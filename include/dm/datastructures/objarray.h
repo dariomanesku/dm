@@ -46,6 +46,12 @@ namespace dm
         // Uninitialized state, init() needs to be called !
         ObjArray()
         {
+            m_values = NULL;
+        }
+
+        bool isInitialized() const
+        {
+            return (NULL != m_values);
         }
 
         ObjArray(uint32_t _max)
