@@ -474,25 +474,25 @@ namespace dm
     ///     C:\\tmp\\foo.c -> foo
     DM_INLINE bool basename(char* _out, size_t _outSize, const char* _filePath)
     {
-       const char *begin;
-       const char *end;
+        const char *begin;
+        const char *end;
 
-       const char *ptr;
-       begin = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
-             : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
-             : _filePath
-             ;
+        const char *ptr;
+        begin = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
+              : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
+              : _filePath
+              ;
 
-       end = NULL != (ptr = strrchr(_filePath, '.')) ? ptr : strrchr(_filePath, '\0');
+        end = NULL != (ptr = strrchr(_filePath, '.')) ? ptr : strrchr(_filePath, '\0');
 
-       if (NULL != begin && NULL != end)
-       {
-           const size_t size = dm::min(size_t(end-begin)+1, _outSize);
-           dm::strscpy(_out, begin, size);
-           return true;
-       }
+        if (NULL != begin && NULL != end)
+        {
+            const size_t size = dm::min(size_t(end-begin)+1, _outSize);
+            dm::strscpy(_out, begin, size);
+            return true;
+        }
 
-       return false;
+        return false;
     }
 
     DM_INLINE long int fileExists(const char* _file)
