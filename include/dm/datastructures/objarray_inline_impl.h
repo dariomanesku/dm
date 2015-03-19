@@ -45,8 +45,8 @@ void removeSwap(uint32_t _idx)
 
     if (_idx != --m_count)
     {
-        Ty* last = &m_values[m_count];
-        elem->Ty(*last);
+        const Ty* last = &m_values[m_count];
+        elem = ::new (elem) Ty(*last);
     }
 }
 
