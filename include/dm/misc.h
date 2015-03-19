@@ -474,10 +474,10 @@ namespace dm
     ///     C:\\tmp\\foo.c -> foo
     DM_INLINE bool basename(char* _out, size_t _outSize, const char* _filePath)
     {
-        const char *begin;
-        const char *end;
+        const char* begin;
+        const char* end;
 
-        const char *ptr;
+        const char* ptr;
         begin = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
               : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
               : _filePath
