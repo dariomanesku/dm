@@ -89,7 +89,7 @@ namespace dm
         }
 
         // Uses externaly allocated memory.
-        void* init(uint32_t _max, void* _mem = NULL)
+        void* init(uint32_t _max, void* _mem)
         {
             m_count = 0;
             m_max = _max;
