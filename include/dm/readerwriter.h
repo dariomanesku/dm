@@ -36,7 +36,7 @@ namespace dm
     {
     };
 
-    class MemoryReader : public ReaderSeekerI
+    class MemoryReader : public dm::ReaderSeekerI
     {
     public:
         MemoryReader(const void* _data, uint32_t _size)
@@ -105,13 +105,13 @@ namespace dm
         int64_t m_top;
     };
 
-    struct BX_NO_VTABLE FileReaderTiI : public ReaderSeekerI
+    struct BX_NO_VTABLE FileReaderI : public dm::ReaderSeekerI
     {
         virtual int32_t open(const char* _filePath) = 0;
         virtual int32_t close() = 0;
     };
 
-    class CrtFileReader : public FileReaderTiI
+    class CrtFileReader : public dm::FileReaderI
     {
     public:
         CrtFileReader()
