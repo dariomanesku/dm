@@ -89,6 +89,11 @@ const Ty& operator[](uint32_t _idx) const
     return m_values[_idx];
 }
 
+const Ty* elements() const
+{
+    return m_values;
+}
+
 void reset()
 {
     m_count = 0;
