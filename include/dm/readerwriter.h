@@ -32,7 +32,7 @@ namespace dm
         }
     };
 
-    struct BX_NO_VTABLE ReaderSeekerI : public bx::ReaderI, public bx::SeekerI, public dm::TypeInfo
+    struct BX_NO_VTABLE ReaderSeekerI : public bx::ReaderSeekerI, public dm::TypeInfo
     {
     };
 
