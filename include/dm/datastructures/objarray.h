@@ -49,11 +49,6 @@ namespace dm
             m_values = NULL;
         }
 
-        bool isInitialized() const
-        {
-            return (NULL != m_values);
-        }
-
         ObjArray(uint32_t _max)
         {
             init(_max);
