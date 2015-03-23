@@ -104,6 +104,7 @@ namespace dm
             }
         }
 
+        #define DM_DYNAMIC_ARRAY
         #include "objarray_inline_impl.h"
 
         uint32_t count() const

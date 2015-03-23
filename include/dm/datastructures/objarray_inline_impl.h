@@ -3,8 +3,43 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
+inline void expandIfFull()
+{
+#ifdef DM_DYNAMIC_ARRAY
+    if (m_count >= m_max)
+    {
+        const uint32_t newMax = m_max + m_max/2;
+
+        if (m_cleanup) // 'm_values' was allocated internally.
+        {
+            m_values = (Ty*)DM_REALLOC(m_values, sizeFor(newMax));
+        }
+        else // 'm_values' was passed as a pointer.
+        {
+            m_values = (Ty*)DM_ALLOC(sizeFor(newMax));
+        }
+
+        m_max = newMax;
+    }
+#endif //DM_DYNAMIC_ARRAY
+}
+
+#ifdef DM_DYNAMIC_ARRAY
+void shrink()
+{
+    if (m_cleanup) // 'm_values' was allocated internally.
+    {
+        m_values = (Ty*)DM_REALLOC(m_values, sizeFor(m_count));
+        m_max = m_count;
+    }
+
+}
+#endif //DM_DYNAMIC_ARRAY
+
 Ty* addNew()
 {
+    expandIfFull();
+
     DM_CHECK(m_count < max(), "objarrayAddNew | %d, %d", m_count, max());
 
     return &m_values[m_count++];
@@ -12,6 +47,8 @@ Ty* addNew()
 
 uint32_t addObj(const Ty& _obj)
 {
+    expandIfFull();
+
     DM_CHECK(m_count < max(), "objarrayAddObj | %d, %d", m_count, max());
 
     Ty* dst = &m_values[m_count++];
@@ -98,5 +135,7 @@ void reset()
 {
     m_count = 0;
 }
+
+#undef DM_DYNAMIC_ARRAY
 
 /* vim: set sw=4 ts=4 expandtab: */
