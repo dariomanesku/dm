@@ -498,7 +498,8 @@ namespace dm
 
     DM_INLINE const char* fileExtension(const char* _filePath)
     {
-        const char* ext = NULL != (ext = strrchr(_filePath, '.')) ? ++ext : _filePath;
+        const char* dot = strrchr(_filePath, '.');
+        const char* ext = (NULL != dot) ? ++dot : _filePath;
         return ext;
     }
 
