@@ -406,7 +406,8 @@ namespace dm
         #if BX_PLATFORM_WINDOWS
             _fullpath(_abs, _rel, DM_PATH_LEN);
         #else // OSX and Linux.
-            ::realpath(_rel, _abs);
+            char* path = ::realpath(_rel, _abs);
+            BX_UNUSED(path);
         #endif // BX_PLATFORM_WINDOWS
     }
 
