@@ -107,7 +107,7 @@ namespace dm
 
     struct BX_NO_VTABLE FileReaderI : public dm::ReaderSeekerI
     {
-        virtual int32_t open(const char* _filePath) = 0;
+        virtual int32_t open(const char* _filePath, bool _binary = true) = 0;
         virtual int32_t close() = 0;
     };
 
@@ -128,9 +128,9 @@ namespace dm
             return ReaderWriterTypes::CrtFileReader;
         }
 
-        virtual int32_t open(const char* _filePath) BX_OVERRIDE
+        virtual int32_t open(const char* _filePath, bool _binary = true) BX_OVERRIDE
         {
-            m_file = fopen(_filePath, "rb");
+            m_file = fopen(_filePath, _binary?"rb":"r");
             return NULL == m_file;
         }
 
