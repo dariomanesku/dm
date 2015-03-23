@@ -71,6 +71,16 @@ void remove(uint32_t _idx)
     m_count--;
 }
 
+void pop()
+{
+    DM_CHECK(0 < m_count, "objarrayPop - 0 | %d", m_count);
+
+    m_count--;
+
+    Ty* elem = &m_values[m_count];
+    elem->~Ty();
+}
+
 // Uses swap instead of memmove. Order is not preserved!
 void removeSwap(uint32_t _idx)
 {
