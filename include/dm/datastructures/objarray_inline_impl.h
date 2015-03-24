@@ -3,42 +3,45 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-inline void expandIfFull()
-{
 #ifdef DM_DYNAMIC_ARRAY
-    if (m_count >= m_max)
+    void resize(uint32_t _max)
     {
-        const uint32_t newMax = m_max + m_max/2;
-
         if (m_cleanup) // 'm_values' was allocated internally.
         {
-            m_values = (Ty*)DM_REALLOC(m_values, sizeFor(newMax));
+            m_values = (Ty*)DM_REALLOC(m_values, sizeFor(_max));
+            m_max = _max;
         }
         else // 'm_values' was passed as a pointer.
         {
-            m_values = (Ty*)DM_ALLOC(sizeFor(newMax));
+            if (_max > m_max) // Expand.
+            {
+                m_values = (Ty*)DM_ALLOC(sizeFor(_max));
+            }
+
+            m_max = _max;
         }
-
-        m_max = newMax;
     }
-#endif //DM_DYNAMIC_ARRAY
-}
 
-#ifdef DM_DYNAMIC_ARRAY
-void shrink()
-{
-    if (m_cleanup) // 'm_values' was allocated internally.
+    private: void expandIfFull()
     {
-        m_values = (Ty*)DM_REALLOC(m_values, sizeFor(m_count));
-        m_max = m_count;
-    }
+        if (m_count >= m_max)
+        {
+            const uint32_t newMax = m_max + m_max/2;
+            resize(newMax);
+        }
+    } public:
 
-}
+    void shrink()
+    {
+        resize(m_count);
+    }
 #endif //DM_DYNAMIC_ARRAY
 
 Ty* addNew()
 {
-    expandIfFull();
+    #ifdef DM_DYNAMIC_ARRAY
+        expandIfFull();
+    #endif //DM_DYNAMIC_ARRAY
 
     DM_CHECK(m_count < max(), "objarrayAddNew | %d, %d", m_count, max());
 
@@ -47,7 +50,9 @@ Ty* addNew()
 
 uint32_t addObj(const Ty& _obj)
 {
-    expandIfFull();
+    #ifdef DM_DYNAMIC_ARRAY
+        expandIfFull();
+    #endif //DM_DYNAMIC_ARRAY
 
     DM_CHECK(m_count < max(), "objarrayAddObj | %d, %d", m_count, max());
 
@@ -55,6 +60,19 @@ uint32_t addObj(const Ty& _obj)
     dst = ::new (dst) Ty(_obj);
 
     return (m_count-1);
+}
+
+void cut(uint32_t _idx)
+{
+    DM_CHECK(_idx < max(), "objarrayCut - 1 | %d, %d", _idx, max());
+
+    for (uint32_t ii = _idx, end = m_count; ii < end; ++ii)
+    {
+        Ty* elem = &m_values[ii];
+        elem->~Ty();
+    }
+
+    m_count = _idx;
 }
 
 void remove(uint32_t _idx)

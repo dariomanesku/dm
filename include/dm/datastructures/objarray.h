@@ -95,6 +95,11 @@ namespace dm
             return end;
         }
 
+        void isInitialized()
+        {
+            return (NULL != m_values);
+        }
+
         void destroy()
         {
             if (m_cleanup && NULL != m_values)

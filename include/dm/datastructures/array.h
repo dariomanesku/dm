@@ -46,6 +46,7 @@ namespace dm
         // Uninitialized state, init() needs to be called !
         Array()
         {
+            m_values = NULL;
         }
 
         Array(uint32_t _max)
@@ -74,7 +75,7 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(uint16_t _max)
+        void init(uint32_t _max)
         {
             m_count = 0;
             m_max = _max;
@@ -83,7 +84,7 @@ namespace dm
         }
 
         // Uses externaly allocated memory.
-        void* init(uint32_t _max, void* _mem = NULL)
+        void* init(uint32_t _max, void* _mem)
         {
             m_count = 0;
             m_max = _max;
@@ -92,6 +93,11 @@ namespace dm
 
             void* end = (void*)((uint8_t*)_mem + sizeFor(_max));
             return end;
+        }
+
+        bool isInitialized()
+        {
+            return (NULL != m_values);
         }
 
         void destroy()
@@ -103,6 +109,7 @@ namespace dm
             }
         }
 
+        #define DM_DYNAMIC_ARRAY
         #include "array_inline_impl.h"
 
         uint32_t count() const
