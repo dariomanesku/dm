@@ -117,7 +117,7 @@ void zero()
 
 void fillWith(Ty _value)
 {
-    for (uint32_t ii = m_max; ii--; )
+    for (uint32_t ii = max(); ii--; )
     {
         m_values[ii] = _value;
     }
