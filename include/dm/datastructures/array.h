@@ -47,6 +47,7 @@ namespace dm
         Array()
         {
             m_values = NULL;
+            m_max = 0;
         }
 
         Array(uint32_t _max)
@@ -98,6 +99,16 @@ namespace dm
         bool isInitialized()
         {
             return (NULL != m_values);
+        }
+
+        void reinit(uint32_t _max)
+        {
+            if (isInitialized())
+            {
+                destroy();
+            }
+
+            init(_max);
         }
 
         void destroy()

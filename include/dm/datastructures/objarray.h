@@ -47,6 +47,7 @@ namespace dm
         ObjArray()
         {
             m_values = NULL;
+            m_max = 0;
         }
 
         ObjArray(uint32_t _max)
