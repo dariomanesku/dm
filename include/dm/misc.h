@@ -405,7 +405,9 @@ namespace dm
     {
         #if BX_PLATFORM_WINDOWS
             _fullpath(_abs, _rel, DM_PATH_LEN);
-        #else // OSX and Linux.
+        #elif BX_PLATFORM_LINUX
+            bx::snprintf(_abs, DM_PATH_LEN, "%s", _rel); //::realpath is not thread-safe on Linux.
+        #else // OSX
             char* path = ::realpath(_rel, _abs);
             BX_UNUSED(path);
         #endif // BX_PLATFORM_WINDOWS
