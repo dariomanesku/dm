@@ -38,9 +38,9 @@ namespace dm
     // Value.
     //-----
 
-    #define DM_MIN(_a, _b) (_a)<(_b)?(_a):(_b)
-    #define DM_MAX(_a, _b) (_a)>(_b)?(_a):(_b)
-    #define DM_CLAMP(_val, _min, _max) DM_MIN(DM_MAX(_val, _min), _max)
+    #define DM_MIN(_a, _b) ((_a)<(_b)?(_a):(_b))
+    #define DM_MAX(_a, _b) ((_a)>(_b)?(_a):(_b))
+    #define DM_CLAMP(_val, _min, _max) (DM_MIN(DM_MAX(_val, _min), _max))
 
     template <typename Ty/*arithmetic type*/>
     DM_INLINE Ty min(Ty _a, Ty _b)
