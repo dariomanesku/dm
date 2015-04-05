@@ -97,7 +97,7 @@ namespace dm
         }
 
         // Uses externaly allocated memory.
-        void* init(uint32_t _max, void* _mem, bx::AllocatorI* _allocator)
+        void* init(uint32_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_max = _max;
             m_numSlots = numSlotsFor(_max);

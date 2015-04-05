@@ -91,13 +91,13 @@ namespace dm
         }
 
         // Uses externaly allocated memory.
-        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
+        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_memoryBlock = _mem;
             m_allocator = _allocator;
             m_cleanup = false;
 
-            void* ptr = m_handles.init(_max, m_memoryBlock, NULL);
+            void* ptr = m_handles.init(_max, m_memoryBlock);
             m_elements = (Elem*)ptr;
 
             m_elements[0].m_prev = 0;

@@ -85,7 +85,7 @@ namespace dm
         }
 
         // Uses externaly allocated memory.
-        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
+        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_num = 0;
             m_max = _max;

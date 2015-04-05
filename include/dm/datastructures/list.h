@@ -85,18 +85,18 @@ namespace dm
             m_reallocator = _reallocator;
             m_cleanup = true;
 
-            void* ptr = m_handles.init(_max, m_memoryBlock, NULL);
+            void* ptr = m_handles.init(_max, m_memoryBlock);
             m_elements = (Ty*)ptr;
         }
 
         // Uses externaly allocated memory.
-        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
+        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_memoryBlock = _mem;
             m_allocator = _allocator;
             m_cleanup = false;
 
-            void* ptr = m_handles.init(_max, m_memoryBlock, NULL);
+            void* ptr = m_handles.init(_max, m_memoryBlock);
             m_elements = (Ty*)ptr;
 
             void* end = (void*)((uint8_t*)_mem + sizeFor(_max));
