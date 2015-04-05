@@ -97,7 +97,7 @@ namespace dm
             m_allocator = _allocator;
             m_cleanup = false;
 
-            void* ptr = m_handles.init(_max, m_memoryBlock);
+            void* ptr = m_handles.init(_max, m_memoryBlock, NULL);
             m_elements = (Elem*)ptr;
 
             m_elements[0].m_prev = 0;
