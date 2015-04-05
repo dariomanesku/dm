@@ -89,7 +89,7 @@ namespace dm
             m_elements = (Ty*)ptr;
         }
 
-        // Uses externaly allocated memory.
+        // Uses externally allocated memory.
         void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_memoryBlock = _mem;

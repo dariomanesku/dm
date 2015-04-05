@@ -83,7 +83,7 @@ namespace dm
             m_cleanup = true;
         }
 
-        // Uses externaly allocated memory.
+        // Uses externally allocated memory.
         void* init(uint32_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_count = 0;

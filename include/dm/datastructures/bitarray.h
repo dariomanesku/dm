@@ -96,7 +96,7 @@ namespace dm
             return numSlotsFor(_max)*sizeof(uint64_t);
         }
 
-        // Uses externaly allocated memory.
+        // Uses externally allocated memory.
         void* init(uint32_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_max = _max;
