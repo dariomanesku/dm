@@ -13,7 +13,7 @@ struct Elem : Node,Ty
 {
 };
 
-Elem* insertAfter(const Ty* _obj)
+Ty* insertAfter(const Ty* _obj)
 {
     const uint16_t idx = m_handles.alloc();
 
@@ -22,7 +22,7 @@ Elem* insertAfter(const Ty* _obj)
 
     Elem* prev = (Elem*)_obj;
     const uint16_t prevHandle = getHandle(prev);
-    Elem* next = getObj(prev->m_next);
+    Elem* next = (Elem*)getObj(prev->m_next);
 
     elem->m_prev = prevHandle;
     elem->m_next = prev->m_next;
@@ -40,31 +40,32 @@ Elem* insertAfter(const Ty* _obj)
     return elem;
 }
 
-Elem* addNew()
+Ty* addNew()
 {
     return insertAfter(m_last);
 }
 
-Elem* insertAfter(uint16_t _handle)
+Ty* insertAfter(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "LinkedListT::insertAfter | %d, %d", _handle, max());
 
-    return insertAfter(getObj(_handle));
+    Elem* elem = (Elem*)getObj(_handle);
+    return insertAfter(elem);
 }
 
-Elem* next(const Ty* _obj)
+Ty* next(const Ty* _obj)
 {
     DM_CHECK(contains(_obj), "LinkedListT::next | Object not from the list.");
 
-    const Elem* elem = static_cast<const Elem*>(_obj);
+    const Elem* elem = (const Elem*)_obj;
     return &m_elements[elem->m_next];
 }
 
-Elem* prev(const Ty* _obj)
+Ty* prev(const Ty* _obj)
 {
     DM_CHECK(contains(_obj), "LinkedListT::prev | Object not from the list.");
 
-    const Elem* elem = static_cast<const Elem*>(_obj);
+    const Elem* elem = (const Elem*)_obj;
     return &m_elements[elem->m_prev];
 }
 
@@ -72,24 +73,27 @@ uint16_t next(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "llNext | %d, %d", _handle, max());
 
-    return getObj(_handle)->m_next;
+    Elem* elem = (Elem*)getObj(_handle);
+    return elem->m_next;
 }
 
 uint16_t prev(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "llPrev | %d, %d", _handle, max());
 
-    return getObj(_handle)->m_prev;
+    Elem* elem = (Elem*)getObj(_handle);
+    return elem->m_prev;
 }
 
-Elem* lastElem()
+Ty* lastElem()
 {
     return getObj(m_last);
 }
 
-Elem* firstElem()
+Ty* firstElem()
 {
-    return getObj(getObj(m_last)->m_next);
+    Elem* last = ((Elem*)getObj(m_last));
+    return getObj(last->m_next);
 }
 
 uint16_t lastHandle()
@@ -99,6 +103,7 @@ uint16_t lastHandle()
 
 uint16_t firstHandle()
 {
+    Elem* elem = (Elem*)getObj(_handle);
     return getObj(m_last)->m_next;
 }
 
@@ -109,7 +114,7 @@ uint16_t getHandle(const Ty* _obj)
     return (uint16_t)((Elem*)_obj - m_elements);
 }
 
-Elem* getObj(uint16_t _handle)
+Ty* getObj(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "llGetObj | %d, %d", _handle, max());
 
@@ -117,7 +122,7 @@ Elem* getObj(uint16_t _handle)
 }
 
 private:
-Elem* getObjAtImpl(uint16_t _idx)
+Ty* getObjAtImpl(uint16_t _idx)
 {
     DM_CHECK(_idx < max(), "llGetObjAt | %d, %d", _idx, max());
 
@@ -126,19 +131,19 @@ Elem* getObjAtImpl(uint16_t _idx)
 }
 public:
 
-Elem* getObjAt(uint16_t _idx)
+Ty* getObjAt(uint16_t _idx)
 {
     This* list = const_cast<This*>(this);
     return list->getObjAtImpl(_idx);
 }
 
-Elem* operator[](uint16_t _idx)
+Ty* operator[](uint16_t _idx)
 {
     This* list = const_cast<This*>(this);
     return list->getObjAtImpl(_idx);
 }
 
-const Elem* operator[](uint16_t _idx) const
+const Ty* operator[](uint16_t _idx) const
 {
     This* list = const_cast<This*>(this);
     return list->getObjAtImpl(_idx);
@@ -148,9 +153,9 @@ void remove(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "llRemove | %d, %d", _handle, max());
 
-    Elem* elem = getObj(_handle);
-    Elem* prev = getObj(elem->m_prev);
-    Elem* next = getObj(elem->m_next);
+    Elem* elem = (Elem*)getObj(_handle);
+    Elem* prev = (Elem*)getObj(elem->m_prev);
+    Elem* next = (Elem*)getObj(elem->m_next);
 
     prev->m_next = elem->m_next;
     next->m_prev = elem->m_prev;
