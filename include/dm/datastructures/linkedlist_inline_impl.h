@@ -103,8 +103,8 @@ uint16_t lastHandle()
 
 uint16_t firstHandle()
 {
-    Elem* elem = (Elem*)getObj(_handle);
-    return getObj(m_last)->m_next;
+    Elem* elem = (Elem*)getObj(m_last);
+    return elem->m_next;
 }
 
 uint16_t getHandle(const Ty* _obj)
