@@ -52,7 +52,7 @@ DM_ALLOC_DEF(9,   32) // for region: 1024MB
 
 #ifdef DM_ALLOC_CONFIG
     #define DM_ALLOC_NUM_REGIONS        10
-    #define DM_ALLOC_NUM_SUB_REGIONS    16
+    #define DM_ALLOC_NUM_SUB_REGIONS    8
     #define DM_ALLOC_SMALLEST_REGION    DM_MEGABYTES(2)
     #define DM_ALLOC_MAX_BIG_FREE_SLOTS 32
 #endif // DM_ALLOC_CONFIG
@@ -81,9 +81,9 @@ DM_ALLOC_DEF(9,   32) // for region: 1024MB
         #define DM_ALLOCATOR_IMPL DM_ALLOCATOR_IMPL_ARRAY
     #endif //DM_ALLOCATOR_IMPL
 
-    #ifndef CS_NATURAL_ALIGNMENT
-        #define CS_NATURAL_ALIGNMENT 16
-    #endif //CS_NATURAL_ALIGNMENT
+    #ifndef DM_NATURAL_ALIGNMENT
+        #define DM_NATURAL_ALIGNMENT 16
+    #endif //DM_NATURAL_ALIGNMENT
 
     #ifndef DM_ALLOC_PRINT_STATS
         #define DM_ALLOC_PRINT_STATS 0

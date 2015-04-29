@@ -9,7 +9,7 @@
 // Allocator header.
 //-----
 
-#include <bx/allocator.h> //bx::ReallocatorI, BX_ALLOC/BX_FREE,BX_REALLOC
+#include <bx/allocator.h> //bx::ReallocatorI, BX_ALLOC/BX_FREE/BX_REALLOC
 #include <dm/misc.h>      //dm::NoCopyNoAssign
 
 #define DM_ALLOC   BX_ALLOC
@@ -142,7 +142,7 @@ namespace dm
                 // Alloc.
                 m_orig = ::malloc(size);
 
-                CS_PRINT_MEM_STATS("Init: Allocating %llu.%lluMB - (0x%p)", dm::U_UMB(size), m_orig);
+                DM_PRINT_MEM_STATS("Init: Allocating %llu.%lluMB - (0x%p)", dm::U_UMB(size), m_orig);
 
                 // Align.
                 void*  alignedPtr;
@@ -214,7 +214,7 @@ namespace dm
                 m_externalSize += _size;
                 #endif //DM_ALLOC_PRINT_STATS
 
-                CS_PRINT_EXT("EXTERNAL ALLOC: %llu.%lluMB - (0x%p)", dm::U_UMB(_size), ptr);
+                DM_PRINT_EXT("EXTERNAL ALLOC: %llu.%lluMB - (0x%p)", dm::U_UMB(_size), ptr);
 
                 return ptr;
             }
@@ -292,7 +292,7 @@ namespace dm
                 if (!this->contains(_ptr))
                 {
                     void* ptr = ::realloc(_ptr, _size);
-                    CS_PRINT_EXT("EXTERNAL REALLOC: %llu.%lluMB - (0x%p - 0x%p)", dm::U_UMB(_size), _ptr, ptr);
+                    DM_PRINT_EXT("EXTERNAL REALLOC: %llu.%lluMB - (0x%p - 0x%p)", dm::U_UMB(_size), _ptr, ptr);
                     return ptr;
                 }
 
@@ -370,7 +370,7 @@ namespace dm
                 }
                 else // external pointer
                 {
-                    CS_PRINT_EXT("~EXTERNAL FREE: (0x%p)", _ptr);
+                    DM_PRINT_EXT("~EXTERNAL FREE: (0x%p)", _ptr);
 
                     #if DM_ALLOC_PRINT_STATS
                     m_externalFree++;
@@ -445,7 +445,7 @@ namespace dm
                     size_t alignedSize;
                     dm::alignPtrAndSize(alignedPtr, alignedSize, _mem, _size, DM_NATURAL_ALIGNMENT);
 
-                    CS_PRINT_MEM_STATS("Init: Using %llu.%lluMB for static storage.", dm::U_UMB(alignedSize));
+                    DM_PRINT_MEM_STATS("Init: Using %llu.%lluMB for static storage.", dm::U_UMB(alignedSize));
 
                     m_ptr   = (uint8_t*)alignedPtr;
                     m_last  = m_ptr;
@@ -478,7 +478,7 @@ namespace dm
                     m_ptr   += size;
                     m_avail -= size;
 
-                    CS_PRINT_STATIC("Static alloc: %llu.%lluMB, Remaining: %llu.%lluMB - (0x%p)", dm::U_UMB(_size), dm::U_UMB(m_avail), m_last);
+                    DM_PRINT_STATIC("Static alloc: %llu.%lluMB, Remaining: %llu.%lluMB - (0x%p)", dm::U_UMB(_size), dm::U_UMB(m_avail), m_last);
 
                     return m_last;
                 }
@@ -512,7 +512,7 @@ namespace dm
                         m_ptr   += diff;
                         m_avail -= diff;
 
-                        CS_PRINT_STATIC("Static realloc: %llu.%lluMB, Remaining: %llu.%lluMB - (0x%p)", dm::U_UMB(newSize), dm::U_UMB(m_avail), m_last);
+                        DM_PRINT_STATIC("Static realloc: %llu.%lluMB, Remaining: %llu.%lluMB - (0x%p)", dm::U_UMB(newSize), dm::U_UMB(m_avail), m_last);
 
                         return m_last;
                     }
@@ -596,7 +596,7 @@ namespace dm
                            , "SegregatedLists::init | Not enough data allocated %llu.%lluMB / %llu.%lluMB"
                            , dm::U_UMB(m_totalSize), dm::U_UMB(DataSize)
                            );
-                    CS_PRINT_MEM_STATS("Init: Using %llu.%lluMB for segregated lists", dm::U_UMB(DataSize));
+                    DM_PRINT_MEM_STATS("Init: Using %llu.%lluMB for segregated lists", dm::U_UMB(DataSize));
 
                     #define DM_SMALL_ALLOC_DEF(_idx, _size, _num) \
                         m_sizes[_idx] = Size ## _idx;
@@ -650,7 +650,7 @@ namespace dm
 
                         CS_CHECK(mem < (uint8_t*)m_mem + m_totalSize, "SegregatedLists::alloc | Allocating outside of bounds!");
 
-                        CS_PRINT_SMALL("Small alloc: %llu.%lluKB -> slot %u (%llu.%lluKB) - %u/%u - (0x%p)"
+                        DM_PRINT_SMALL("Small alloc: %llu.%lluKB -> slot %u (%llu.%lluKB) - %u/%u - (0x%p)"
                                       , dm::U_UKB(_size)
                                       , slot
                                       , dm::U_UKB(m_sizes[idx])
@@ -668,7 +668,7 @@ namespace dm
                     }
                     else
                     {
-                        CS_PRINT_SMALL("Small alloc: All small lists of %uB are full. Requested %zuB.", m_sizes[idx], _size);
+                        DM_PRINT_SMALL("Small alloc: All small lists of %uB are full. Requested %zuB.", m_sizes[idx], _size);
 
                         #if DM_ALLOC_PRINT_STATS
                         m_mutex.lock();
@@ -692,7 +692,7 @@ namespace dm
                             m_allocs[ii].unset(slot);
                             m_mutex.unlock();
 
-                            CS_PRINT_SMALL("~Small free: slot %u %llu.%lluKB %d/%d - (0x%p)"
+                            DM_PRINT_SMALL("~Small free: slot %u %llu.%lluKB %d/%d - (0x%p)"
                                           , slot
                                           , dm::U_UKB(m_sizes[ii])
                                           , m_allocs[ii].count(), m_allocs[ii].max()
@@ -923,7 +923,7 @@ namespace dm
                         // Find and assign first.
                         for (uint16_t ii = subRegion+1; ii < NumSubRegions; ++ii)
                         {
-                            if (m_freeSlotsCount[ii] > 0)
+                            if (m_freeSlotsCount[ii] >= 0)
                             {
                                 first = ii;
                                 break;
@@ -1683,12 +1683,12 @@ namespace dm
 
                     BX_ALIGN_DECL_16(uint32_t* m_freeSlotsSize[NumRegions*NumSubRegions]);
                     #define DM_ALLOC_DEF(_regionIdx, _num) \
-                        BX_ALIGN_DECL_16(uint32_t m_freeSlotsSize ## _regionIdx ## [NumSubRegions][NumSlots ## _regionIdx ## ]);
+                        BX_ALIGN_DECL_16(uint32_t m_freeSlotsSize ## _regionIdx ## [NumSubRegions][NumSlots ## _regionIdx]);
                     #include "allocator_config.h"
 
                     BX_ALIGN_DECL_16(void** m_freeSlotsPtr[NumRegions*NumSubRegions]);
                     #define DM_ALLOC_DEF(_regionIdx, _num) \
-                        BX_ALIGN_DECL_16(void* m_freeSlotsPtr ## _regionIdx ## [NumSubRegions][NumSlots ## _regionIdx ##]);
+                        BX_ALIGN_DECL_16(void* m_freeSlotsPtr ## _regionIdx ## [NumSubRegions][NumSlots ## _regionIdx]);
                     #include "allocator_config.h"
                 #else
                     struct FreeSlot
@@ -1858,7 +1858,7 @@ namespace dm
                 DynamicStackAllocator* stack = m_dynamicStacks.addNew();
                 stack->init(&s_memory.m_stackPtr, &s_memory.m_heapEnd);
 
-                CS_PRINT_STACK("Stack split: %llu.%lluMB and %llu.%lluMB."
+                DM_PRINT_STACK("Stack split: %llu.%lluMB and %llu.%lluMB."
                              , dm::U_UMB(s_memory.sizeBetweenStackAndHeap())
                              , dm::U_UMB(prev.available())
                              );
@@ -1882,7 +1882,7 @@ namespace dm
                         // Make previous stack use it.
                         prev.setExternal(&s_memory.m_stackPtr, &s_memory.m_heapEnd);
 
-                        CS_PRINT_STACK("Stack split freed: Available %llu.%lluMB.", dm::U_UMB(s_memory.sizeBetweenStackAndHeap()));
+                        DM_PRINT_STACK("Stack split freed: Available %llu.%lluMB.", dm::U_UMB(s_memory.sizeBetweenStackAndHeap()));
 
                         m_dynamicStacks.remove(ii);
                         return true;
