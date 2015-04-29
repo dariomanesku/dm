@@ -36,7 +36,6 @@
     #define DM_ALLOCATOR_IMPL dm::Allocator
 #endif //!defined(DM_ALLOCATOR_IMPL)
 
-
 // Allocator interface.
 //-----
 
