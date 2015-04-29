@@ -147,7 +147,7 @@ namespace dm
                 // Align.
                 void*  alignedPtr;
                 size_t alignedSize;
-                dm::alignPtrAndSize(alignedPtr, alignedSize, m_orig, size, CS_NATURAL_ALIGNMENT);
+                dm::alignPtrAndSize(alignedPtr, alignedSize, m_orig, size, DM_NATURAL_ALIGNMENT);
 
                 // Assign.
                 m_memory = alignedPtr;
@@ -162,8 +162,8 @@ namespace dm
                 ptr = m_segregatedLists.init(ptr, SegregatedLists::DataSize);
 
                 void* end = (void*)((uint8_t*)m_memory + m_size);
-                m_stackPtr = (uint8_t*)dm::alignPtrNext(ptr, CS_NATURAL_ALIGNMENT);
-                m_heapEnd  = (uint8_t*)dm::alignPtrPrev(end, CS_NATURAL_ALIGNMENT);
+                m_stackPtr = (uint8_t*)dm::alignPtrNext(ptr, DM_NATURAL_ALIGNMENT);
+                m_heapEnd  = (uint8_t*)dm::alignPtrPrev(end, DM_NATURAL_ALIGNMENT);
 
                 m_stack.init(&m_stackPtr, &m_heapEnd);
                 m_heap.init(&m_stackPtr, &m_heapEnd);
@@ -443,7 +443,7 @@ namespace dm
                 {
                     void*  alignedPtr;
                     size_t alignedSize;
-                    dm::alignPtrAndSize(alignedPtr, alignedSize, _mem, _size, CS_NATURAL_ALIGNMENT);
+                    dm::alignPtrAndSize(alignedPtr, alignedSize, _mem, _size, DM_NATURAL_ALIGNMENT);
 
                     CS_PRINT_MEM_STATS("Init: Using %llu.%lluMB for static storage.", dm::U_UMB(alignedSize));
 
@@ -460,7 +460,7 @@ namespace dm
 
                 void* alloc(size_t _size)
                 {
-                    const size_t size = dm::alignSizeNext(_size, CS_NATURAL_ALIGNMENT);
+                    const size_t size = dm::alignSizeNext(_size, DM_NATURAL_ALIGNMENT);
 
                     CS_CHECK(size <= m_avail
                             , "StaticStorage::alloc | No more space left. %llu.%lluKB - %llu.%lluKB (requested/left)"
@@ -495,7 +495,7 @@ namespace dm
                     if (_ptr == m_last)
                     {
                         const size_t currSize = m_ptr - m_last;
-                        const size_t newSize = dm::alignSizeNext(_size, CS_NATURAL_ALIGNMENT);
+                        const size_t newSize = dm::alignSizeNext(_size, DM_NATURAL_ALIGNMENT);
                         const int32_t diff = int32_t(newSize - currSize);
 
                         CS_CHECK(diff <= int32_t(m_avail)
@@ -588,7 +588,7 @@ namespace dm
                 {
                     void*  alignedPtr;
                     size_t alignedSize;
-                    dm::alignPtrAndSize(alignedPtr, alignedSize, _mem, _size, CS_NATURAL_ALIGNMENT);
+                    dm::alignPtrAndSize(alignedPtr, alignedSize, _mem, _size, DM_NATURAL_ALIGNMENT);
 
                     m_mem = alignedPtr;
                     m_totalSize = alignedSize;
@@ -1381,7 +1381,7 @@ namespace dm
                 {
                     bx::LwMutexScope lock(m_mutex);
 
-                    const size_t alignedSize = dm::alignSizeNext(_size, CS_NATURAL_ALIGNMENT);
+                    const size_t alignedSize = dm::alignSizeNext(_size, DM_NATURAL_ALIGNMENT);
                     const size_t totalSize   = alignedSize + HeaderFooterSize;
 
                     // Search for free space.
@@ -1471,7 +1471,7 @@ namespace dm
                     const uint64_t currTotalSize = currSize + HeaderFooterSize;
 
                     // Requested size.
-                    const size_t reqSize      = dm::alignSizeNext(_size, CS_NATURAL_ALIGNMENT);
+                    const size_t reqSize      = dm::alignSizeNext(_size, DM_NATURAL_ALIGNMENT);
                     const size_t reqTotalSize = reqSize + HeaderFooterSize;
 
                     if (reqTotalSize == currTotalSize)
@@ -1728,7 +1728,7 @@ namespace dm
             {
             }
 
-            virtual void* alloc(size_t _size, size_t _align = CS_NATURAL_ALIGNMENT, const char* _file = NULL, uint32_t _line = 0) BX_OVERRIDE
+            virtual void* alloc(size_t _size, size_t _align = DM_NATURAL_ALIGNMENT, const char* _file = NULL, uint32_t _line = 0) BX_OVERRIDE
             {
                 BX_UNUSED(_align, _file, _line);
 
@@ -1751,7 +1751,7 @@ namespace dm
                 }
             }
 
-            virtual void* realloc(void* _ptr, size_t _size, size_t _align = CS_NATURAL_ALIGNMENT, const char* _file = NULL, uint32_t _line = 0) BX_OVERRIDE
+            virtual void* realloc(void* _ptr, size_t _size, size_t _align = DM_NATURAL_ALIGNMENT, const char* _file = NULL, uint32_t _line = 0) BX_OVERRIDE
             {
                 BX_UNUSED(_ptr, _size, _align, _file, _line);
 
