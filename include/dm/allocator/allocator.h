@@ -760,7 +760,7 @@ namespace dm
 
             struct Heap
             {
-                #define DM_HEAP_ARRAY_IMPL (DM_ALLOCATOR_IMPL_ARRAY == DM_HEAP_ARRAY_IMPL)
+                #define DM_HEAP_ARRAY_IMPL (DM_ALLOCATOR_UNDERLYING_IMPL_ARRAY == DM_ALLOCATOR_UNDERLYING_IMPL)
 
                 enum
                 {
@@ -1144,7 +1144,6 @@ namespace dm
                         return false;
                     }
                 #endif //DM_HEAP_ARRAY_IMPL
-
 
                 bool removeBigFreeSpaceRef(void* _ptr)
                 {

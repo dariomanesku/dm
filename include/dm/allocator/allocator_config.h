@@ -74,12 +74,12 @@ DM_ALLOC_DEF(9,   32) // for region: 1024MB
     //     #define DM_MEM_SIZE_FUNC memSizeFunc
     //     size_t memSizeFunc() { return DM_GIGABYTES(1); }
 
-    #define DM_ALLOCATOR_IMPL_LIST  0 // Slower - left for testing purposes.
-    #define DM_ALLOCATOR_IMPL_ARRAY 1 // Faster - recommended!
+    #define DM_ALLOCATOR_UNDERLYING_IMPL_LIST  0 // Slower - left for testing purposes.
+    #define DM_ALLOCATOR_UNDERLYING_IMPL_ARRAY 1 // Faster - recommended!
 
-    #ifndef DM_ALLOCATOR_IMPL
-        #define DM_ALLOCATOR_IMPL DM_ALLOCATOR_IMPL_ARRAY
-    #endif //DM_ALLOCATOR_IMPL
+    #ifndef DM_ALLOCATOR_UNDERLYING_IMPL
+        #define DM_ALLOCATOR_UNDERLYING_IMPL DM_ALLOCATOR_UNDERLYING_IMPL_ARRAY
+    #endif //DM_ALLOCATOR_UNDERLYING_IMPL
 
     #ifndef DM_NATURAL_ALIGNMENT
         #define DM_NATURAL_ALIGNMENT 16
