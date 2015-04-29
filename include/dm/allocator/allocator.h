@@ -74,11 +74,7 @@ namespace dm
 // Allocator implementation.
 //-----
 
-#ifndef DM_ALLOCATOR_IMPL
-#   define DM_ALLOCATOR_IMPL 0
-#endif
-
-#if DM_ALLOCATOR_IMPL
+#ifdef DM_ALLOCATOR_IMPL
 #include "allocator_config.h"
 #include "allocator_p.h"
 
