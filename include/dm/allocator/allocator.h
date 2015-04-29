@@ -1298,13 +1298,13 @@ namespace dm
                     return (void*)begin;
                 }
 
-                uint64_t readUsedSize(const void* _beg) const
+                uint64_t readHeader(const void* _beg) const
                 {
-                    const uint64_t* usedSize = (const uint64_t*)_beg;
-                    return *usedSize;
+                    const uint64_t* header = (const uint64_t*)_beg;
+                    return *header;
                 }
 
-                uint64_t readLeftUsedSize(const void* _beg) const
+                uint64_t readLeftHeader(const void* _beg) const
                 {
                     const uint64_t* usedSize = (const uint64_t*)_beg-1;
                     return *usedSize;
@@ -1465,8 +1465,8 @@ namespace dm
                     void* beg = ptrToBegin(_ptr);
 
                     // Current size.
-                    const uint64_t currUsedSize  = readUsedSize(beg);
-                    const uint64_t currSize      = unpackSize(currUsedSize);
+                    const uint64_t currHeader    = readHeader(beg);
+                    const uint64_t currSize      = unpackSize(currHeader);
                     const uint64_t currTotalSize = currSize + HeaderFooterSize;
 
                     // Requested size.
@@ -1505,10 +1505,10 @@ namespace dm
                         // Try to expand.
 
                         void*    rightBeg = (uint8_t*)beg + currTotalSize;
-                        uint64_t rightUsedSize = readUsedSize(rightBeg);
-                        if (isFree(rightUsedSize))
+                        uint64_t rightHeader = readHeader(rightBeg);
+                        if (isFree(rightHeader))
                         {
-                            const uint64_t rightSize      = unpackSize(rightUsedSize);
+                            const uint64_t rightSize      = unpackSize(rightHeader);
                             const uint64_t rightTotalSize = rightSize + HeaderFooterSize;
 
                             const uint64_t expandSize = reqTotalSize - currTotalSize;
@@ -1520,8 +1520,8 @@ namespace dm
                                     #if DM_HEAP_ARRAY_IMPL
                                         removeFreeSpace(rightBeg, uint32_t(rightTotalSize));
                                     #else
-                                        const uint16_t group  = unpackGroup(rightUsedSize);
-                                        const uint16_t handle = unpackHandle(rightUsedSize);
+                                        const uint16_t group  = unpackGroup(rightHeader);
+                                        const uint16_t handle = unpackHandle(rightHeader);
                                         removeFreeSpace(rightBeg, uint32_t(rightTotalSize), group, handle);
                                     #endif //DM_HEAP_ARRAY_IMPL
                                 }
@@ -1560,7 +1560,7 @@ namespace dm
 
                     void* beg = ptrToBegin(_ptr);
 
-                    const uint64_t usedSize = readUsedSize(beg);
+                    const uint64_t usedSize = readHeader(beg);
                     const uint64_t size = unpackSize(usedSize);
                     const uint64_t totalSize = size + HeaderFooterSize;
 
@@ -1569,10 +1569,10 @@ namespace dm
 
                     // Right.
                     void*    rightBeg = (uint8_t*)beg + totalSize;
-                    uint64_t rightUsedSize = readUsedSize(rightBeg);
-                    if (isFree(rightUsedSize))
+                    uint64_t rightHeader = readHeader(rightBeg);
+                    if (isFree(rightHeader))
                     {
-                        const uint64_t rightSize      = unpackSize(rightUsedSize);
+                        const uint64_t rightSize      = unpackSize(rightHeader);
                         const uint64_t rightTotalSize = rightSize + HeaderFooterSize;
 
                         if (rightTotalSize <= BiggestRegion)
@@ -1580,8 +1580,8 @@ namespace dm
                             #if DM_HEAP_ARRAY_IMPL
                                 removeFreeSpace(rightBeg, uint32_t(rightTotalSize));
                             #else
-                                const uint16_t group  = unpackGroup(rightUsedSize);
-                                const uint16_t handle = unpackHandle(rightUsedSize);
+                                const uint16_t group  = unpackGroup(rightHeader);
+                                const uint16_t handle = unpackHandle(rightHeader);
                                 removeFreeSpace(rightBeg, uint32_t(rightTotalSize), group, handle);
                             #endif //DM_HEAP_ARRAY_IMPL
                         }
@@ -1594,8 +1594,8 @@ namespace dm
                     }
 
                     // Left.
-                    const uint64_t leftUsedSize = readLeftUsedSize(beg);
-                    if (UINT64_MAX == leftUsedSize)
+                    const uint64_t leftHeader = readLeftHeader(beg);
+                    if (UINT64_MAX == leftHeader)
                     {
                         *m_end += freeSize;
 
@@ -1606,10 +1606,10 @@ namespace dm
                     }
                     else
                     {
-                        const bool leftUsed = unpackUsed(leftUsedSize);
+                        const bool leftUsed = unpackUsed(leftHeader);
                         if (!leftUsed)
                         {
-                            const uint64_t leftSize      = unpackSize(leftUsedSize);
+                            const uint64_t leftSize      = unpackSize(leftHeader);
                             const uint64_t leftTotalSize = leftSize + HeaderFooterSize;
 
                             void* leftBeg = (uint8_t*)beg - leftTotalSize;
@@ -1618,8 +1618,8 @@ namespace dm
                                 #if DM_HEAP_ARRAY_IMPL
                                     removeFreeSpace(leftBeg, uint32_t(leftTotalSize));
                                 #else
-                                    const uint16_t group  = unpackGroup(leftUsedSize);
-                                    const uint16_t handle = unpackHandle(leftUsedSize);
+                                    const uint16_t group  = unpackGroup(leftHeader);
+                                    const uint16_t handle = unpackHandle(leftHeader);
                                     removeFreeSpace(leftBeg, uint32_t(leftTotalSize), group, handle);
                                 #endif //DM_HEAP_ARRAY_IMPL
                             }
@@ -1639,7 +1639,8 @@ namespace dm
                 size_t getSize(void* _ptr) const
                 {
                     const void* beg = ptrToBegin(_ptr);
-                    const uint64_t size = readUsedSize(beg);
+                    const uint64_t header = readHeader(beg);
+                    const uint64_t size = unpackSize(header);
 
                     return size_t(size);
                 }
