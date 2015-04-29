@@ -18,7 +18,6 @@
 
 namespace dm
 {
-
     struct BX_NO_VTABLE StackAllocatorI : public bx::ReallocatorI
     {
         virtual void push() = 0;
@@ -75,6 +74,7 @@ namespace dm
 //-----
 
 #ifdef DM_ALLOCATOR_IMPL
+
 #include "allocator_config.h"
 #include "allocator_p.h"
 
@@ -2341,7 +2341,6 @@ namespace dm
         dm::ObjArray<PtrArray> m_pointers;
     };
     static CrtStackAllocator s_crtStackAllocator;
-
 
     bool allocInit()
     {
