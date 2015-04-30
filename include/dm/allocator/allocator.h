@@ -12,6 +12,9 @@
 #include <bx/allocator.h> //bx::ReallocatorI, BX_ALLOC/BX_FREE/BX_REALLOC
 #include <dm/misc.h>      //dm::NoCopyNoAssign
 
+#include <dm/datastructures/bitarray.h>
+#include <dm/datastructures/oplist.h>
+
 #define DM_ALLOC   BX_ALLOC
 #define DM_FREE    BX_FREE
 #define DM_REALLOC BX_REALLOC
