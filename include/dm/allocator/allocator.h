@@ -228,6 +228,11 @@ namespace dm
 
             void* alloc(size_t _size)
             {
+                if (0 == _size)
+                {
+                    return NULL;
+                }
+
                 void* ptr;
 
                 // Try small alloc.
