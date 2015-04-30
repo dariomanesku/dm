@@ -1049,7 +1049,7 @@ namespace dm
                     }
                 }
 
-                void removeFreeSlot(uint32_t _group, uint32_t _idx)
+                void removeFreeSlot(uint16_t _group, uint32_t _idx)
                 {
                     #if DM_HEAP_ARRAY_IMPL
                         const uint32_t last = --m_freeSlotsCount[_group];
@@ -1059,7 +1059,7 @@ namespace dm
                         m_freeSlots[_group].remove(_idx);
                     #endif //DM_HEAP_ARRAY_IMPL
 
-                    unregisterSlotGroup(uint16_t(_group));
+                    unregisterSlotGroup(_group);
                 }
 
                 void removeBigFreeSlot(uint32_t _idx)
@@ -1132,12 +1132,12 @@ namespace dm
                         return removeFreeSpaceSSE(_ptr, _size);
                     }
                 #else
-                    bool removeFreeSpace(void* /*_ptr*/, uint32_t /*_size*/, uint16_t _group, uint16_t _handle)
+                    bool removeFreeSpace(uint16_t _group, uint16_t _handle)
                     {
                         if (_handle != UINT16_MAX)
                         {
                             m_freeSlots[_group].remove(_handle);
-                            unregisterSlotGroup(uint16_t(_group));
+                            unregisterSlotGroup(_group);
                             return true;
                         }
 
@@ -1524,7 +1524,7 @@ namespace dm
                                     #else
                                         const uint16_t group  = unpackGroup(rightHeader);
                                         const uint16_t handle = unpackHandle(rightHeader);
-                                        removeFreeSpace(rightBeg, uint32_t(rightTotalSize), group, handle);
+                                        removeFreeSpace(group, handle);
                                     #endif //DM_HEAP_ARRAY_IMPL
                                 }
                                 else
@@ -1584,7 +1584,7 @@ namespace dm
                             #else
                                 const uint16_t group  = unpackGroup(rightHeader);
                                 const uint16_t handle = unpackHandle(rightHeader);
-                                removeFreeSpace(rightBeg, uint32_t(rightTotalSize), group, handle);
+                                removeFreeSpace(group, handle);
                             #endif //DM_HEAP_ARRAY_IMPL
                         }
                         else
@@ -1622,7 +1622,7 @@ namespace dm
                                 #else
                                     const uint16_t group  = unpackGroup(leftHeader);
                                     const uint16_t handle = unpackHandle(leftHeader);
-                                    removeFreeSpace(leftBeg, uint32_t(leftTotalSize), group, handle);
+                                    removeFreeSpace(group, handle);
                                 #endif //DM_HEAP_ARRAY_IMPL
                             }
                             else
