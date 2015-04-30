@@ -1215,7 +1215,8 @@ namespace dm
 
                 uint64_t packHeader(bool _used, uint64_t _size) const
                 {
-                    return ((uint64_t(_size)<<DM_SizeShift)&DM_SizeMask)
+                    return 0
+                         | ((uint64_t(_size)<<DM_SizeShift)&DM_SizeMask)
                          | ((uint64_t(_used)<<DM_UsedShift)&DM_UsedMask)
                          ;
                 }
@@ -1223,7 +1224,8 @@ namespace dm
                 #if !DM_HEAP_ARRAY_IMPL
                     uint64_t packHeader(bool _used, uint16_t _group, uint16_t _handle, uint64_t _size) const
                     {
-                        return ((uint64_t(_size)<<DM_SizeShift)&DM_SizeMask)
+                        return 0
+                             | ((uint64_t(_size)<<DM_SizeShift)&DM_SizeMask)
                              | ((uint64_t(_handle)<<DM_HandleShift)&DM_HandleMask)
                              | ((uint64_t(_group)<<DM_GroupShift)&DM_GroupMask)
                              | ((uint64_t(_used)<<DM_UsedShift)&DM_UsedMask)
