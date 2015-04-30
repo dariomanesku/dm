@@ -846,13 +846,13 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
     configuration { "xcode4", "x32" }
         targetdir (path.join(_buildDir, "osx32_" .. _ACTION, "bin"))
         objdir (path.join(_buildDir, "osx32_" .. _ACTION, "obj"))
-        libdirs { path.join(_libDir, "lib/osx32_" .. _ACTION), }
+        --libdirs { path.join(_libDir, "lib/osx32_" .. _ACTION), }
         buildoptions { "-m32" }
 
     configuration { "xcode4", "x64" }
         targetdir (path.join(_buildDir, "osx64_" .. _ACTION, "bin"))
         objdir (path.join(_buildDir, "osx64_" .. _ACTION, "obj"))
-        libdirs { path.join(_libDir, "lib/osx64_" .. _ACTION), }
+        --libdirs { path.join(_libDir, "lib/osx64_" .. _ACTION), }
         buildoptions { "-m64", }
 
     configuration { "ios*" }
