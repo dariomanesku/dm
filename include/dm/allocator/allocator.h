@@ -848,7 +848,7 @@ namespace dm
                         #define DM_ALLOC_DEF(_regionIdx, _num)                                                        \
                             for (uint32_t ii = 0; ii < NumSubRegions; ++ii)                                           \
                             {                                                                                         \
-                                m_freeSlotsSize[_regionIdx*NumSubRegions+ii] = m_freeSlotsSize ## _regionIdx ## [ii]; \
+                                m_freeSlotsSize[_regionIdx*NumSubRegions+ii] = m_freeSlotsSize ## _regionIdx[ii]; \
                             }
                         #include "allocator_config.h"
 
@@ -863,7 +863,7 @@ namespace dm
                         #define DM_ALLOC_DEF(_regionIdx, _num)                                                      \
                             for (uint32_t ii = 0; ii < NumSubRegions; ++ii)                                         \
                             {                                                                                       \
-                                m_freeSlotsPtr[_regionIdx*NumSubRegions+ii] = m_freeSlotsPtr ## _regionIdx ## [ii]; \
+                                m_freeSlotsPtr[_regionIdx*NumSubRegions+ii] = m_freeSlotsPtr ## _regionIdx[ii]; \
                             }
                         #include "allocator_config.h"
                     #else
@@ -1691,12 +1691,12 @@ namespace dm
 
                     BX_ALIGN_DECL_16(uint32_t* m_freeSlotsSize[NumRegions*NumSubRegions]);
                     #define DM_ALLOC_DEF(_regionIdx, _num) \
-                        BX_ALIGN_DECL_16(uint32_t m_freeSlotsSize ## _regionIdx ## [NumSubRegions][NumSlots ## _regionIdx]);
+                        BX_ALIGN_DECL_16(uint32_t m_freeSlotsSize ## _regionIdx [NumSubRegions][NumSlots ## _regionIdx]);
                     #include "allocator_config.h"
 
                     BX_ALIGN_DECL_16(void** m_freeSlotsPtr[NumRegions*NumSubRegions]);
                     #define DM_ALLOC_DEF(_regionIdx, _num) \
-                        BX_ALIGN_DECL_16(void* m_freeSlotsPtr ## _regionIdx ## [NumSubRegions][NumSlots ## _regionIdx]);
+                        BX_ALIGN_DECL_16(void* m_freeSlotsPtr ## _regionIdx [NumSubRegions][NumSlots ## _regionIdx]);
                     #include "allocator_config.h"
                 #else
                     struct FreeSlot
