@@ -831,7 +831,7 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
         buildoptions
         {
             "-Wfatal-errors",
-            "-msse2",
+            "-msse4.1",
             "-Wunused-value",
             "-Wundef",
         }
