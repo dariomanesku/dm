@@ -79,8 +79,12 @@ namespace dm
 #include "allocator_p.h"
 
 #include <stdio.h>                      // fprintf
-#include <emmintrin.h>                  // __m128i
 #include "stack.h"                      // DynamicStack, FreeStack
+
+#include <emmintrin.h>                  // __m128i
+#if defined(__SSE4_1__)
+#   include <smmintrin.h>               // _mm_cmpeq_epi64()
+#endif // defined(__SSE4_1__)
 
 #include <dm/misc.h>                    // DM_MEGABYTES
 #include <dm/datastructures/array.h>    // dm::Array
