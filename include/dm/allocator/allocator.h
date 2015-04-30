@@ -762,6 +762,24 @@ namespace dm
             {
                 #define DM_HEAP_ARRAY_IMPL (DM_ALLOCATOR_UNDERLYING_IMPL_ARRAY == DM_ALLOCATOR_UNDERLYING_IMPL)
 
+                #if DM_HEAP_ARRAY_IMPL
+                #   define DM_UsedMask    0x8000000000000000UL
+                #   define DM_UsedShift   63UL
+                #   define DM_SizeMask    0x7fffffffffffffffUL
+                #   define DM_SizeShift   0UL
+                #else
+                #   define DM_UsedMask    0x8000000000000000UL
+                #   define DM_UsedShift   63UL
+                #   define DM_HandleMask  0x7fff000000000000UL
+                #   define DM_HandleShift 48UL
+                #   define DM_HandleMax   (DM_HandleMask>>DM_HandleShift)
+                #   define DM_GroupMask   0x0000fff000000000UL
+                #   define DM_GroupShift  36UL
+                #   define DM_GroupMax    (DM_GroupMask>>DM_GroupShift)
+                #   define DM_SizeMask    0x0000000fffffffffUL
+                #   define DM_SizeShift   0UL
+                #endif //DM_HEAP_ARRAY_IMPL
+
                 enum
                 {
                     HeaderSize = sizeof(uint64_t),
@@ -1015,12 +1033,11 @@ namespace dm
                             freeSlot->m_size = _size;
                             freeSlot->m_ptr  = _ptr;
                             const uint16_t handle = m_freeSlots[group].getHandleOf(freeSlot);
-                            writeHeaderFooter(_ptr, (uint64_t)_size, group, handle);
+                            writeHeaderFooter(_ptr, (uint64_t)_size, group, handle, false);
                         }
                         else
                         {
-                            const uint16_t handle = UINT16_MAX;
-                            writeHeaderFooter(_ptr, (uint64_t)_size, group, handle);
+                            writeHeaderFooter(_ptr, (uint64_t)_size, group, DM_HandleMax, false);
                         }
                     #endif //DM_HEAP_ARRAY_IMPL
                 }
@@ -1056,7 +1073,7 @@ namespace dm
                         m_freeSlotsSize[_group][_idx] = m_freeSlotsSize[_group][last];
                         m_freeSlotsPtr [_group][_idx] = m_freeSlotsPtr [_group][last];
                     #else
-                        m_freeSlots[_group].remove(_idx);
+                        m_freeSlots[_group].removeAt(_idx);
                     #endif //DM_HEAP_ARRAY_IMPL
 
                     unregisterSlotGroup(_group);
@@ -1134,7 +1151,7 @@ namespace dm
                 #else
                     bool removeFreeSpace(uint16_t _group, uint16_t _handle)
                     {
-                        if (_handle != UINT16_MAX)
+                        if (_handle < DM_HandleMax)
                         {
                             m_freeSlots[_group].remove(_handle);
                             unregisterSlotGroup(_group);
@@ -1197,22 +1214,6 @@ namespace dm
                     return removeBigFreeSpaceSSE(_ptr);
                 }
 
-                #if DM_HEAP_ARRAY_IMPL
-                #   define DM_UsedMask    0x8000000000000000UL
-                #   define DM_UsedShift   63UL
-                #   define DM_SizeMask    0x7fffffffffffffffUL
-                #   define DM_SizeShift   0UL
-                #else
-                #   define DM_UsedMask    0x8000000000000000UL
-                #   define DM_UsedShift   63UL
-                #   define DM_HandleMask  0x7fff000000000000UL
-                #   define DM_HandleShift 48UL
-                #   define DM_GroupMask   0x0000fff000000000UL
-                #   define DM_GroupShift  36UL
-                #   define DM_SizeMask    0x0000000fffffffffUL
-                #   define DM_SizeShift   0UL
-                #endif //DM_HEAP_ARRAY_IMPL
-
                 uint64_t packHeader(bool _used, uint64_t _size) const
                 {
                     return 0
@@ -1272,7 +1273,7 @@ namespace dm
                 }
 
                 #if !DM_HEAP_ARRAY_IMPL
-                    void* writeHeaderFooter(const void* _begin, uint64_t _totalSize, uint16_t _group, uint16_t _handle)
+                    void* writeHeaderFooter(const void* _begin, uint64_t _totalSize, uint16_t _group, uint16_t _handle, bool _used = true)
                     {
                         uint8_t* end = (uint8_t*)_begin+_totalSize;
 
@@ -1281,7 +1282,7 @@ namespace dm
                         uint64_t* footer = (uint64_t*)end-1;
 
                         const uint64_t allocSize = _totalSize - HeaderFooterSize;
-                        const uint64_t headerData = packHeader(true, _group, _handle, allocSize);
+                        const uint64_t headerData = packHeader(_used, _group, _handle, allocSize);
                         *header = headerData;
                         *footer = headerData;
 
@@ -1429,6 +1430,7 @@ namespace dm
                                     if (slot.m_size > uint32_t(totalSize))
                                     {
                                         void* ptr = consumeFreeSpace(group, ii, slot.m_size, uint32_t(totalSize));
+
                                         return ptr;
                                     }
 
