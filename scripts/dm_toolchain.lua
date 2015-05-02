@@ -521,7 +521,7 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
         buildoptions
         {
             "-std=c++0x",
-            "-msse2",
+            "-msse4.1",
             "-Wunused-value",
             "-Wundef",
         }
