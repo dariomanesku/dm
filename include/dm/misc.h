@@ -156,26 +156,26 @@ namespace dm
     }
 
     /// Example: for input 12780 (12.492KB) returns 12.
-    DM_INLINE uint64_t asKBInt(uint64_t _dataSize)
+    DM_INLINE uint32_t asKBInt(uint64_t _dataSize)
     {
         return _dataSize>>10;
     }
 
     /// Example: for input 12780 (12.492KB) returns 492.
-    DM_INLINE uint64_t asKBDec(uint64_t _dataSize)
+    DM_INLINE uint32_t asKBDec(uint64_t _dataSize)
     {
         const uint64_t kb = asKBInt(_dataSize);
         return _dataSize-(kb<<10);
     }
 
     /// Example: for input 13450000 (12.846MB) returns 12.
-    DM_INLINE uint64_t asMBInt(uint64_t _dataSize)
+    DM_INLINE uint32_t asMBInt(uint64_t _dataSize)
     {
         return _dataSize>>20;
     }
 
     /// Example: for input 13450000 (12.846MB) returns 826.
-    DM_INLINE uint64_t asMBDec(uint64_t _dataSize)
+    DM_INLINE uint32_t asMBDec(uint64_t _dataSize)
     {
         const uint64_t mb = asMBInt(_dataSize);
         return (_dataSize-(mb<<20))>>10;

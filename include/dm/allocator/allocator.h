@@ -149,7 +149,7 @@ namespace dm
                 // Alloc.
                 m_orig = ::malloc(size);
 
-                DM_PRINT_MEM_STATS("Init: Allocating %llu.%lluMB - (0x%p)", dm::U_UMB(size), m_orig);
+                DM_PRINT_MEM_STATS("Init: Allocating %u.%uMB - (0x%p)", dm::U_UMB(size), m_orig);
 
                 // Align.
                 void*  alignedPtr;
@@ -185,7 +185,7 @@ namespace dm
                 m_stack.printStats();
                 m_segregatedLists.printStats();
                 m_heap.printStats();
-                printf("External: alloc/free %u.%u, total %llu.%lluMB\n\n", m_externalAlloc, m_externalFree, dm::U_UMB(m_externalSize));
+                printf("External: alloc/free %u.%u, total %u.%uMB\n\n", m_externalAlloc, m_externalFree, dm::U_UMB(m_externalSize));
                 #endif //DM_ALLOC_PRINT_STATS
             }
 
@@ -202,7 +202,7 @@ namespace dm
                 const size_t stackTotal = m_stack.total();
                 const size_t heapUsage  = m_heap.getUsage();
                 const size_t heapTotal  = m_heap.total();
-                printf("Usage: Stack %llu.%lluMB / %llu.%lluMB - Heap %llu.%lluMB / %llu.%lluMB\n"
+                printf("Usage: Stack %u.%uMB / %u.%uMB - Heap %u.%uMB / %u.%uMB\n"
                       , dm::U_UMB(stackUsage), dm::U_UMB(stackTotal)
                       , dm::U_UMB(heapUsage),  dm::U_UMB(heapTotal)
                       );
@@ -221,7 +221,7 @@ namespace dm
                 m_externalSize += _size;
                 #endif //DM_ALLOC_PRINT_STATS
 
-                DM_PRINT_EXT("EXTERNAL ALLOC: %llu.%lluMB - (0x%p)", dm::U_UMB(_size), ptr);
+                DM_PRINT_EXT("EXTERNAL ALLOC: %u.%uMB - (0x%p)", dm::U_UMB(_size), ptr);
 
                 return ptr;
             }
@@ -304,7 +304,7 @@ namespace dm
                 if (!this->contains(_ptr))
                 {
                     void* ptr = ::realloc(_ptr, _size);
-                    DM_PRINT_EXT("EXTERNAL REALLOC: %llu.%lluMB - (0x%p - 0x%p)", dm::U_UMB(_size), _ptr, ptr);
+                    DM_PRINT_EXT("EXTERNAL REALLOC: %u.%uMB - (0x%p - 0x%p)", dm::U_UMB(_size), _ptr, ptr);
                     return ptr;
                 }
 
@@ -457,7 +457,7 @@ namespace dm
                     size_t alignedSize;
                     dm::alignPtrAndSize(alignedPtr, alignedSize, _mem, _size, DM_NATURAL_ALIGNMENT);
 
-                    DM_PRINT_MEM_STATS("Init: Using %llu.%lluMB for static storage.", dm::U_UMB(alignedSize));
+                    DM_PRINT_MEM_STATS("Init: Using %u.%uMB for static storage.", dm::U_UMB(alignedSize));
 
                     m_ptr   = (uint8_t*)alignedPtr;
                     m_last  = m_ptr;
@@ -475,7 +475,7 @@ namespace dm
                     const size_t size = dm::alignSizeNext(_size, DM_NATURAL_ALIGNMENT);
 
                     CS_CHECK(size <= m_avail
-                            , "StaticStorage::alloc | No more space left. %llu.%lluKB - %llu.%lluKB (requested/left)"
+                            , "StaticStorage::alloc | No more space left. %u.%uKB - %u.%uKB (requested/left)"
                             , dm::U_UKB(size)
                             , dm::U_UKB(m_avail)
                             );
@@ -490,7 +490,7 @@ namespace dm
                     m_ptr   += size;
                     m_avail -= size;
 
-                    DM_PRINT_STATIC("Static alloc: %llu.%lluMB, Remaining: %llu.%lluMB - (0x%p)", dm::U_UMB(_size), dm::U_UMB(m_avail), m_last);
+                    DM_PRINT_STATIC("Static alloc: %u.%uMB, Remaining: %u.%uMB - (0x%p)", dm::U_UMB(_size), dm::U_UMB(m_avail), m_last);
 
                     return m_last;
                 }
@@ -511,7 +511,7 @@ namespace dm
                         const int32_t diff = int32_t(newSize - currSize);
 
                         CS_CHECK(diff <= int32_t(m_avail)
-                               , "StaticStorage::realloc | No more space left. %llu.%lluKB - %llu.%lluKB (requested/left)"
+                               , "StaticStorage::realloc | No more space left. %u.%uKB - %u.%uKB (requested/left)"
                                , dm::U_UKB(diff)
                                , dm::U_UKB(m_avail)
                                );
@@ -524,7 +524,7 @@ namespace dm
                         m_ptr   += diff;
                         m_avail -= diff;
 
-                        DM_PRINT_STATIC("Static realloc: %llu.%lluMB, Remaining: %llu.%lluMB - (0x%p)", dm::U_UMB(newSize), dm::U_UMB(m_avail), m_last);
+                        DM_PRINT_STATIC("Static realloc: %u.%uMB, Remaining: %u.%uMB - (0x%p)", dm::U_UMB(newSize), dm::U_UMB(m_avail), m_last);
 
                         return m_last;
                     }
@@ -542,7 +542,7 @@ namespace dm
                 {
                     const size_t diff = m_size-m_avail;
                     printf("Static storage:\n");
-                    printf("\tTotal: %llu.%03lluMB, Used: %llu.%03lluMB, Remaining: %llu.%03lluMB\n\n"
+                    printf("\tTotal: %u.%03lluMB, Used: %u.%03lluMB, Remaining: %u.%03lluMB\n\n"
                           , dm::U_UMB(m_size), dm::U_UMB(diff), dm::U_UMB(m_avail));
                 }
                 #endif //DM_ALLOC_PRINT_STATS
@@ -605,10 +605,10 @@ namespace dm
                     m_mem = alignedPtr;
                     m_totalSize = alignedSize;
                     CS_CHECK(m_totalSize == DataSize
-                           , "SegregatedLists::init | Not enough data allocated %llu.%lluMB / %llu.%lluMB"
+                           , "SegregatedLists::init | Not enough data allocated %u.%uMB / %u.%uMB"
                            , dm::U_UMB(m_totalSize), dm::U_UMB(DataSize)
                            );
-                    DM_PRINT_MEM_STATS("Init: Using %llu.%lluMB for segregated lists", dm::U_UMB(DataSize));
+                    DM_PRINT_MEM_STATS("Init: Using %u.%uMB for segregated lists", dm::U_UMB(DataSize));
 
                     #define DM_SMALL_ALLOC_DEF(_idx, _size, _num) \
                         m_sizes[_idx] = Size ## _idx;
@@ -662,7 +662,7 @@ namespace dm
 
                         CS_CHECK(mem < (uint8_t*)m_mem + m_totalSize, "SegregatedLists::alloc | Allocating outside of bounds!");
 
-                        DM_PRINT_SMALL("Small alloc: %llu.%lluKB -> slot %u (%llu.%lluKB) - %u/%u - (0x%p)"
+                        DM_PRINT_SMALL("Small alloc: %u.%uKB -> slot %u (%u.%uKB) - %u/%u - (0x%p)"
                                       , dm::U_UKB(_size)
                                       , slot
                                       , dm::U_UKB(m_sizes[idx])
@@ -704,7 +704,7 @@ namespace dm
                             m_allocs[ii].unset(slot);
                             m_mutex.unlock();
 
-                            DM_PRINT_SMALL("~Small free: slot %u %llu.%lluKB %d/%d - (0x%p)"
+                            DM_PRINT_SMALL("~Small free: slot %u %u.%uKB %d/%d - (0x%p)"
                                           , slot
                                           , dm::U_UKB(m_sizes[ii])
                                           , m_allocs[ii].count(), m_allocs[ii].max()
@@ -749,7 +749,7 @@ namespace dm
                               , ii, dm::U_UKB(m_sizes[ii]), used, max, m_overflow[ii], m_totalUsed[ii]);
                     }
                     printf("\t-------------------------\n");
-                    printf("\tTotal: %llu.%lluMB / %llu.%lluMB\n\n", dm::U_UMB(totalSize), dm::U_UMB(DataSize));
+                    printf("\tTotal: %u.%uMB / %u.%uMB\n\n", dm::U_UMB(totalSize), dm::U_UMB(DataSize));
                 }
                 #endif //DM_ALLOC_PRINT_STATS
 
@@ -1827,7 +1827,7 @@ namespace dm
             dm::StackAllocatorI* createFixed(size_t _size)
             {
                 void* mem = s_memory.alloc(_size);
-                CS_CHECK(mem, "Memory for stack could not be allocated. Requested %llu.%llu", dm::U_UMB(_size));
+                CS_CHECK(mem, "Memory for stack could not be allocated. Requested %u.%u", dm::U_UMB(_size));
 
                 FixedStackAllocator* stackAlloc = m_fixedStacks.addNew();
                 stackAlloc->init(mem, _size);
@@ -1874,7 +1874,7 @@ namespace dm
                 DynamicStackAllocator* stack = m_dynamicStacks.addNew();
                 stack->init(&s_memory.m_stackPtr, &s_memory.m_heapEnd);
 
-                DM_PRINT_STACK("Stack split: %llu.%lluMB and %llu.%lluMB."
+                DM_PRINT_STACK("Stack split: %u.%uMB and %u.%uMB."
                              , dm::U_UMB(s_memory.sizeBetweenStackAndHeap())
                              , dm::U_UMB(prev.available())
                              );
@@ -1898,7 +1898,7 @@ namespace dm
                         // Make previous stack use it.
                         prev.setExternal(&s_memory.m_stackPtr, &s_memory.m_heapEnd);
 
-                        DM_PRINT_STACK("Stack split freed: Available %llu.%lluMB.", dm::U_UMB(s_memory.sizeBetweenStackAndHeap()));
+                        DM_PRINT_STACK("Stack split freed: Available %u.%uMB.", dm::U_UMB(s_memory.sizeBetweenStackAndHeap()));
 
                         m_dynamicStacks.remove(ii);
                         return true;
