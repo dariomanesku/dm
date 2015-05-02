@@ -953,7 +953,7 @@ namespace dm
                         // Find and assign first.
                         for (uint16_t ii = subRegion+1; ii < NumSubRegions; ++ii)
                         {
-                            if (m_freeSlotsCount[ii] >= 0)
+                            if (m_freeSlotsCount[ii] > 0)
                             {
                                 first = ii;
                                 break;
