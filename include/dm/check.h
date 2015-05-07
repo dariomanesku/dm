@@ -17,7 +17,7 @@
 //-----
 
 #ifndef DM_CHECK_CONFIG
-    #define DM_CHECK_CONFIG DM_CHECK_CONFIG_NOOP
+#   define DM_CHECK_CONFIG DM_CHECK_CONFIG_NOOP
 #endif //DM_CHECK_CONFIG
 
 // Implementation.
@@ -33,7 +33,7 @@
     {                                                                                      \
         if (!(_condition))                                                                 \
         {                                                                                  \
-            fprintf(stderr, "DM ERROR (" DM_FILE_LINE "): "  _format "\n", ##__VA_ARGS__); \
+            fprintf(stderr, "DM ERROR [" DM_FILE_LINE "]: "  _format "\n", ##__VA_ARGS__); \
         }                                                                                  \
     } while(0)
 #define _DM_CHECK_BREAK(_condition, _format, ...)                                          \
@@ -41,25 +41,29 @@
     {                                                                                      \
         if (!(_condition))                                                                 \
         {                                                                                  \
-            fprintf(stderr, "DM ERROR (" DM_FILE_LINE "): "  _format "\n", ##__VA_ARGS__); \
+            fprintf(stderr, "DM ERROR [" DM_FILE_LINE "]: "  _format "\n", ##__VA_ARGS__); \
             bx::debugBreak();                                                              \
         }                                                                                  \
     } while(0)
 
 #if (DM_CHECK_CONFIG == DM_CHECK_CONFIG_PRINT)
-    #define _DM_CHECK _DM_CHECK_PRINT
-    #include <stdio.h> // fprintf()
+#    define _DM_CHECK _DM_CHECK_PRINT
+#    include <stdio.h> // fprintf()
 #elif (DM_CHECK_CONFIG == DM_CHECK_CONFIG_DEBUG_BREAK)
-    #define _DM_CHECK _DM_CHECK_BREAK
-    #include <stdio.h> // fprintf()
-    #include "../../3rdparty/bx/debug.h" // bx::debugBreak()
+#    define _DM_CHECK _DM_CHECK_BREAK
+#    include <stdio.h> // fprintf()
+#    include "../../3rdparty/bx/debug.h" // bx::debugBreak()
 #else
-    #define _DM_CHECK _DM_CHECK_NOOP
+#    define _DM_CHECK _DM_CHECK_NOOP
 #endif //(DM_CHECK_CONFIG == DM_CHECK_CONFIG_PRINT)
 
 #if !defined(DM_CHECK)
-    #define DM_CHECK _DM_CHECK
+#    define DM_CHECK _DM_CHECK
 #endif //!defined(DM_CHECK)
+
+#if !defined(DM_ASSERT)
+#    define DM_ASSERT(_condition) _DM_CHECK(_condition, "Assertion failed!")
+#endif //!defined(DM_ASSERT)
 
 #endif // DM_CHECK_H_HEADER_GUARD
 
