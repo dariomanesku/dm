@@ -6,19 +6,21 @@
 #ifndef DM_CHECK_H_HEADER_GUARD
 #define DM_CHECK_H_HEADER_GUARD
 
-// Config listing.
+// Choose desired config.
 //-----
 
 #define DM_CHECK_CONFIG_NOOP        0
 #define DM_CHECK_CONFIG_PRINT       1
 #define DM_CHECK_CONFIG_DEBUG_BREAK 2
 
-// Choose desired config.
-//-----
-
 #ifndef DM_CHECK_CONFIG
 #   define DM_CHECK_CONFIG DM_CHECK_CONFIG_NOOP
 #endif //DM_CHECK_CONFIG
+
+// Public flags.
+//-----
+
+#define DM_DEBUG_BUILD (DM_CHECK_CONFIG != DM_CHECK_CONFIG_NOOP)
 
 // Implementation.
 //-----
