@@ -11,6 +11,19 @@
 
 namespace dm
 {
+    DM_INLINE uint32_t hash(const char _str[])
+    {
+        // Sdbm hash from public domain.
+
+        uint32_t hash = 0;
+        for (const char* ch = _str; ch; ++ch)
+        {
+            hash = uint32_t(*ch) + (hash << 6) + (hash << 16) - hash;
+        }
+
+        return hash;
+    }
+
     DM_INLINE uint32_t hash(const uint8_t* _bytes, uint32_t _size)
     {
         // Sdbm hash from public domain.
