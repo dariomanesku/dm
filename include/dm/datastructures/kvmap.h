@@ -7,10 +7,12 @@
 #define DM_KVMAP_H_HEADER_GUARD
 
 #include <stdint.h> // uint32_t
-#include <new> // placement-new
+#include <new>      // placement-new
 
 #include "../common/common.h" // DM_INLINE
-#include "../check.h" // DM_CHECK
+#include "../check.h"         // DM_CHECK
+
+#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
 
 #include "set.h"
 

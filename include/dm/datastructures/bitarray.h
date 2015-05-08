@@ -9,9 +9,11 @@
 #include <stdint.h> // uint32_t
 #include <new>      // placement-new
 
-#include "../common/common.h"              // DM_INLINE
-#include "../check.h"                      // DM_CHECK
-#include "../../../3rdparty/bx/uint32_t.h" // bx::uint64_cnttz(), bx::uint64_cntlz(), bx::uint64_cntbits()
+#include "../common/common.h" // DM_INLINE
+#include "../check.h"         // DM_CHECK
+
+#include "../../../3rdparty/bx/uint32_t.h"  // bx::uint64_cnttz(), bx::uint64_cntlz(), bx::uint64_cntbits()
+#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
 
 namespace dm
 {

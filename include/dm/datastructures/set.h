@@ -12,6 +12,8 @@
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
 
+#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
+
 namespace dm
 {
     // Based on: http://research.swtch.com/sparse

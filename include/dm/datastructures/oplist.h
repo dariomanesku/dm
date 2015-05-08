@@ -12,6 +12,8 @@
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
 
+#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
+
 #include "array.h"
 #include "handlealloc.h"
 
