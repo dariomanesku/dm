@@ -7,12 +7,12 @@
 #define DM_MISC_H_HEADER_GUARD
 
 #include <stdint.h>
-#include <stdlib.h> // _fullpath
-#include <ctype.h>  // toupper()
-#include <math.h>   // logf()
-#include <stdio.h>  // FILE, fopen()
-#include <float.h>  // FLT_EPSILON
-#include <malloc.h> // alloca()
+#include <stdlib.h>  // _fullpath
+#include <ctype.h>   // toupper()
+#include <math.h>    // logf()
+#include <stdio.h>   // FILE, fopen()
+#include <float.h>   // FLT_EPSILON
+#include <malloc.h>  // alloca()
 
 #include "common/common.h" // DM_INLINE()
 #include "check.h"         // DM_CHECK()
@@ -23,18 +23,6 @@
 
 namespace dm
 {
-    // Compile time.
-    //-----
-
-    /// Usage: Log<2, 512>::Value
-    template <uint8_t Base, uint32_t N>
-    struct Log
-    {
-        enum { Value = 1 + Log<Base, N/Base>::Value };
-    };
-    template <uint8_t Base> struct Log<Base, 1> { enum { Value = 0 }; };
-    template <uint8_t Base> struct Log<Base, 0> { enum { Value = 0 }; };
-
     // Value.
     //-----
 
