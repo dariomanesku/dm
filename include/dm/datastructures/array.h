@@ -11,6 +11,7 @@
 
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
+#include "../compiletime.h"   // DM_ENABLE_IF_OBJ
 
 #include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
 

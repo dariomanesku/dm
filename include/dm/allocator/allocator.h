@@ -90,6 +90,7 @@ namespace dm
 #endif // defined(__SSE4_1__)
 
 #include <dm/misc.h>                    // DM_MEGABYTES
+#include <dm/compiletime.h>             // dm::Log<>::value
 #include <dm/datastructures/array.h>    // dm::Array
 #include <dm/datastructures/objarray.h> // dm::ObjArray
 
@@ -582,7 +583,7 @@ namespace dm
                     #include "allocator_config.h"
                     Count       = DM_SMALL_ALLOC_COUNT,
                     BiggestSize = DM_SMALL_ALLOC_BIGGEST_SIZE,
-                    Steps = dm::Log<2,BiggestSize>::Value + 1,
+                    Steps = dm::Log<2,BiggestSize>::value + 1,
 
                 };
 
@@ -807,7 +808,7 @@ namespace dm
                     NumSubRegions     = DM_ALLOC_NUM_SUB_REGIONS,
                     SmallestRegion    = DM_ALLOC_SMALLEST_REGION,
                     BiggestRegion     = DM_ALLOC_SMALLEST_REGION<<(DM_ALLOC_NUM_REGIONS-1),
-                    SmallestRegionPwr = dm::Log<2,(SmallestRegion>>20ul)>::Value,
+                    SmallestRegionPwr = dm::Log<2,(SmallestRegion>>20ul)>::value,
 
                     #define DM_ALLOC_DEF(_regionIdx, _num) \
                         NumSlots ## _regionIdx = _num,
