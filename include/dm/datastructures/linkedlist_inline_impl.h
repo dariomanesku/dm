@@ -121,32 +121,30 @@ Ty* getObj(uint16_t _handle)
     return &m_elements[_handle];
 }
 
-private:
-Ty* getObjAtImpl(uint16_t _idx)
+private: Ty* getObjAt_impl(uint16_t _idx)
 {
     DM_CHECK(_idx < max(), "llGetObjAt | %d, %d", _idx, max());
 
     const uint16_t handle = m_handles.getHandleAt(_idx);
     return &m_elements[handle];
-}
-public:
+} public:
 
 Ty* getObjAt(uint16_t _idx)
 {
     This* list = const_cast<This*>(this);
-    return list->getObjAtImpl(_idx);
+    return list->getObjAt_impl(_idx);
 }
 
 Ty* operator[](uint16_t _idx)
 {
     This* list = const_cast<This*>(this);
-    return list->getObjAtImpl(_idx);
+    return list->getObjAt_impl(_idx);
 }
 
 const Ty* operator[](uint16_t _idx) const
 {
     This* list = const_cast<This*>(this);
-    return list->getObjAtImpl(_idx);
+    return list->getObjAt_impl(_idx);
 }
 
 void remove(uint16_t _handle)
