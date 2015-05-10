@@ -9,6 +9,8 @@
 #include <stdint.h> // uint32_t
 #include <new>      // placement-new
 
+#include "common.h" // Heap alloc utils.
+
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
 
@@ -150,26 +152,6 @@ namespace dm
         bool m_cleanup;
         void* m_memoryBlock;
     };
-
-    template <typename Ty/*arithmetic type*/>
-    DM_INLINE KeyValueMap<Ty>* createKeyValueMap(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
-    {
-        return ::new (_mem) KeyValueMap<Ty>(_max, (uint8_t*)_mem + sizeof(KeyValueMap<Ty>), _allocator);
-    }
-
-    template <typename Ty/*arithmetic type*/>
-    DM_INLINE KeyValueMap<Ty>* createKeyValueMap(uint16_t _max, bx::AllocatorI* _allocator)
-    {
-        uint8_t* ptr = (uint8_t*)BX_ALLOC(_allocator, sizeof(KeyValueMap<Ty>) + KeyValueMap<Ty>::sizeFor(_max));
-        return createKeyValueMap<Ty>(_max, ptr, _allocator);
-    }
-
-    template <typename Ty/*arithmetic type*/>
-    DM_INLINE void destroyKeyValueMap(KeyValueMap<Ty>* _kvMap)
-    {
-        _kvMap->~KeyValueMap<Ty>();
-        BX_FREE(_kvMap->allocator(), _kvMap);
-    }
 
 } // namespace dm
 

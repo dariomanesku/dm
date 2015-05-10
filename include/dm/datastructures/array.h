@@ -9,6 +9,8 @@
 #include <stdint.h> // uint32_t
 #include <new>      // placement-new
 
+#include "common.h" // Heap alloc utils.
+
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
 #include "../compiletime.h"   // DM_ENABLE_IF_OBJ
@@ -154,26 +156,6 @@ namespace dm
         };
         bool m_cleanup;
     };
-
-    template <typename Ty>
-    DM_INLINE Array<Ty>* createArray(uint32_t _max, void* _mem, bx::AllocatorI* _allocator)
-    {
-        return ::new (_mem) Array<Ty>(_max, (uint8_t*)_mem + sizeof(Array<Ty>), _allocator);
-    }
-
-    template <typename Ty>
-    DM_INLINE Array<Ty>* createArray(uint32_t _max, bx::AllocatorI* _allocator)
-    {
-        uint8_t* ptr = (uint8_t*)BX_ALLOC(_allocator, sizeof(Array<Ty>) + Array<Ty>::sizeFor(_max));
-        return createArray<Ty>(_max, ptr, _allocator);
-    }
-
-    template <typename Ty>
-    DM_INLINE void destroyArray(Array<Ty>* _array)
-    {
-        _array->~Array<Ty>();
-        BX_FREE(_array->allocator(), _array);
-    }
 
 } // namespace dm
 

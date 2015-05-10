@@ -9,6 +9,8 @@
 #include <stdint.h> // uint32_t
 #include <new>      // placement-new
 
+#include "common.h" // Heap alloc utils.
+
 #include "../common/common.h" // DM_INLINE / BX_UNUSED
 #include "../check.h"         // DM_CHECK
 
@@ -162,26 +164,6 @@ namespace dm
         bool m_cleanup;
         Elem* m_elements;
     };
-
-    template <typename Ty/*obj type*/>
-    DM_INLINE LinkedList<Ty>* createLinkedList(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
-    {
-        return ::new (_mem) LinkedList<Ty>(_max, (uint8_t*)_mem + sizeof(LinkedList<Ty>), _allocator);
-    }
-
-    template <typename Ty/*obj type*/>
-    DM_INLINE LinkedList<Ty>* createLinkedList(uint16_t _max, bx::AllocatorI* _allocator)
-    {
-        uint8_t* ptr = (uint8_t*)BX_ALLOC(_allocator, sizeof(LinkedList<Ty>) + LinkedList<Ty>::sizeFor(_max));
-        return createLinkedList<Ty>(_max, ptr, _allocator);
-    }
-
-    template <typename Ty/*obj type*/>
-    DM_INLINE void destroyLinkedList(LinkedList<Ty>* _ll)
-    {
-        _ll->~LinkedList<Ty>();
-        BX_FREE(_ll->allocator(), _ll);
-    }
 
 } // namespace dm
 

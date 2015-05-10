@@ -9,6 +9,8 @@
 #include <stdint.h> // uint32_t
 #include <new>      // placement-new
 
+#include "common.h" // Heap alloc utils.
+
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
 
@@ -146,26 +148,6 @@ namespace dm
         };
         bool m_cleanup;
     };
-
-    template <typename Ty/*obj type*/>
-    DM_INLINE OpList<Ty>* createOpList(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
-    {
-        return ::new (_mem) OpList<Ty>(_max, (uint8_t*)_mem + sizeof(OpList<Ty>), _allocator);
-    }
-
-    template <typename Ty/*obj type*/>
-    DM_INLINE OpList<Ty>* createOpList(uint16_t _max, bx::AllocatorI* _allocator)
-    {
-        uint8_t* ptr = (uint8_t*)BX_ALLOC(_allocator, sizeof(OpList<Ty>) + OpList<Ty>::sizeFor(_max));
-        return createOpList<Ty>(_max, ptr, _allocator);
-    }
-
-    template <typename Ty/*obj type*/>
-    DM_INLINE void destroyOpList(OpList<Ty>* _opList)
-    {
-        _opList->~OpList<Ty>();
-        BX_FREE(_opList->allocator(), _opList);
-    }
 
 } // namespace dm
 

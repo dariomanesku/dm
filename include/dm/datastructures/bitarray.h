@@ -9,6 +9,8 @@
 #include <stdint.h> // uint32_t
 #include <new>      // placement-new
 
+#include "common.h" // Heap alloc utils.
+
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
 
@@ -156,23 +158,6 @@ namespace dm
         };
         bool m_cleanup;
     };
-
-    DM_INLINE BitArray* createBitArray(uint32_t _max, void* _mem, bx::AllocatorI* _allocator)
-    {
-        return ::new (_mem) BitArray(_max, (uint8_t*)_mem + sizeof(BitArray), _allocator);
-    }
-
-    DM_INLINE BitArray* createBitArray(uint32_t _max, bx::AllocatorI* _allocator)
-    {
-        uint8_t* ptr = (uint8_t*)BX_ALLOC(_allocator, sizeof(BitArray) + BitArray::sizeFor(_max));
-        return createBitArray(_max, ptr, _allocator);
-    }
-
-    DM_INLINE void destroyBitArray(BitArray* _bitArray)
-    {
-        _bitArray->~BitArray();
-        BX_FREE(_bitArray->allocator(), _bitArray);
-    }
 
 } // namespace dm
 
