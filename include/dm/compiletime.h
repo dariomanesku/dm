@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include <limits.h>  // CHAR_MAX
 
+#ifndef DM_CPP11
+#   define DM_CPP11 (__cplusplus >= 201103L)
+#endif
+
 namespace dm
 {
     /// Log.
@@ -51,7 +55,7 @@ namespace dm
     template <> struct TyInfo<double>    { static double    Max() { union { uint64_t m_u64; double m_d; } val; val.m_u64 = UINT64_MAX; return val.m_d; } };
 
     /// Bool types.
-    template <bool ValueT> struct bool_type { static constexpr bool value = ValueT; };
+    template <bool ValueT> struct bool_type { static const bool value = ValueT; };
     struct false_type : dm::bool_type<false> {};
     struct true_type  : dm::bool_type<true>  {};
 
@@ -95,8 +99,10 @@ namespace dm
     /// C types.
     template <typename Ty> struct is_bool                   : dm::bool_type<dm::is_same<bool,                    typename dm::remove_cv<Ty>::type>::value> {};
     template <typename Ty> struct is_char                   : dm::bool_type<dm::is_same<char,                    typename dm::remove_cv<Ty>::type>::value> {};
+    #if DM_CPP11
     template <typename Ty> struct is_char16                 : dm::bool_type<dm::is_same<char16_t,                typename dm::remove_cv<Ty>::type>::value> {};
     template <typename Ty> struct is_char32                 : dm::bool_type<dm::is_same<char32_t,                typename dm::remove_cv<Ty>::type>::value> {};
+    #endif //DM_CPP11
     template <typename Ty> struct is_wchar                  : dm::bool_type<dm::is_same<wchar_t,                 typename dm::remove_cv<Ty>::type>::value> {};
     template <typename Ty> struct is_signed_char            : dm::bool_type<dm::is_same<signed char,             typename dm::remove_cv<Ty>::type>::value> {};
     template <typename Ty> struct is_short_int              : dm::bool_type<dm::is_same<short int,               typename dm::remove_cv<Ty>::type>::value> {};
@@ -133,8 +139,10 @@ namespace dm
     /// Is character.
     /// Usage: bool val = dm::is_character<char>::value
     template <typename Ty> struct is_character : dm::bool_type <dm::is_char<Ty>::value
+                                                              #if DM_CPP11
                                                               ||dm::is_char16<Ty>::value
                                                               ||dm::is_char32<Ty>::value
+                                                              #endif //DM_CPP11
                                                               ||dm::is_wchar<Ty>::value
                                                               > {};
 
@@ -142,8 +150,10 @@ namespace dm
     /// Usage: bool val = dm::is_integral<int>::value
     template <typename Ty> struct is_integral : dm::bool_type <dm::is_bool<Ty>::value
                                                             ||dm::is_char<Ty>::value
+                                                            #if DM_CPP11
                                                             ||dm::is_char16<Ty>::value
                                                             ||dm::is_char32<Ty>::value
+                                                            #endif //DM_CPP11
                                                             ||dm::is_wchar<Ty>::value
                                                             ||dm::is_signed_char<Ty>::value
                                                             ||dm::is_short_int<Ty>::value
