@@ -130,6 +130,13 @@ namespace dm
         return log2floor(_u64);
     }
 
+    #define DM_IS_POW_TWO(_v) ((0!=(_v)) && (0==((_v)&((_v)-1))))
+
+    DM_INLINE bool isPowTwo(uint32_t _v)
+    {
+        return (0 != _v) && (0 == (_v & (_v-1)));
+    }
+
     /// Usage:
     ///   270 -> 256 /* For a non-power-of-two input, returns expected value. */
     ///   256 -> 256 /* For a power-of-two input, returns the same value. */
