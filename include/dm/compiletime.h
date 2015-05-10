@@ -149,23 +149,23 @@ namespace dm
     /// Is integral.
     /// Usage: bool val = dm::is_integral<int>::value
     template <typename Ty> struct is_integral : dm::bool_type <dm::is_bool<Ty>::value
-                                                            ||dm::is_char<Ty>::value
-                                                            #if DM_CPP11
-                                                            ||dm::is_char16<Ty>::value
-                                                            ||dm::is_char32<Ty>::value
-                                                            #endif //DM_CPP11
-                                                            ||dm::is_wchar<Ty>::value
-                                                            ||dm::is_signed_char<Ty>::value
-                                                            ||dm::is_short_int<Ty>::value
-                                                            ||dm::is_int<Ty>::value
-                                                            ||dm::is_long_int<Ty>::value
-                                                            ||dm::is_long_long_int<Ty>::value
-                                                            ||dm::is_unsigned_char<Ty>::value
-                                                            ||dm::is_unsigned_short_int<Ty>::value
-                                                            ||dm::is_unsigned_int<Ty>::value
-                                                            ||dm::is_unsigned_long_int<Ty>::value
-                                                            ||dm::is_unsigned_long_long_int<Ty>::value
-                                                             > {};
+                                                             ||dm::is_char<Ty>::value
+                                                             #if DM_CPP11
+                                                             ||dm::is_char16<Ty>::value
+                                                             ||dm::is_char32<Ty>::value
+                                                             #endif //DM_CPP11
+                                                             ||dm::is_wchar<Ty>::value
+                                                             ||dm::is_signed_char<Ty>::value
+                                                             ||dm::is_short_int<Ty>::value
+                                                             ||dm::is_int<Ty>::value
+                                                             ||dm::is_long_int<Ty>::value
+                                                             ||dm::is_long_long_int<Ty>::value
+                                                             ||dm::is_unsigned_char<Ty>::value
+                                                             ||dm::is_unsigned_short_int<Ty>::value
+                                                             ||dm::is_unsigned_int<Ty>::value
+                                                             ||dm::is_unsigned_long_int<Ty>::value
+                                                             ||dm::is_unsigned_long_long_int<Ty>::value
+                                                              > {};
 
     /// Is floating point.
     /// Usage: bool val = dm::is_floating_point<float>::value
