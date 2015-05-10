@@ -9,11 +9,11 @@
 // Allocator header.
 //-----
 
-#include <bx/allocator.h> //bx::ReallocatorI, BX_ALLOC/BX_FREE/BX_REALLOC
-#include <dm/misc.h>      //dm::NoCopyNoAssign
+#include "../../../3rdparty/bx/allocator.h" //bx::ReallocatorI, BX_ALLOC/BX_FREE/BX_REALLOC
+#include "../misc.h"                        //dm::NoCopyNoAssign
 
-#include <dm/datastructures/bitarray.h>
-#include <dm/datastructures/oplist.h>
+#include "../datastructures/bitarray.h"
+#include "../datastructures/oplist.h"
 
 #define DM_ALLOC   BX_ALLOC
 #define DM_FREE    BX_FREE
