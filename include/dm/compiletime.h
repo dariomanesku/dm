@@ -214,8 +214,10 @@ namespace dm
     template <bool B, typename Ty = void> struct enable_if {};
     template <typename Ty> struct enable_if<true, Ty> { typedef Ty type; };
 
-    #define DM_ENABLE_IF_SCALAR(_type) template <typename DmTy = _type, typename dm::enable_if<dm::is_scalar<DmTy>::value == true,  DmTy>::type* = nullptr>
-    #define DM_ENABLE_IF_OBJ(_type)    template <typename DmTy = _type, typename dm::enable_if<dm::is_scalar<DmTy>::value == false, DmTy>::type* = nullptr>
+    /// Usage:
+    ///     template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic)>
+    ///     void func(Ty _val) { /*...*/ }
+    #define DM_ENABLE_IF(_ty, _func) typename dm::enable_if<dm::_func<_ty>::value == true, _ty>::type* = nullptr
 
 } // namespace dm
 
