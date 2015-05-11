@@ -204,6 +204,13 @@ namespace dm
     template <typename Ty> struct is_char_ptr    : dm::bool_type <dm::is_pointer<Ty>::value && dm::is_character<typename dm::naked_type<Ty>::type>::value > {};
     template <typename Ty> struct is_char_string : dm::bool_type <dm::is_char_array<Ty>::value || dm::is_char_ptr<Ty>::value > {};
 
+    /// Size test.
+    /// Usage: bool val = dm::is_32bit<float>::value
+    template <typename Ty> struct is_8bit  : dm::bool_type <sizeof(Ty) == 1> {};
+    template <typename Ty> struct is_16bit : dm::bool_type <sizeof(Ty) == 2> {};
+    template <typename Ty> struct is_32bit : dm::bool_type <sizeof(Ty) == 4> {};
+    template <typename Ty> struct is_64bit : dm::bool_type <sizeof(Ty) == 8> {};
+
     /// Is class.
     /// Usage: bool val = dm::is_class<Foo>::value
     template <typename Ty> char testIsClass(int Ty::*);
