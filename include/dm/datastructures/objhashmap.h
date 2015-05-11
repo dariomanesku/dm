@@ -13,6 +13,7 @@
 #include "../check.h"         // DM_CHECK
 #include "../misc.h"          // dm::TyInfo<>
 #include "../hash.h"          // dm::hash
+#include "../misc.h"          // dm::isPowTwo
 
 #include "common.h" // Heap alloc utils.
 #include "handlealloc.h"

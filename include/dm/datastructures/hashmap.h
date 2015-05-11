@@ -16,6 +16,7 @@
 #include "../check.h"         // DM_CHECK
 #include "../compiletime.h"   // dm::TyInfo<>, DM_ENABLE_IF
 #include "../hash.h"          // dm::hash
+#include "../misc.h"          // dm::isPowTwo
 
 #include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
 
