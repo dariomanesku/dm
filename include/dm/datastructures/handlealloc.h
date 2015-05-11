@@ -20,7 +20,7 @@ namespace dm
 {
     // Adapted from: https://github.com/bkaradzic/bx/blob/master/include/bx/handlealloc.h
 
-    template <uint16_t MaxHandlesT>
+    template <uint32_t MaxHandlesT, typename HandleTy=uint16_t/*uint16_t or uint32_t*/>
     struct HandleAllocT
     {
         HandleAllocT()
@@ -30,21 +30,24 @@ namespace dm
 
         #include "handlealloc_inline_impl.h"
 
-        uint16_t count() const
+        HandleTy count() const
         {
             return m_numHandles;
         }
 
-        uint16_t max() const
+        HandleTy max() const
         {
             return MaxHandlesT;
         }
 
     private:
-        uint16_t m_handles[MaxHandlesT*2];
-        uint16_t m_numHandles;
+        HandleTy m_handles[MaxHandlesT*2];
+        HandleTy m_numHandles;
     };
+    template <uint32_t MaxHandlesT> struct HandleAllocT16 : HandleAllocT<MaxHandlesT, uint16_t> { };
+    template <uint32_t MaxHandlesT> struct HandleAllocT32 : HandleAllocT<MaxHandlesT, uint32_t> { };
 
+    template <typename HandleTy=uint16_t /*uint16_t or uint32_t*/>
     struct HandleAlloc
     {
         // Uninitialized state, init() needs to be called !
@@ -53,12 +56,12 @@ namespace dm
             m_handles = NULL;
         }
 
-        HandleAlloc(uint16_t _max, bx::ReallocatorI* _reallocator)
+        HandleAlloc(HandleTy _max, bx::ReallocatorI* _reallocator)
         {
             init(_max, _reallocator);
         }
 
-        HandleAlloc(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
+        HandleAlloc(HandleTy _max, void* _mem, bx::AllocatorI* _allocator)
         {
             init(_max, _mem, _allocator);
         }
@@ -69,10 +72,10 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(uint16_t _max, bx::ReallocatorI* _reallocator)
+        void init(HandleTy _max, bx::ReallocatorI* _reallocator)
         {
             m_maxHandles = _max;
-            m_handles = (uint16_t*)BX_ALLOC(_reallocator, sizeFor(_max));
+            m_handles = (HandleTy*)BX_ALLOC(_reallocator, sizeFor(_max));
             m_reallocator = _reallocator;
             m_cleanup = true;
 
@@ -81,19 +84,19 @@ namespace dm
 
         enum
         {
-            SizePerElement = 2*sizeof(uint16_t),
+            SizePerElement = 2*sizeof(HandleTy),
         };
 
-        static inline uint32_t sizeFor(uint16_t _max)
+        static inline uint32_t sizeFor(HandleTy _max)
         {
             return _max*SizePerElement;
         }
 
         // Uses externally allocated memory.
-        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
+        void* init(HandleTy _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_maxHandles = _max;
-            m_handles = (uint16_t*)_mem;
+            m_handles = (HandleTy*)_mem;
             m_allocator = _allocator;
             m_cleanup = false;
 
@@ -121,12 +124,12 @@ namespace dm
 
         #include "handlealloc_inline_impl.h"
 
-        uint16_t count() const
+        HandleTy count() const
         {
             return m_numHandles;
         }
 
-        uint16_t max() const
+        HandleTy max() const
         {
             return m_maxHandles;
         }
@@ -137,9 +140,9 @@ namespace dm
         }
 
     private:
-        uint16_t m_numHandles;
-        uint16_t m_maxHandles;
-        uint16_t* m_handles;
+        HandleTy m_numHandles;
+        HandleTy m_maxHandles;
+        HandleTy* m_handles;
         union
         {
             bx::AllocatorI*   m_allocator;
@@ -147,6 +150,8 @@ namespace dm
         };
         bool m_cleanup;
     };
+    typedef HandleAlloc<uint16_t> HandleAlloc16;
+    typedef HandleAlloc<uint32_t> HandleAlloc32;
 
 } // namespace dm
 

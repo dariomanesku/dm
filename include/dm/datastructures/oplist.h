@@ -36,7 +36,7 @@ namespace dm
 
     private:
         ArrayT<uint16_t, MaxT> m_handles;
-        HandleAllocT<MaxT> m_handleAlloc;
+        HandleAllocT16<MaxT> m_handleAlloc;
         Ty m_objects[MaxT];
     };
 
@@ -81,7 +81,7 @@ namespace dm
         {
             SizePerElement = sizeof(Ty)
                            + Array<uint16_t>::SizePerElement
-                           + HandleAlloc::SizePerElement
+                           + HandleAlloc16::SizePerElement
                            ,
         };
 
@@ -138,7 +138,7 @@ namespace dm
 
     private:
         Array<uint16_t> m_handles;
-        HandleAlloc m_handleAlloc;
+        HandleAlloc16 m_handleAlloc;
         Ty* m_objects;
         void* m_memoryBlock;
         union

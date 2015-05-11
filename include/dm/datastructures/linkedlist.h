@@ -44,7 +44,7 @@ namespace dm
 
     private:
         uint16_t m_last;
-        HandleAllocT<MaxT> m_handles;
+        HandleAllocT16<MaxT> m_handles;
         Elem m_elements[MaxT];
     };
 
@@ -134,7 +134,7 @@ namespace dm
 
         enum
         {
-            SizePerElement = sizeof(Elem) + HandleAlloc::SizePerElement,
+            SizePerElement = sizeof(Elem) + HandleAlloc16::SizePerElement,
         };
 
         uint16_t count() const
@@ -154,7 +154,7 @@ namespace dm
 
     private:
         uint16_t m_last;
-        HandleAlloc m_handles;
+        HandleAlloc16 m_handles;
         void* m_memoryBlock;
         union
         {

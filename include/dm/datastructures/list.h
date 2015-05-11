@@ -42,7 +42,7 @@ namespace dm
         }
 
     private:
-        HandleAllocT<MaxT> m_handles;
+        HandleAllocT16<MaxT> m_handles;
         Ty m_elements[MaxT];
     };
 
@@ -74,7 +74,7 @@ namespace dm
 
         enum
         {
-            SizePerElement = sizeof(Ty) + HandleAlloc::SizePerElement,
+            SizePerElement = sizeof(Ty) + HandleAlloc16::SizePerElement,
         };
 
         static inline uint32_t sizeFor(uint16_t _max)
@@ -143,7 +143,7 @@ namespace dm
         }
 
     private:
-        HandleAlloc m_handles;
+        HandleAlloc16 m_handles;
         Ty* m_elements;
         void* m_memoryBlock;
         union
