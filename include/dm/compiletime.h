@@ -224,7 +224,10 @@ namespace dm
     /// Usage:
     ///     template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic)>
     ///     void func(Ty _val) { /*...*/ }
-    #define DM_ENABLE_IF(_ty, _func) typename dm::enable_if<dm::_func<_ty>::value == true, _ty>::type* = nullptr
+    /// or
+    ///     template <uint32_t MaxT_PowTwo, DM_ENABLE_IF(MaxT_PowTwo, is_powtwo)>
+    ///     struct Foo { };
+    #define DM_ENABLE_IF(_templateParam, _testFunc) typename dm::enable_if<dm::_testFunc<_templateParam>::value == true, void>::type* = nullptr
 
 } // namespace dm
 
