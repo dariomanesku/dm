@@ -211,6 +211,13 @@ namespace dm
     template <typename Ty> struct is_32bit : dm::bool_type <sizeof(Ty) == 4> {};
     template <typename Ty> struct is_64bit : dm::bool_type <sizeof(Ty) == 8> {};
 
+    /// Is power of two.
+    /// Usage: bool val = dm::is_powtwo<float>::value
+    #ifndef DM_IS_POW_TWO
+    #   define DM_IS_POW_TWO(_v) ((0!=(_v)) && (0==((_v)&((_v)-1))))
+    #endif // DM_IS_POW_TWO
+    template <uint32_t Val> struct is_powtwo : dm::bool_type <DM_IS_POW_TWO(Val)> {};
+
     /// Is class.
     /// Usage: bool val = dm::is_class<Foo>::value
     template <typename Ty> char testIsClass(int Ty::*);

@@ -130,7 +130,9 @@ namespace dm
         return log2floor(_u64);
     }
 
-    #define DM_IS_POW_TWO(_v) ((0!=(_v)) && (0==((_v)&((_v)-1))))
+    #ifndef DM_IS_POW_TWO
+    #   define DM_IS_POW_TWO(_v) ((0!=(_v)) && (0==((_v)&((_v)-1))))
+    #endif // DM_IS_POW_TWO
 
     DM_INLINE bool isPowTwo(uint32_t _v)
     {
