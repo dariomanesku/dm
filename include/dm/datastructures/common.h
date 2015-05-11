@@ -6,6 +6,7 @@
 #ifndef DM_DATASTRUCTURES_COMMON_H_HEADER_GUARD
 #define DM_DATASTRUCTURES_COMMON_H_HEADER_GUARD
 
+#include <stdint.h>
 #include "../../../3rdparty/bx/allocator.h" // bx::AllocatorI
 
 namespace dm
@@ -17,6 +18,7 @@ namespace dm
     ///     IntArray* intArray = dm::create<IntArray>(64, &allocator);
     ///     /*...*/
     ///     dm::destroy(intArray);
+    ///
 
     template <typename Ty>
     DM_INLINE Ty* create(uint32_t _max, void* _mem, bx::AllocatorI* _memDeallocator)
@@ -39,6 +41,7 @@ namespace dm
     }
 
 } // namespace dm
+
 #endif // DM_DATASTRUCTURES_COMMON_H_HEADER_GUARD
 
 /* vim: set sw=4 ts=4 expandtab: */
