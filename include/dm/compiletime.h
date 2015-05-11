@@ -204,12 +204,26 @@ namespace dm
     template <typename Ty> struct is_char_ptr    : dm::bool_type <dm::is_pointer<Ty>::value && dm::is_character<typename dm::naked_type<Ty>::type>::value > {};
     template <typename Ty> struct is_char_string : dm::bool_type <dm::is_char_array<Ty>::value || dm::is_char_ptr<Ty>::value > {};
 
-    /// Size test.
+    /// Type size test.
     /// Usage: bool val = dm::is_32bit<float>::value
     template <typename Ty> struct is_8bit  : dm::bool_type <sizeof(Ty) == 1> {};
     template <typename Ty> struct is_16bit : dm::bool_type <sizeof(Ty) == 2> {};
     template <typename Ty> struct is_32bit : dm::bool_type <sizeof(Ty) == 4> {};
     template <typename Ty> struct is_64bit : dm::bool_type <sizeof(Ty) == 8> {};
+
+    /// Type fit test.
+    /// Usage: bool val = dm::fits_32bit<float>::value
+    template <uint64_t Val> struct fits_8bit  : dm::bool_type <Val <= UINT8_MAX>  {};
+    template <uint64_t Val> struct fits_16bit : dm::bool_type <Val <= UINT16_MAX> {};
+    template <uint64_t Val> struct fits_32bit : dm::bool_type <Val <= UINT32_MAX> {};
+    template <uint64_t Val> struct fits_64bit : dm::bool_type <Val <= UINT64_MAX> {};
+
+    /// Type best fit test.
+    /// Usage: bool val = dm::bestfit_16bit<500>::value
+    template <uint64_t Val> struct bestfit_8bit  : dm::bool_type <         0 <= uint64_t(Val) && uint64_t(Val) <= UINT8_MAX > {};
+    template <uint64_t Val> struct bestfit_16bit : dm::bool_type < UINT8_MAX <= uint64_t(Val) && uint64_t(Val) <= UINT16_MAX> {};
+    template <uint64_t Val> struct bestfit_32bit : dm::bool_type <UINT16_MAX <= uint64_t(Val) && uint64_t(Val) <= UINT32_MAX> {};
+    template <uint64_t Val> struct bestfit_64bit : dm::bool_type <UINT32_MAX <= uint64_t(Val) && uint64_t(Val) <= UINT64_MAX> {};
 
     /// Is power of two.
     /// Usage: bool val = dm::is_powtwo<float>::value
