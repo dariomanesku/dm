@@ -7,6 +7,7 @@
 #define DM_DATASTRUCTURES_COMMON_H_HEADER_GUARD
 
 #include <stdint.h>
+#include "../common/common.h"               // DM_INLINE
 #include "../../../3rdparty/bx/allocator.h" // bx::AllocatorI
 
 namespace dm
