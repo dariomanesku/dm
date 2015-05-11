@@ -86,7 +86,8 @@ namespace dm
             m_reallocator = _reallocator;
             m_cleanup = true;
 
-            void* ptr = m_set.init(_max, m_memoryBlock, (bx::AllocatorI*)_reallocator);
+            void* ptr = m_memoryBlock;
+            ptr = m_set.init(_max, ptr, (bx::AllocatorI*)_reallocator);
             m_values = (Ty*)ptr;
         }
 
@@ -98,7 +99,8 @@ namespace dm
             m_allocator = _allocator;
             m_cleanup = false;
 
-            void* ptr = m_set.init(_max, m_memoryBlock);
+            void* ptr = m_memoryBlock;
+            ptr = m_set.init(_max, ptr);
             m_values = (Ty*)ptr;
 
             void* end = (void*)((uint8_t*)_mem + sizeFor(_max));
