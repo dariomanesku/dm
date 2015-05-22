@@ -7,14 +7,16 @@
 #define DM_DATASTRUCTURES_H_HEADER_GUARD
 
 #include "datastructures/array.h"
-#include "datastructures/objarray.h"
 #include "datastructures/bitarray.h"
 #include "datastructures/handlealloc.h"
-#include "datastructures/list.h"
-#include "datastructures/oplist.h"
-#include "datastructures/linkedlist.h"
-#include "datastructures/set.h"
+#include "datastructures/hashmap.h"
 #include "datastructures/kvmap.h"
+#include "datastructures/linkedlist.h"
+#include "datastructures/list.h"
+#include "datastructures/objarray.h"
+#include "datastructures/objhashmap.h"
+#include "datastructures/oplist.h"
+#include "datastructures/set.h"
 
 #endif // DM_DATASTRUCTURES_H_HEADER_GUARD
 
