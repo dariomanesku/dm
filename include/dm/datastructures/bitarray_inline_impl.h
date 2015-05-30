@@ -47,8 +47,8 @@ inline uint32_t setRightmostBit(uint32_t _slot)
 
     const uint32_t pos = uint32_t(bx::uint64_cnttz(rightmost));
     const uint32_t idx = (_slot<<6)+pos;
-    const uint32_t max = this->max();
-    return idx < max ? idx : max;
+    const uint32_t maxIdx = this->max();
+    return idx < maxIdx ? idx : maxIdx;
 }
 public:
 
@@ -176,7 +176,7 @@ uint32_t getLastUnsetBit()
     return max();
 }
 
-uint32_t count()
+uint32_t doCount() const
 {
     uint64_t count = 0;
     for (uint32_t ii = numSlots(); ii--; )

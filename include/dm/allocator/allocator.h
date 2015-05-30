@@ -1269,7 +1269,7 @@ namespace dm
                     return uint64_t((_header&DM_SizeMask)>>DM_SizeShift);
                 }
 
-                void* writeHeaderFooter(const void* _begin, uint64_t _totalSize, bool _used = true)
+                void* writeHeaderFooter(void* _begin, uint64_t _totalSize, bool _used = true)
                 {
                     uint8_t* end = (uint8_t*)_begin+_totalSize;
 
@@ -1310,7 +1310,7 @@ namespace dm
 
                 void* ptrToBegin(void* _ptr) const
                 {
-                    const uint64_t* begin = (uint64_t*)_ptr-1;
+                    uint64_t* begin = (uint64_t*)_ptr-1;
                     return (void*)begin;
                 }
 
@@ -1830,20 +1830,20 @@ namespace dm
                 void* mem = s_memory.alloc(_size);
                 CS_CHECK(mem, "Memory for stack could not be allocated. Requested %u.%u", dm::U_UMB(_size));
 
-                FixedStackAllocator* stackAlloc = m_fixedStacks.addNew();
-                stackAlloc->init(mem, _size);
+                FixedStackAllocator* fixedStackAlloc = m_fixedStacks.addNew();
+                fixedStackAlloc->init(mem, _size);
 
-                return (dm::StackAllocatorI*)stackAlloc;
+                return (dm::StackAllocatorI*)fixedStackAlloc;
             }
 
             bool freeFixed(dm::StackAllocatorI* _fixedStackAlloc)
             {
                 for (uint16_t ii = m_fixedStacks.count(); ii--; )
                 {
-                    FixedStackAllocator* stackAlloc = m_fixedStacks.get(ii);
-                    if (stackAlloc == _fixedStackAlloc)
+                    FixedStackAllocator* fixedStackAlloc = m_fixedStacks.get(ii);
+                    if (fixedStackAlloc == _fixedStackAlloc)
                     {
-                        s_memory.free(stackAlloc->mem());
+                        s_memory.free(fixedStackAlloc->mem());
 
                         m_fixedStacks.remove(ii);
                         return true;
@@ -1887,8 +1887,8 @@ namespace dm
             {
                 for (uint16_t ii = m_dynamicStacks.count(); ii--; )
                 {
-                    DynamicStackAllocator* stackAlloc = m_dynamicStacks.get(ii);
-                    if (stackAlloc == _dynamicStackAlloc)
+                    DynamicStackAllocator* dynStackAlloc = m_dynamicStacks.get(ii);
+                    if (dynStackAlloc == _dynamicStackAlloc)
                     {
                         // Determine previous stack.
                         DynamicStack& prev = (0 == ii) ? s_memory.m_stack : m_dynamicStacks[ii-1].m_stack;

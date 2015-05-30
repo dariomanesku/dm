@@ -28,6 +28,7 @@ namespace dm
         HashMapT()
         {
             DM_ASSERT(dm::isPowTwo(MaxT_PowTwo));
+
             memset(m_ukv, 0xff, sizeof(m_ukv));
         }
 
