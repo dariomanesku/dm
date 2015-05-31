@@ -22,11 +22,13 @@
         }
     }
 
-    private: void expandIfFull()
+    private: void expandIfNecessaryToMakeRoomFor(uint32_t _count)
     {
-        if (m_count >= m_max)
+        const uint32_t needed = m_count + _count;
+        if (needed >= m_max)
         {
-            const uint32_t newMax = m_max + m_max/2;
+            const uint32_t proposedMax = m_max + (m_max>>1);
+            const uint32_t newMax = dm::max(proposedMax, needed);
             resize(newMax);
         }
     } public:
@@ -37,15 +39,23 @@
     }
 #endif //DM_DYNAMIC_ARRAY
 
-void add(Ty _value)
+Ty* reserve(uint32_t _count)
 {
     #ifdef DM_DYNAMIC_ARRAY
-        expandIfFull();
+        expandIfNecessaryToMakeRoomFor(_count);
     #endif //DM_DYNAMIC_ARRAY
 
-    DM_CHECK(m_count < max(), "arrayAddVal | %d, %d", m_count, max());
+    DM_CHECK(m_count < max(), "arrayReserve | %d, %d", m_count, max());
 
-    m_values[m_count++] = _value;
+    const uint32_t curr = m_count;
+    m_count += _count;
+    return &m_values[curr];
+}
+
+void add(Ty _value)
+{
+    Ty* elem = this->reserve(1);
+    *elem = _value;
 }
 
 void cut(uint32_t _idx)

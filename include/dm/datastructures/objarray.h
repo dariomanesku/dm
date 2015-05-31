@@ -105,6 +105,7 @@ namespace dm
             return (NULL != m_values);
         }
 
+        //TODO: get rid of this or reimplement !
         void reinit(uint32_t _max, bx::ReallocatorI* _reallocator)
         {
             if (isInitialized())

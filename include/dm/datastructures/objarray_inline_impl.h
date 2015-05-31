@@ -22,11 +22,13 @@
         }
     }
 
-    private: void expandIfFull()
+    private: void expandIfNecessaryToMakeRoomFor(uint32_t _count)
     {
-        if (m_count >= m_max)
+        const uint32_t needed = m_count + _count;
+        if (needed >= m_max)
         {
-            const uint32_t newMax = m_max + m_max/2;
+            const uint32_t proposedMax = m_max + (m_max>>1);
+            const uint32_t newMax = dm::max(proposedMax, needed);
             resize(newMax);
         }
     } public:
@@ -37,26 +39,28 @@
     }
 #endif //DM_DYNAMIC_ARRAY
 
-Ty* addNew()
+Ty* reserve(uint32_t _count)
 {
     #ifdef DM_DYNAMIC_ARRAY
-        expandIfFull();
+        expandIfNecessaryToMakeRoomFor(_count);
     #endif //DM_DYNAMIC_ARRAY
 
-    DM_CHECK(m_count < max(), "objarrayAddNew | %d, %d", m_count, max());
+    DM_CHECK(m_count < max(), "objarrayReserve | %d, %d", m_count, max());
 
-    return &m_values[m_count++];
+    const uint32_t curr = m_count;
+    m_count += _count;
+    return &m_values[curr];
+}
+
+Ty* addNew()
+{
+    Ty* elem = this->reserve(1);
+    return elem;
 }
 
 uint32_t addObj(const Ty& _obj)
 {
-    #ifdef DM_DYNAMIC_ARRAY
-        expandIfFull();
-    #endif //DM_DYNAMIC_ARRAY
-
-    DM_CHECK(m_count < max(), "objarrayAddObj | %d, %d", m_count, max());
-
-    Ty* dst = &m_values[m_count++];
+    Ty* dst = this->reserve(1);
     dst = ::new (dst) Ty(_obj);
 
     return (m_count-1);
