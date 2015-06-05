@@ -1074,7 +1074,6 @@ namespace dm
                     }
                     else
                     {
-                        bx::debugBreak();
                         addBigFreeSpace(_ptr, _size);
                     }
                 }
