@@ -9,7 +9,6 @@
         if (m_cleanup) // 'm_values' was allocated internally.
         {
             m_values = (Ty*)BX_REALLOC(m_reallocator, m_values, sizeFor(_max));
-            m_max = _max;
         }
         else // 'm_values' was passed as a pointer.
         {
@@ -17,8 +16,13 @@
             {
                 m_values = (Ty*)BX_ALLOC(m_allocator, sizeFor(_max));
             }
+        }
 
-            m_max = _max;
+        m_max = _max;
+        for (uint32_t ii = _max, end = m_count; ii < end; ++ii)
+        {
+            Ty* elem = &m_values[ii];
+            elem->~Ty();
         }
     }
 
