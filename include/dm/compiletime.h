@@ -239,7 +239,7 @@ namespace dm
     template <typename Ty> struct is_class : dm::bool_type<sizeof(testIsClass<Ty>(0))==1> {};
 
     /// Enable if.
-    template <bool B, typename Ty = void> struct enable_if {};
+    template <bool B, typename Ty> struct enable_if {};
     template <typename Ty> struct enable_if<true, Ty> { typedef Ty type; };
 
     /// Usage:
