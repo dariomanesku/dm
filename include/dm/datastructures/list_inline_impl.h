@@ -96,8 +96,14 @@ void remove(uint16_t _handle)
     DM_CHECK(_handle < max(), "listRemove | %d, %d", _handle, max());
 
     m_elements[_handle].~Ty();
-
     m_handles.free(_handle);
+}
+
+uint16_t removeObj(Ty* _obj)
+{
+    const uint16_t handle = getHandleOf(_obj);
+    this->remove(handle);
+    return handle;
 }
 
 void removeAt(uint16_t _idx)
