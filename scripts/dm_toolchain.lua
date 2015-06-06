@@ -443,7 +443,7 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
             "-Wunused-value",
             "-fdata-sections",
             "-ffunction-sections",
-            "-msse2",
+            "-msse4.1",
             "-Wunused-value",
             "-Wundef",
         }
@@ -691,7 +691,7 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
             "-march=i686",
             "-mtune=atom",
             "-mstackrealign",
-            "-msse3",
+            "-msse4.1",
             "-mfpmath=sse",
             "-Wunused-value",
             "-Wundef",
