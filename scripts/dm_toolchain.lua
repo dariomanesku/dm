@@ -1026,6 +1026,7 @@ function strip()
         -- Wall
             "-Waddress"
         .. " -Wc++11-compat"
+        .. " -Wc++11-extenions"
         .. " -Wchar-subscripts"
         .. " -Wcomment"
         .. " -Wformat"
