@@ -65,17 +65,30 @@ void cut(uint32_t _idx)
     m_count = _idx;
 }
 
-void remove(uint32_t _idx)
+Ty remove(uint32_t _idx)
 {
     DM_CHECK(0 < m_count && m_count <= max(), "arrayRemove - 0 | %d, %d", m_count, max());
     DM_CHECK(_idx < max(), "arrayRemove - 1 | %d, %d", _idx, max());
 
+    const Ty val = m_values[_idx];
+
     Ty* elem = &m_values[_idx];
     Ty* next = &m_values[_idx+1];
-
     memmove(elem, next, (m_count-_idx-1)*sizeof(Ty));
+    --m_count;
 
-    m_count--;
+    return val;
+}
+
+// Uses swap instead of memmove. Order is not preserved!
+Ty removeSwap(uint32_t _idx)
+{
+    DM_CHECK(0 < m_count && m_count <= max(), "arrayRemoveSwap - 0 | %d, %d", m_count, max());
+    DM_CHECK(_idx < max(), "arrayRemoveSwap - 1 | %d, %d", _idx, max());
+
+    const Ty val = m_values[_idx];
+    m_values[_idx] = m_values[--m_count];
+    return val;
 }
 
 Ty pop()
@@ -83,15 +96,6 @@ Ty pop()
     DM_CHECK(0 < m_count, "arrayPop | %d", m_count);
 
     return m_values[--m_count];
-}
-
-// Uses swap instead of memmove. Order is not preserved!
-void removeSwap(uint32_t _idx)
-{
-    DM_CHECK(0 < m_count && m_count <= max(), "arrayRemoveSwap - 0 | %d, %d", m_count, max());
-    DM_CHECK(_idx < max(), "arrayRemoveSwap - 1 | %d, %d", _idx, max());
-
-    m_values[_idx] = m_values[--m_count];
 }
 
 Ty get(uint32_t _idx) const
