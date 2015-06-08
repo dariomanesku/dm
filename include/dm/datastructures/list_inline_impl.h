@@ -38,9 +38,14 @@ bool contains(uint16_t _handle)
     return m_handles.contains(_handle);
 }
 
+bool containsObj(const Ty* _obj) const
+{
+    return (&m_elements[0] <= _obj && _obj < &m_elements[max()]);
+}
+
 uint16_t getHandleOf(const Ty* _obj) const
 {
-    DM_CHECK(&m_elements[0] <= _obj && _obj < &m_elements[max()], "listGetHandleOf | Object not from the list.");
+    DM_CHECK(containsObj(_obj), "listGetHandleOf | Object not from the list.");
 
     return uint16_t(_obj - m_elements);
 }
