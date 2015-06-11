@@ -248,7 +248,7 @@ namespace dm
     /// or
     ///     template <uint32_t MaxT_PowTwo, DM_ENABLE_IF(MaxT_PowTwo, is_powtwo)>
     ///     struct Foo { };
-    #define DM_ENABLE_IF(_templateParam, _testFunc) typename dm::enable_if<dm::_testFunc<_templateParam>::value == true, void>::type* = nullptr
+    #define DM_ENABLE_IF(_templateParam, _testFunc) typename dm::enable_if<dm::_testFunc<_templateParam>::value == true, void>::type* = NULL
 
 } // namespace dm
 
