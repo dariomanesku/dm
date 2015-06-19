@@ -18,8 +18,6 @@
 
 namespace dm
 {
-    // Adapted from: https://github.com/bkaradzic/bx/blob/master/include/bx/handlealloc.h
-
     template <uint32_t MaxHandlesT, typename HandleTy=uint16_t/*uint16_t or uint32_t*/>
     struct HandleAllocT
     {
