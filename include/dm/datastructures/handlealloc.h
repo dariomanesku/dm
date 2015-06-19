@@ -41,8 +41,8 @@ namespace dm
         }
 
     private:
-        HandleTy m_dense[MaxHandlesT];
-        HandleTy m_sparse[MaxHandlesT];
+        HandleTy m_handles[MaxHandlesT];
+        HandleTy m_indices[MaxHandlesT];
         HandleTy m_numHandles;
     };
     template <uint32_t MaxHandlesT> struct HandleAllocT16 : HandleAllocT<MaxHandlesT, uint16_t> { };
@@ -54,8 +54,8 @@ namespace dm
         // Uninitialized state, init() needs to be called !
         HandleAlloc()
         {
-            m_dense = NULL;
-            m_sparse = NULL;
+            m_handles = NULL;
+            m_indices = NULL;
         }
 
         HandleAlloc(HandleTy _max, bx::ReallocatorI* _reallocator)
@@ -77,8 +77,8 @@ namespace dm
         void init(HandleTy _max, bx::ReallocatorI* _reallocator)
         {
             m_maxHandles = _max;
-            m_dense = (HandleTy*)BX_ALLOC(_reallocator, sizeFor(_max));
-            m_sparse = m_dense + _max;
+            m_handles = (HandleTy*)BX_ALLOC(_reallocator, sizeFor(_max));
+            m_indices = m_handles + _max;
             m_reallocator = _reallocator;
             m_cleanup = true;
 
@@ -99,8 +99,8 @@ namespace dm
         void* init(HandleTy _max, void* _mem, bx::AllocatorI* _allocator = NULL)
         {
             m_maxHandles = _max;
-            m_dense = (HandleTy*)_mem;
-            m_sparse = m_dense + _max;
+            m_handles = (HandleTy*)_mem;
+            m_indices = m_handles + _max;
             m_allocator = _allocator;
             m_cleanup = false;
 
@@ -112,16 +112,16 @@ namespace dm
 
         bool isInitialized() const
         {
-            return (NULL != m_dense);
+            return (NULL != m_handles);
         }
 
         void destroy()
         {
-            if (m_cleanup && NULL != m_dense)
+            if (m_cleanup && NULL != m_handles)
             {
-                BX_FREE(m_reallocator, m_dense);
-                m_dense = NULL;
-                m_sparse = NULL;
+                BX_FREE(m_reallocator, m_handles);
+                m_handles = NULL;
+                m_indices = NULL;
             }
 
             m_numHandles = 0;
@@ -147,8 +147,8 @@ namespace dm
     private:
         HandleTy m_numHandles;
         HandleTy m_maxHandles;
-        HandleTy* m_dense;
-        HandleTy* m_sparse;
+        HandleTy* m_handles;
+        HandleTy* m_indices;
         union
         {
             bx::AllocatorI*   m_allocator;
