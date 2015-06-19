@@ -25,9 +25,9 @@ uint16_t add(const Ty& _obj)
     return obj;
 }
 
-void remove(uint16_t _idx)
+void removeAt(uint16_t _idx)
 {
-    DM_CHECK(_idx < max(), "oplistRemove | %d, %d", _idx, max());
+    DM_CHECK(_idx < max(), "oplistRemoveAt | %d, %d", _idx, max());
 
     const uint16_t handle = m_handles[_idx];
     m_handles.remove(_idx);
@@ -46,17 +46,17 @@ void removeAll()
     m_handles.reset();
 }
 
-Ty* get(uint16_t _idx)
+Ty* getAt(uint16_t _idx)
 {
-    DM_CHECK(_idx < max(), "oplistGet | %d, %d", _idx, max());
+    DM_CHECK(_idx < max(), "oplistGetAt | %d, %d", _idx, max());
 
     const uint16_t handle = m_handles[_idx];
     return &m_objects[handle];
 }
 
-const Ty* get(uint16_t _idx) const
+const Ty* getAt(uint16_t _idx) const
 {
-    DM_CHECK(_idx < max(), "oplistGet const | %d, %d", _idx, max());
+    DM_CHECK(_idx < max(), "oplistGetAt const | %d, %d", _idx, max());
 
     const uint16_t handle = m_handles[_idx];
     return &m_objects[handle];
@@ -105,4 +105,3 @@ uint16_t count()
 }
 
 /* vim: set sw=4 ts=4 expandtab: */
-

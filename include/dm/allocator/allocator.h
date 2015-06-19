@@ -1839,12 +1839,12 @@ namespace dm
             {
                 for (uint16_t ii = m_fixedStacks.count(); ii--; )
                 {
-                    FixedStackAllocator* fixedStackAlloc = m_fixedStacks.get(ii);
+                    FixedStackAllocator* fixedStackAlloc = m_fixedStacks.getAt(ii);
                     if (fixedStackAlloc == _fixedStackAlloc)
                     {
                         s_memory.free(fixedStackAlloc->mem());
 
-                        m_fixedStacks.remove(ii);
+                        m_fixedStacks.removeAt(ii);
                         return true;
                     }
                 }
@@ -1886,7 +1886,7 @@ namespace dm
             {
                 for (uint16_t ii = m_dynamicStacks.count(); ii--; )
                 {
-                    DynamicStackAllocator* dynStackAlloc = m_dynamicStacks.get(ii);
+                    DynamicStackAllocator* dynStackAlloc = m_dynamicStacks.getAt(ii);
                     if (dynStackAlloc == _dynamicStackAlloc)
                     {
                         // Determine previous stack.
@@ -1900,7 +1900,7 @@ namespace dm
 
                         DM_PRINT_STACK("Stack split freed: Available %u.%uMB.", dm::U_UMB(s_memory.sizeBetweenStackAndHeap()));
 
-                        m_dynamicStacks.remove(ii);
+                        m_dynamicStacks.removeAt(ii);
                         return true;
                     }
                 }
