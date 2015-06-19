@@ -32,6 +32,15 @@ namespace dm
     template <uint8_t Base> struct Log<Base, 1> { enum { value = 0 }; };
     template <uint8_t Base> struct Log<Base, 0> { enum { value = 0 }; };
 
+    /// Pow.
+    /// Usage: Pow<2, 16>::value
+    template <uint8_t Base, uint32_t N>
+    struct Pow
+    {
+        enum { value = Base * Pow<Base, N-1>::value };
+    };
+    template <uint8_t Base> struct Pow<Base, 0> { enum { value = 1 }; };
+
     /// Type info.
     /// Usage: uint8_t val = TyInfo<uint8_t>::Max();
     template <typename Ty> struct TyInfo { static bool      Max() { return false;       } };
