@@ -12,12 +12,9 @@ uint16_t insert(uint16_t _val)
         return this->indexOf(_val);
     }
 
-    m_values[m_num] = _val;
-    uint16_t* sparse = &m_values[max()];
-    sparse[_val] = m_num;
-
-    const uint16_t index = m_num;
-    ++m_num;
+    const uint16_t index = m_num++;
+    m_values[index] = _val;
+    m_indices[_val] = index;
 
     return index;
 }
@@ -36,8 +33,7 @@ bool contains(uint16_t _val)
 {
     DM_CHECK(_val < max(), "setContains - 0 | %d, %d", _val, max());
 
-    const uint16_t* sparse = &m_values[max()];
-    const uint16_t index = sparse[_val];
+    const uint16_t index = m_indices[_val];
 
     return (index < m_num && m_values[index] == _val);
 }
@@ -46,8 +42,7 @@ uint16_t indexOf(uint16_t _val)
 {
     DM_CHECK(_val < max(), "setIndexOf | %d, %d", _val, max());
 
-    const uint16_t* sparse = &m_values[max()];
-    return sparse[_val];
+    return m_indices[_val];
 }
 
 uint16_t getValueAt(uint16_t _idx)
@@ -67,16 +62,14 @@ void remove(uint16_t _val)
         return;
     }
 
-    uint16_t* sparse = &m_values[max()];
-
-    const uint16_t index = sparse[_val];
+    const uint16_t index = m_indices[_val];
     const uint16_t last = m_values[--m_num];
 
     DM_CHECK(index < max(), "setRemove - 2 | %d, %d", index, max());
     DM_CHECK(last < max(), "setRemove - 3 | %d, %d", last, max());
 
     m_values[index] = last;
-    sparse[last] = index;
+    m_indices[last] = index;
 }
 
 void reset()

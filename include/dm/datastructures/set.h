@@ -42,7 +42,8 @@ namespace dm
 
     private:
         uint16_t m_num;
-        uint16_t m_values[MaxValueT*2];
+        uint16_t m_values[MaxValueT];
+        uint16_t m_indices[MaxValueT];
     };
 
     struct Set
@@ -51,6 +52,7 @@ namespace dm
         Set()
         {
             m_values = NULL;
+            m_indices = NULL;
         }
 
         Set(uint16_t _max, bx::ReallocatorI* _reallocator)
@@ -74,6 +76,7 @@ namespace dm
             m_num = 0;
             m_max = _max;
             m_values = (uint16_t*)BX_ALLOC(_reallocator, sizeFor(_max));
+            m_indices = m_values + _max;
             m_reallocator = _reallocator;
             m_cleanup = true;
         }
@@ -94,6 +97,7 @@ namespace dm
             m_num = 0;
             m_max = _max;
             m_values = (uint16_t*)_mem;
+            m_indices = m_values + _max;
             m_allocator = _allocator;
             m_cleanup = false;
 
@@ -107,6 +111,7 @@ namespace dm
             {
                 BX_FREE(m_reallocator, m_values);
                 m_values = NULL;
+                m_indices = NULL;
             }
         }
 
@@ -136,6 +141,7 @@ namespace dm
         uint16_t m_max;
         uint16_t m_num;
         uint16_t* m_values;
+        uint16_t* m_indices;
         union
         {
             bx::AllocatorI*   m_allocator;
