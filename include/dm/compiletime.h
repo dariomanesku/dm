@@ -15,6 +15,13 @@
 
 namespace dm
 {
+    /// Static assert.
+    /// To be used as a statement inside a scope.
+    /// Example: template <typename Ty> void foo(Ty _in) { dm_staticAssert(sizeof(Ty) == 4); }
+    template <bool> struct StaticAssert;               // Declaration.
+    template     <> struct StaticAssert<true> {};      // True has a definition.
+    #define dm_staticAssert(x) dm::StaticAssert<(x)>() // False will cause compile-time error.
+
     /// Log.
     /// Usage: Log<2, 512>::value
     template <uint8_t Base, uint32_t N>
