@@ -237,9 +237,9 @@ namespace dm
     /// Type best fit test.
     /// Usage: bool val = dm::bestfit_16bit<500>::value
     template <uint64_t Val> struct bestfit_8bit  : dm::bool_type <         0 <= uint64_t(Val) && uint64_t(Val) <= UINT8_MAX > {};
-    template <uint64_t Val> struct bestfit_16bit : dm::bool_type < UINT8_MAX <= uint64_t(Val) && uint64_t(Val) <= UINT16_MAX> {};
-    template <uint64_t Val> struct bestfit_32bit : dm::bool_type <UINT16_MAX <= uint64_t(Val) && uint64_t(Val) <= UINT32_MAX> {};
-    template <uint64_t Val> struct bestfit_64bit : dm::bool_type <UINT32_MAX <= uint64_t(Val) && uint64_t(Val) <= UINT64_MAX> {};
+    template <uint64_t Val> struct bestfit_16bit : dm::bool_type < UINT8_MAX  < uint64_t(Val) && uint64_t(Val) <= UINT16_MAX> {};
+    template <uint64_t Val> struct bestfit_32bit : dm::bool_type <UINT16_MAX  < uint64_t(Val) && uint64_t(Val) <= UINT32_MAX> {};
+    template <uint64_t Val> struct bestfit_64bit : dm::bool_type <UINT32_MAX  < uint64_t(Val) && uint64_t(Val) <= UINT64_MAX> {};
 
     /// Is power of two.
     /// Usage: bool val = dm::is_powtwo<float>::value
