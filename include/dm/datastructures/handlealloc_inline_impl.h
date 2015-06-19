@@ -15,9 +15,8 @@ HandleTy alloc()
     if (m_numHandles < max())
     {
         const HandleTy index = m_numHandles++;
-        const HandleTy handle = m_handles[index];
-        HandleTy* sparse = &m_handles[max()];
-        sparse[handle] = index;
+        const HandleTy handle = m_dense[index];
+        m_sparse[handle] = index;
         return handle;
     }
 
@@ -28,39 +27,37 @@ bool contains(HandleTy _handle)
 {
     DM_CHECK(_handle < max(), "handleAllocContains | %d, %d", _handle, max());
 
-    HandleTy* sparse = &m_handles[max()];
-    HandleTy index = sparse[_handle];
+    HandleTy index = m_sparse[_handle];
 
-    return (index < m_numHandles && m_handles[index] == _handle);
+    return (index < m_numHandles && m_dense[index] == _handle);
 }
 
 void free(HandleTy _handle)
 {
     DM_CHECK(m_numHandles > 0, "handleAllocFree | %d", m_numHandles);
 
-    HandleTy* sparse = &m_handles[max()];
-    HandleTy index = sparse[_handle];
+    HandleTy index = m_sparse[_handle];
 
-    if (index < m_numHandles && m_handles[index] == _handle)
+    if (index < m_numHandles && m_dense[index] == _handle)
     {
         --m_numHandles;
-        HandleTy temp = m_handles[m_numHandles];
-        m_handles[m_numHandles] = _handle;
-        sparse[temp] = index;
-        m_handles[index] = temp;
+        HandleTy temp = m_dense[m_numHandles];
+        m_dense[m_numHandles] = _handle;
+        m_sparse[temp] = index;
+        m_dense[index] = temp;
     }
 }
 
 const HandleTy* getHandles() const
 {
-    return m_handles;
+    return m_dense;
 }
 
 HandleTy getHandleAt(HandleTy _idx) const
 {
     DM_CHECK(_idx < m_numHandles, "handleAllocGetHandleAt | %d %d", _idx, m_numHandles);
 
-    return m_handles[_idx];
+    return m_dense[_idx];
 }
 
 void reset()
@@ -68,7 +65,7 @@ void reset()
     m_numHandles = 0;
     for (HandleTy ii = 0, end = max(); ii < end; ++ii)
     {
-        m_handles[ii] = ii;
+        m_dense[ii] = ii;
     }
 }
 
