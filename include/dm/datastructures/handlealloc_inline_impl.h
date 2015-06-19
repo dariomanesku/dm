@@ -58,6 +58,8 @@ const HandleTy* getHandles() const
 
 HandleTy getHandleAt(HandleTy _idx) const
 {
+    DM_CHECK(_idx < m_numHandles, "handleAllocGetHandleAt | %d %d", _idx, m_numHandles);
+
     return m_handles[_idx];
 }
 
