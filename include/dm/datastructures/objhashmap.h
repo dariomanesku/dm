@@ -14,6 +14,7 @@
 #include "../misc.h"          // dm::TyInfo<>
 #include "../hash.h"          // dm::hash
 #include "../misc.h"          // dm::isPowTwo
+#include "../compiletime.h"   // dm_staticAssert(), dm::is_powtwo<>::value
 
 #include "common.h" // Heap alloc utils.
 #include "handlealloc.h"
@@ -27,11 +28,11 @@ namespace dm
             >
     struct ObjHashMapT
     {
-        typedef uint32_t HandleTy;
+        typedef typename dm::bestfit_type<MaxT_PowTwo*EntriesPerSlot_PowTwo>::type HandleType;
 
         ObjHashMapT()
         {
-            DM_ASSERT(dm::isPowTwo(MaxT_PowTwo));
+            dm_staticAssert(is_powtwo<MaxT_PowTwo>::value);
         }
 
         #include "objhashmap_inline_impl.h"
@@ -49,15 +50,15 @@ namespace dm
             InvalidIdx = UINT32_MAX,
         };
 
-        HashMapT<KeyLen, HandleTy, MaxT_PowTwo*EntriesPerSlot_PowTwo> m_hashMap;
-        HandleAllocT<MaxT_PowTwo, HandleTy>                           m_handleAlloc;
-        ValTy                                                         m_objects[MaxT_PowTwo];
+        HashMapT<KeyLen, HandleType, MaxT_PowTwo*EntriesPerSlot_PowTwo> m_hashMap;
+        HandleAllocTy<MaxT_PowTwo, HandleType>                          m_handleAlloc;
+        ValTy                                                           m_objects[MaxT_PowTwo];
     };
 
     template <uint8_t KeyLen, typename ValTy>
     struct ObjHashMap
     {
-        typedef uint32_t HandleTy;
+        typedef uint32_t HandleType;
 
         // Uninitialized state, init() needs to be called !
         ObjHashMap()
@@ -95,8 +96,8 @@ namespace dm
 
         enum
         {
-            SizePerElement = sizeof(ValTy) + HandleAlloc<HandleTy>::SizePerElement + HashMap<KeyLen, HandleTy>::SizePerElement,
-            SizePerAdditionalEntry = HashMap<KeyLen, HandleTy>::SizePerElement,
+            SizePerElement = sizeof(ValTy) + HandleAlloc<HandleType>::SizePerElement + HashMap<KeyLen, HandleType>::SizePerElement,
+            SizePerAdditionalEntry = HashMap<KeyLen, HandleType>::SizePerElement,
         };
 
         static inline uint32_t sizeFor(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo)
@@ -204,8 +205,8 @@ namespace dm
 
         uint32_t m_max;
         uint8_t m_entriesPerSlot;
-        HashMap<KeyLen, HandleTy> m_hashMap;
-        HandleAlloc<HandleTy> m_handleAlloc;
+        HashMap<KeyLen, HandleType> m_hashMap;
+        HandleAlloc<HandleType> m_handleAlloc;
         ValTy* m_objects;
         union
         {

@@ -5,7 +5,7 @@
 
 ValTy* insertNew(const void* _key)
 {
-    const HandleTy handle = m_handleAlloc.alloc();
+    const HandleType handle = m_handleAlloc.alloc();
     m_hashMap.insert(_key, handle);
     return getValueOf(handle);
 }
@@ -18,7 +18,7 @@ ValTy* insertNew(Ty _key)
 
 uint32_t insertObj(const void* _key, const ValTy& _obj)
 {
-    const HandleTy handle = m_handleAlloc.alloc();
+    const HandleType handle = m_handleAlloc.alloc();
     m_hashMap.insert(_key, handle);
     ValTy* dst = getValueOf(handle);
     dst = ::new (dst) ValTy(_obj);
@@ -42,7 +42,7 @@ uint32_t unsafeFindHandleOf(Ty _key)
     return unsafeFindHandleOf(_key);
 }
 
-ValTy* getValueOf(HandleTy _handle)
+ValTy* getValueOf(HandleType _handle)
 {
     return &m_objects[_handle];
 }
@@ -74,7 +74,7 @@ ValTy* find(const void* _key, uint32_t _lookAhead = UINT32_MAX)
     const uint32_t idx = m_hashMap.findIdxOf(_key, _lookAhead);
     if (InvalidIdx != idx)
     {
-        const HandleTy handle = { idx };
+        const HandleType handle = { idx };
         return getValueOf(handle);
     }
     else
@@ -103,7 +103,7 @@ bool contains(Ty _key, uint32_t _lookAhead = UINT32_MAX)
 void unsafeRemove(const void* _key)
 {
     const uint32_t idx = m_hashMap.unsafeRemove(_key);
-    const HandleTy handle = { idx };
+    const HandleType handle = { idx };
     m_handleAlloc.free(handle);
     ValTy* dst = getValueOf(handle);
     dst->~ValTy();
@@ -117,7 +117,7 @@ void unsafeRemove(Ty _key)
 
 bool remove(const void* _key, uint32_t _lookAhead = UINT32_MAX)
 {
-    const HandleTy handle = m_hashMap.find(_key, _lookAhead);
+    const HandleType handle = m_hashMap.find(_key, _lookAhead);
     if (InvalidIdx != handle)
     {
         m_handleAlloc.free(handle);
@@ -144,7 +144,7 @@ uint32_t count() const
 
 ValTy* getValueAt(uint32_t _idx)
 {
-    const HandleTy handle = { m_handleAlloc.getHandleAt(_idx) };
+    const HandleType handle = { m_handleAlloc.getHandleAt(_idx) };
     return getValueOf(handle);
 }
 
