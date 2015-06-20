@@ -20,10 +20,11 @@
 
 namespace dm
 {
-    template <typename Ty/*obj type*/, uint16_t MaxT>
+    template <typename ObjTy, uint32_t MaxT>
     struct ListT
     {
-        typedef ListT<Ty,MaxT> This;
+        typedef ListT<ObjTy,MaxT> This;
+        typedef HandleAllocT<MaxT> HandleAlloc;
 
         ListT()
         {
@@ -42,14 +43,47 @@ namespace dm
         }
 
     private:
-        HandleAllocT16<MaxT> m_handles;
-        Ty m_elements[MaxT];
+        HandleAlloc m_handles;
+        ObjTy m_elements[MaxT];
     };
 
-    template <typename Ty/*obj type*/>
+    template <typename ObjTy, uint32_t MaxT, typename HandleTy/*uint16_t or uint32_t*/>
+    struct ListTy
+    {
+        typedef ListTy<ObjTy,MaxT,HandleTy>  This;
+        typedef HandleAllocTy<MaxT,HandleTy> HandleAlloc;
+
+        ListTy()
+        {
+            dm_staticAssert(MaxT <= TyInfo<HandleTy>::MaxVal);
+        }
+
+        #include "list_inline_impl.h"
+
+        uint16_t count() const
+        {
+            return m_handles.count();
+        }
+
+        uint16_t max() const
+        {
+            return MaxT;
+        }
+
+    private:
+        HandleAlloc m_handles;
+        ObjTy m_elements[MaxT];
+    };
+
+    template <typename ObjTy, uint32_t MaxT> struct ListTy8  : ListTy<ObjTy, MaxT, uint8_t>  { };
+    template <typename ObjTy, uint32_t MaxT> struct ListTy16 : ListTy<ObjTy, MaxT, uint16_t> { };
+    template <typename ObjTy, uint32_t MaxT> struct ListTy32 : ListTy<ObjTy, MaxT, uint32_t> { };
+
+    template <typename ObjTy/*obj type*/>
     struct List
     {
-        typedef List<Ty> This;
+        typedef List<ObjTy> This;
+        typedef HandleAlloc16 HandleAlloc;
 
         // Uninitialized state, init() needs to be called !
         List()
@@ -74,7 +108,7 @@ namespace dm
 
         enum
         {
-            SizePerElement = sizeof(Ty) + HandleAlloc16::SizePerElement,
+            SizePerElement = sizeof(ObjTy) + HandleAlloc16::SizePerElement,
         };
 
         static inline uint32_t sizeFor(uint16_t _max)
@@ -90,7 +124,7 @@ namespace dm
             m_cleanup = true;
 
             void* ptr = m_handles.init(_max, m_memoryBlock);
-            m_elements = (Ty*)ptr;
+            m_elements = (ObjTy*)ptr;
         }
 
         // Uses externally allocated memory.
@@ -101,7 +135,7 @@ namespace dm
             m_cleanup = false;
 
             void* ptr = m_handles.init(_max, m_memoryBlock);
-            m_elements = (Ty*)ptr;
+            m_elements = (ObjTy*)ptr;
 
             void* end = (void*)((uint8_t*)_mem + sizeFor(_max));
             return end;
@@ -143,8 +177,8 @@ namespace dm
         }
 
     private:
-        HandleAlloc16 m_handles;
-        Ty* m_elements;
+        HandleAlloc m_handles;
+        ObjTy* m_elements;
         void* m_memoryBlock;
         union
         {

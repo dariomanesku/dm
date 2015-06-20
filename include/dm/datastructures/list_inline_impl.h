@@ -3,33 +3,36 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-enum { Invalid = UINT16_MAX };
-
-void fillWith(const Ty* _obj)
+static typename HandleAlloc::HandleType invalid()
 {
-    Ty* elem = m_elements;
+    return HandleAlloc::invalid();
+}
+
+void fillWith(const ObjTy* _obj)
+{
+    ObjTy* elem = m_elements;
     for (uint16_t ii = count(); ii--; )
     {
-        ::new (&elem[ii]) Ty(*_obj);
+        ::new (&elem[ii]) ObjTy(*_obj);
     }
 }
 
-uint16_t add(const Ty& _obj)
+uint16_t add(const ObjTy& _obj)
 {
     const uint16_t idx = m_handles.alloc();
 
-    Ty* dst = &m_elements[idx];
-    dst = ::new (dst) Ty(_obj);
+    ObjTy* dst = &m_elements[idx];
+    dst = ::new (dst) ObjTy(_obj);
     return idx;
 }
 
-Ty* addNew()
+ObjTy* addNew()
 {
     const uint16_t idx = m_handles.alloc();
     DM_CHECK(idx < max(), "listAddNew | %d, %d", idx, max());
 
-    Ty* dst = &m_elements[idx];
-    dst = ::new (dst) Ty();
+    ObjTy* dst = &m_elements[idx];
+    dst = ::new (dst) ObjTy();
     return dst;
 }
 
@@ -38,12 +41,12 @@ bool contains(uint16_t _handle)
     return m_handles.contains(_handle);
 }
 
-bool containsObj(const Ty* _obj) const
+bool containsObj(const ObjTy* _obj) const
 {
     return (&m_elements[0] <= _obj && _obj < &m_elements[max()]);
 }
 
-uint16_t getHandleOf(const Ty* _obj) const
+uint16_t getHandleOf(const ObjTy* _obj) const
 {
     DM_CHECK(containsObj(_obj), "listGetHandleOf | Object not from the list.");
 
@@ -55,15 +58,15 @@ uint16_t getHandleAt(uint16_t _idx) const
     return m_handles.getHandleAt(_idx);
 }
 
-Ty* getObjFromHandle(uint16_t _handle)
+ObjTy* getObjFromHandle(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "listGetObjFromHandle | %d, %d", _handle, max());
 
-    return const_cast<Ty*>(&m_elements[_handle]);
+    return const_cast<ObjTy*>(&m_elements[_handle]);
 }
 
 private:
-Ty* getObjAt_impl(uint16_t _idx)
+ObjTy* getObjAt_impl(uint16_t _idx)
 {
     DM_CHECK(_idx < max(), "listGetObjAt | %d, %d", _idx, max());
 
@@ -72,25 +75,25 @@ Ty* getObjAt_impl(uint16_t _idx)
 }
 public:
 
-Ty* getObjAt(uint16_t _idx)
+ObjTy* getObjAt(uint16_t _idx)
 {
     This* list = const_cast<This*>(this);
     return list->getObjAt_impl(_idx);
 }
 
-const Ty* getObjAt(uint16_t _idx) const
+const ObjTy* getObjAt(uint16_t _idx) const
 {
     This* list = const_cast<This*>(this);
     return list->getObjAt_impl(_idx);
 }
 
-Ty& operator[](uint16_t _idx)
+ObjTy& operator[](uint16_t _idx)
 {
     This* list = const_cast<This*>(this);
     return *list->getObjAt_impl(_idx);
 }
 
-const Ty& operator[](uint16_t _idx) const
+const ObjTy& operator[](uint16_t _idx) const
 {
     This* list = const_cast<This*>(this);
     return *list->getObjAt_impl(_idx);
@@ -100,11 +103,11 @@ void remove(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "listRemove | %d, %d", _handle, max());
 
-    m_elements[_handle].~Ty();
+    m_elements[_handle].~ObjTy();
     m_handles.free(_handle);
 }
 
-uint16_t removeObj(Ty* _obj)
+uint16_t removeObj(ObjTy* _obj)
 {
     const uint16_t handle = getHandleOf(_obj);
     this->remove(handle);
