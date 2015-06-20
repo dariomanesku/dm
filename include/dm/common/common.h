@@ -9,6 +9,7 @@
 #include "../../../3rdparty/bx/macros.h" //BX_FORCE_INLINE
 
 #define DM_INLINE inline
+#define DM_STATIC_ASSERT BX_STATIC_ASSERT
 
 #endif // DM_COMMON_H_HEADER_GUARD
 
