@@ -126,8 +126,9 @@ void removeAll()
 {
     for (uint16_t ii = count(); ii--; )
     {
-        this->removeAt(0);
+        this->getObjAt(ii)->~ObjTy();
     }
+    m_handles.reset();
 }
 
 void reset()
