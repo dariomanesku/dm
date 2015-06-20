@@ -44,7 +44,7 @@ namespace dm
 
     private:
         uint16_t m_last;
-        HandleAllocT16<MaxT> m_handles;
+        HandleAllocT<MaxT> m_handles;
         Elem m_elements[MaxT];
     };
 
