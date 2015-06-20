@@ -242,6 +242,20 @@ namespace dm
     template <uint64_t Val> struct bestfit_32bit : dm::bool_type <UINT16_MAX  < uint64_t(Val) && uint64_t(Val) <= UINT32_MAX> {};
     template <uint64_t Val> struct bestfit_64bit : dm::bool_type <UINT32_MAX  < uint64_t(Val) && uint64_t(Val) <= UINT64_MAX> {};
 
+    /// Get best fit type.
+    /// Usage: bestfit_type<567>::type foo; // 'foo' will be uint16_t.
+    template <uint64_t Val> struct bestfit_type_impl    { typedef uint64_t type; };
+    template             <> struct bestfit_type_impl<1> { typedef uint32_t type; };
+    template             <> struct bestfit_type_impl<2> { typedef uint16_t type; };
+    template             <> struct bestfit_type_impl<3> { typedef uint8_t  type; };
+    template <uint64_t Val> struct bestfit_type
+    {
+        typedef typename bestfit_type_impl<(unsigned)dm::fits_32bit<Val>::value
+                                          +(unsigned)dm::fits_16bit<Val>::value
+                                          +(unsigned)dm::fits_8bit <Val>::value
+                                          >::type type;
+    };
+
     /// Is power of two.
     /// Usage: bool val = dm::is_powtwo<float>::value
     #ifndef DM_IS_POW_TWO
