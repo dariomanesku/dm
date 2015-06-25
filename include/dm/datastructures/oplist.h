@@ -36,7 +36,7 @@ namespace dm
 
     private:
         ArrayT<uint16_t, MaxT> m_handles;
-        HandleAllocTy16<MaxT> m_handleAlloc;
+        HandleAllocT<MaxT> m_handleAlloc;
         Ty m_objects[MaxT];
     };
 

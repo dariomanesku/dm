@@ -51,7 +51,7 @@ namespace dm
         };
 
         HashMapT<KeyLen, HandleType, MaxT_PowTwo*EntriesPerSlot_PowTwo> m_hashMap;
-        HandleAllocTy<MaxT_PowTwo, HandleType>                          m_handleAlloc;
+        HandleAllocT<MaxT_PowTwo>                                       m_handleAlloc;
         ValTy                                                           m_objects[MaxT_PowTwo];
     };
 

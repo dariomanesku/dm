@@ -3,24 +3,14 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-static HandleType invalid()
-{
-    return TyInfo<HandleType>::Max();
-}
-
 HandleType alloc()
 {
     DM_CHECK(m_numHandles < max(), "handleAllocAlloc | %d, %d", m_numHandles, max());
 
-    if (m_numHandles < max())
-    {
-        const HandleType index = m_numHandles++;
-        const HandleType handle = m_handles[index];
-        m_indices[handle] = index;
-        return handle;
-    }
-
-    return invalid();
+    const HandleType index = m_numHandles++;
+    const HandleType handle = m_handles[index];
+    m_indices[handle] = index;
+    return handle;
 }
 
 bool contains(HandleType _handle)

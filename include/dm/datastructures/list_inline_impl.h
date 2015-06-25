@@ -3,11 +3,6 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-static typename HandleAlloc::HandleType invalid()
-{
-    return HandleAlloc::invalid();
-}
-
 void fillWith(const ObjTy* _obj)
 {
     ObjTy* elem = m_elements;

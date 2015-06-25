@@ -24,12 +24,6 @@ namespace dm
     struct ListT
     {
         typedef ListT<ObjTy,MaxT> This;
-        typedef HandleAllocT<MaxT> HandleAlloc;
-
-        ListT()
-        {
-        }
-
         #include "list_inline_impl.h"
 
         uint16_t count() const
@@ -43,48 +37,13 @@ namespace dm
         }
 
     private:
-        HandleAlloc m_handles;
+        HandleAllocT<MaxT> m_handles;
         ObjTy m_elements[MaxT];
     };
-
-    template <typename ObjTy, uint32_t MaxT, typename HandleTy/*uint16_t or uint32_t*/>
-    struct ListTy
-    {
-        typedef ListTy<ObjTy,MaxT,HandleTy>  This;
-        typedef HandleAllocTy<MaxT,HandleTy> HandleAlloc;
-
-        ListTy()
-        {
-            dm_staticAssert(MaxT <= TyInfo<HandleTy>::MaxVal);
-        }
-
-        #include "list_inline_impl.h"
-
-        uint16_t count() const
-        {
-            return m_handles.count();
-        }
-
-        uint16_t max() const
-        {
-            return MaxT;
-        }
-
-    private:
-        HandleAlloc m_handles;
-        ObjTy m_elements[MaxT];
-    };
-
-    template <typename ObjTy, uint32_t MaxT> struct ListTy8  : ListTy<ObjTy, MaxT, uint8_t>  { };
-    template <typename ObjTy, uint32_t MaxT> struct ListTy16 : ListTy<ObjTy, MaxT, uint16_t> { };
-    template <typename ObjTy, uint32_t MaxT> struct ListTy32 : ListTy<ObjTy, MaxT, uint32_t> { };
 
     template <typename ObjTy/*obj type*/>
     struct List
     {
-        typedef List<ObjTy> This;
-        typedef HandleAlloc16 HandleAlloc;
-
         // Uninitialized state, init() needs to be called !
         List()
         {
@@ -159,6 +118,7 @@ namespace dm
             }
         }
 
+        typedef List<ObjTy> This;
         #include "list_inline_impl.h"
 
         uint16_t count() const
@@ -177,7 +137,7 @@ namespace dm
         }
 
     private:
-        HandleAlloc m_handles;
+        HandleAlloc16 m_handles;
         ObjTy* m_elements;
         void* m_memoryBlock;
         union

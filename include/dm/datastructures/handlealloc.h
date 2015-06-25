@@ -47,39 +47,6 @@ namespace dm
         HandleType m_numHandles;
     };
 
-    template <uint32_t MaxHandlesT, typename HandleTy = uint16_t>
-    struct HandleAllocTy
-    {
-        typedef HandleTy HandleType;
-
-        HandleAllocTy()
-        {
-            dm_staticAssert(MaxHandlesT <= TyInfo<HandleType>::MaxVal);
-
-            reset();
-        }
-
-        #include "handlealloc_inline_impl.h"
-
-        HandleType count() const
-        {
-            return m_numHandles;
-        }
-
-        HandleType max() const
-        {
-            return MaxHandlesT;
-        }
-
-    private:
-        HandleType m_handles[MaxHandlesT];
-        HandleType m_indices[MaxHandlesT];
-        HandleType m_numHandles;
-    };
-    template <uint32_t MaxHandlesT> struct HandleAllocTy8  : HandleAllocTy<MaxHandlesT, uint8_t>  { };
-    template <uint32_t MaxHandlesT> struct HandleAllocTy16 : HandleAllocTy<MaxHandlesT, uint16_t> { };
-    template <uint32_t MaxHandlesT> struct HandleAllocTy32 : HandleAllocTy<MaxHandlesT, uint32_t> { };
-
     template <typename HandleTy=uint16_t>
     struct HandleAlloc
     {
