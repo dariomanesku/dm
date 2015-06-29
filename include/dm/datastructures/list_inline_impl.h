@@ -53,7 +53,7 @@ uint16_t getHandleAt(uint16_t _idx) const
     return m_handles.getHandleAt(_idx);
 }
 
-ObjTy* getObjFromHandle(uint16_t _handle)
+ObjTy* getObj(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "listGetObjFromHandle | %d, %d", _handle, max());
 
@@ -66,7 +66,7 @@ ObjTy* getObjAt_impl(uint16_t _idx)
     DM_CHECK(_idx < max(), "listGetObjAt | %d, %d", _idx, max());
 
     const uint16_t handle = m_handles.getHandleAt(_idx);
-    return this->getObjFromHandle(handle);
+    return this->getObj(handle);
 }
 public:
 
