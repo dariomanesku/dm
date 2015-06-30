@@ -53,7 +53,7 @@ uint16_t getHandleAt(uint16_t _idx) const
     return m_handles.getHandleAt(_idx);
 }
 
-ObjTy* getObj(uint16_t _handle)
+ObjTy* get(uint16_t _handle)
 {
     DM_CHECK(_handle < max(), "listGetObjFromHandle | %d, %d", _handle, max());
 
@@ -66,17 +66,17 @@ ObjTy* getObjAt_impl(uint16_t _idx)
     DM_CHECK(_idx < max(), "listGetObjAt | %d, %d", _idx, max());
 
     const uint16_t handle = m_handles.getHandleAt(_idx);
-    return this->getObj(handle);
+    return this->get(handle);
 }
 public:
 
-ObjTy* getObjAt(uint16_t _idx)
+ObjTy* getAt(uint16_t _idx)
 {
     This* list = const_cast<This*>(this);
     return list->getObjAt_impl(_idx);
 }
 
-const ObjTy* getObjAt(uint16_t _idx) const
+const ObjTy* getAt(uint16_t _idx) const
 {
     This* list = const_cast<This*>(this);
     return list->getObjAt_impl(_idx);
@@ -121,7 +121,7 @@ void removeAll()
 {
     for (uint16_t ii = count(); ii--; )
     {
-        this->getObjAt(ii)->~ObjTy();
+        this->getAt(ii)->~ObjTy();
     }
     m_handles.reset();
 }
