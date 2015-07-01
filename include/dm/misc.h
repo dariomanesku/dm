@@ -336,7 +336,12 @@ namespace dm
             strncat(_dst, _src, _dstSize-1);
         }
     }
-    #define strscpya(_charArray, _src) strscpy(_charArray, _src, sizeof(_charArray))
+
+    template <uint32_t DstSize>
+    DM_INLINE void strscpya(char (&_dst)[DstSize], const char* _src)
+    {
+        strscpy(_dst, _src, DstSize);
+    }
 
     DM_INLINE void strtolower(char* _out, char* _in)
     {
