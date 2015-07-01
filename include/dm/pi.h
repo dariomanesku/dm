@@ -13,6 +13,18 @@ namespace dm
     static const float piHalf    = 1.57079632679489661923f;
     static const float invPi     = 0.31830988618379067153f;
     static const float invPiHalf = 0.15915494309189533576f;
+    static const float toRad     = 0.0174532925199432957692369076848861271344287188854172f; // pi/180.0
+    static const float toDeg     = 57.295779513082320876798154814105170332405472466564321f; // 180.0/pi
+
+    DM_INLINE float degToRad(float _deg)
+    {
+        return _deg*(pi/180.0f);
+    }
+
+    DM_INLINE float radToDeg(float _rad)
+    {
+        return _rad*(180.0f/pi);
+    }
 
 } // namespace dm
 
