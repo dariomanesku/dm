@@ -363,7 +363,7 @@ namespace dm
 
     DM_INLINE void strtolower(char* _str)
     {
-        for( ; *_str; ++_str)
+        for (; *_str; ++_str)
         {
             *_str = (char)tolower(*_str);
         }
@@ -371,7 +371,7 @@ namespace dm
 
     DM_INLINE void strtoupper(char* _str)
     {
-        for( ; *_str; ++_str)
+        for (; *_str; ++_str)
         {
             *_str = (char)toupper(*_str);
         }
