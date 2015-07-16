@@ -24,6 +24,7 @@
             Ty* elem = &m_values[ii];
             elem->~Ty();
         }
+        m_count = _max < m_count ? _max : m_count;
     }
 
     private: void expandIfNecessaryToMakeRoomFor(uint32_t _count)
