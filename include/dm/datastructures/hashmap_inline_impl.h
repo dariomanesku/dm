@@ -31,6 +31,66 @@ uint32_t insert(Ty _key, ValTy _val)
     return insert((const void*)&_key, _val);
 }
 
+struct CollisionIdx
+{
+    union
+    {
+        uint64_t m_collisionIdx;
+
+        struct
+        {
+            uint32_t m_collision;
+            uint32_t m_idx;
+        };
+    };
+
+    bool isCollision() const
+    {
+        return (m_collision > 0);
+    }
+};
+
+CollisionIdx insertHandleCollision(const void* _key, ValTy _val)
+{
+    CollisionIdx result;
+
+    const uint32_t hash = dm::hash(_key, KeyLen);
+    uint32_t idx = wrapAround(hash);
+    for (;;)
+    {
+        if (Used == m_ukv[idx].m_used                       // Used
+        &&     0 == memcmp(_key, m_ukv[idx].m_key, KeyLen)) // && key matches.
+        {
+            // Collision found.
+
+            result.m_collision = 1;
+            result.m_idx = idx;
+            return result;
+        }
+
+        if (Unused == m_ukv[idx].m_used)
+        {
+            // Insert new entry.
+
+            m_ukv[idx].m_used = Used;
+            memcpy(m_ukv[idx].m_key, _key, KeyLen);
+            memcpy(&m_ukv[idx].m_val, &_val, sizeof(_val));
+
+            result.m_collision = 0;
+            result.m_idx = idx;
+            return result;
+        }
+
+        idx = wrapAround(idx+1);
+    }
+}
+
+template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+CollisionIdx insertHandleCollision(Ty _key, ValTy _val)
+{
+    return insertHandleCollision((const void*)&_key, _val);
+}
+
 uint32_t unsafeFindHandleOf(const void* _key)
 {
     const uint32_t hash = dm::hash(_key);
