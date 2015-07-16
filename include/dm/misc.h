@@ -509,6 +509,31 @@ namespace dm
         return false;
     }
 
+    /*
+    // Gets the directory from file path. Examples:
+    //    /tmp/foo.c -> /tmp/
+    //    C:\\tmp\\foo.c -> C:\\tmp\\
+    */
+    DM_INLINE bool dirpath(char* _out, size_t _outSize, const char* _filePath)
+    {
+        const char* end;
+
+        const char* ptr;
+        end = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
+            : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
+            : _filePath
+            ;
+
+        if (NULL != end)
+        {
+            const size_t size = dm::min(size_t(end-_filePath)+1, _outSize);
+            dm::strscpy(_out, _filePath, size);
+            return true;
+        }
+
+        return false;
+    }
+
     DM_INLINE const char* fileExt(const char* _filePath)
     {
         const char* dot = strrchr(_filePath, '.');
