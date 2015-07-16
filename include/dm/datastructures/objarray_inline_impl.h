@@ -21,8 +21,7 @@
         m_max = _max;
         for (uint32_t ii = _max, end = m_count; ii < end; ++ii)
         {
-            Ty* elem = &m_values[ii];
-            elem->~Ty();
+            m_values[ii].~Ty();
         }
         m_count = _max < m_count ? _max : m_count;
     }
@@ -77,8 +76,7 @@ void cut(uint32_t _idx)
 
     for (uint32_t ii = _idx, end = m_count; ii < end; ++ii)
     {
-        Ty* elem = &m_values[ii];
-        elem->~Ty();
+        m_values[ii].~Ty();
     }
 
     m_count = _idx;
@@ -102,10 +100,7 @@ void pop()
 {
     DM_CHECK(0 < m_count, "objarrayPop - 0 | %d", m_count);
 
-    m_count--;
-
-    Ty* elem = &m_values[m_count];
-    elem->~Ty();
+    m_values[--m_count].~Ty();
 }
 
 // Uses swap instead of memmove. Order is not preserved!
