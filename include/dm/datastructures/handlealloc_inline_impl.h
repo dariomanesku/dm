@@ -13,7 +13,7 @@ HandleType alloc()
     return handle;
 }
 
-bool contains(HandleType _handle)
+bool contains(uint32_t _handle)
 {
     DM_CHECK(_handle < max(), "handleAllocContains | %d, %d", _handle, max());
 
@@ -22,7 +22,7 @@ bool contains(HandleType _handle)
     return (index < m_numHandles && m_handles[index] == _handle);
 }
 
-void free(HandleType _handle)
+void free(uint32_t _handle)
 {
     DM_CHECK(m_numHandles > 0, "handleAllocFree | %d", m_numHandles);
 
@@ -43,14 +43,14 @@ const HandleType* getHandles() const
     return m_handles;
 }
 
-HandleType getHandleAt(HandleType _idx) const
+HandleType getHandleAt(uint32_t _idx) const
 {
     DM_CHECK(_idx < m_numHandles, "handleAllocGetHandleAt | %d %d", _idx, m_numHandles);
 
     return m_handles[_idx];
 }
 
-HandleType getIdxOf(HandleType _handle) const
+HandleType getIdxOf(uint32_t _handle) const
 {
     DM_CHECK(_handle < max(), "handleAllocGetIdxOf | %d %d", _handle, max());
 
