@@ -3,9 +3,6 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-// Notice: It gives cryptic compile errors but it does the job.
-#define DM_ASSERT_KEYLEN_FITS_IN_TYPE(_ty) typename dm::enable_if<sizeof(_ty) <= KeyLen, _ty>::type* = nullptr
-
 //TODO: Not safe. infinite loop if hashmap is full !
 uint32_t insert(const void* _key, ValTy _val)
 {
@@ -25,9 +22,12 @@ uint32_t insert(const void* _key, ValTy _val)
     }
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+template <typename Ty>
 uint32_t insert(Ty _key, ValTy _val)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+    dm_staticAssert(sizeof(Ty) <= KeyLen);
+
     return insert((const void*)&_key, _val);
 }
 
@@ -85,9 +85,12 @@ CollisionIdx insertHandleCollision(const void* _key, ValTy _val)
     }
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+template <typename Ty>
 CollisionIdx insertHandleCollision(Ty _key, ValTy _val)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+    dm_staticAssert(sizeof(Ty) <= KeyLen);
+
     return insertHandleCollision((const void*)&_key, _val);
 }
 
@@ -107,9 +110,12 @@ uint32_t unsafeFindHandleOf(const void* _key)
     }
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+template <typename Ty>
 uint32_t unsafeFindHandleOf(Ty _key)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+    dm_staticAssert(sizeof(Ty) <= KeyLen);
+
     return unsafeFindHandleOf((const void*)&_key);
 }
 
@@ -123,9 +129,12 @@ ValTy unsafeFind(const void* _key)
     return getValueOf(unsafeFindHandleOf(_key));
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+template <typename Ty>
 ValTy unsafeFind(Ty _key)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+    dm_staticAssert(sizeof(Ty) <= KeyLen);
+
     return unsafeFind((const void*)&_key);
 }
 
@@ -147,9 +156,12 @@ uint32_t findIdxOf(const void* _key, uint32_t _lookAhead = UINT32_MAX)
     return InvalidIdx;
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+template <typename Ty>
 uint32_t findIdxOf(Ty _key, uint32_t _lookAhead = UINT32_MAX)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+    dm_staticAssert(sizeof(Ty) <= KeyLen);
+
     return findIdxOf((const void*)&_key, _lookAhead);
 }
 
@@ -166,9 +178,12 @@ ValTy find(const void* _key, uint32_t _lookAhead = UINT32_MAX)
     }
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+template <typename Ty>
 ValTy find(Ty _key, uint32_t _lookAhead = UINT32_MAX)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+    dm_staticAssert(sizeof(Ty) <= KeyLen);
+
     return find((const void*)&_key, _lookAhead);
 }
 
@@ -177,9 +192,11 @@ bool contains(const void* _key, uint32_t _lookAhead = UINT32_MAX)
     return (InvalidIdx != findIdxOf(_key, _lookAhead));
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic)>
+template <typename Ty>
 bool contains(Ty _key, uint32_t _lookAhead = UINT32_MAX)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+
     return contains((const void*)&_key, _lookAhead);
 }
 
@@ -190,9 +207,12 @@ ValTy unsafeRemove(const void* _key)
     return m_ukv[idx].m_val;
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+template <typename Ty>
 ValTy unsafeRemove(Ty _key)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+    dm_staticAssert(sizeof(Ty) <= KeyLen);
+
     return unsafeRemove((const void*)&_key);
 }
 
@@ -210,9 +230,12 @@ bool remove(const void* _key, uint32_t _lookAhead = UINT32_MAX)
     }
 }
 
-template <typename Ty, DM_ENABLE_IF(Ty, is_arithmetic), DM_ASSERT_KEYLEN_FITS_IN_TYPE(Ty)>
+template <typename Ty>
 bool remove(Ty _key, uint32_t _lookAhead = UINT32_MAX)
 {
+    dm_staticAssert(is_arithmetic<Ty>::value);
+    dm_staticAssert(sizeof(Ty) <= KeyLen);
+
     return remove((const void*)&_key, _lookAhead);
 }
 
