@@ -4,7 +4,8 @@
  */
 
 //TODO: Not safe. infinite loop if hashmap is full !
-uint32_t insert(const void* _key, ValTy _val)
+template <typename PtrTy>
+uint32_t insert(const PtrTy* _key, ValTy _val)
 {
     const uint32_t hash = dm::hash(_key, KeyLen);
     uint32_t idx = wrapAround(hash);
@@ -50,7 +51,8 @@ struct CollisionIdx
     }
 };
 
-CollisionIdx insertHandleCollision(const void* _key, ValTy _val)
+template <typename PtrTy>
+CollisionIdx insertHandleCollision(const PtrTy* _key, ValTy _val)
 {
     CollisionIdx result;
 
@@ -94,7 +96,8 @@ CollisionIdx insertHandleCollision(Ty _key, ValTy _val)
     return insertHandleCollision((const void*)&_key, _val);
 }
 
-uint32_t unsafeFindHandleOf(const void* _key)
+template <typename PtrTy>
+uint32_t unsafeFindHandleOf(const PtrTy* _key)
 {
     const uint32_t hash = dm::hash(_key);
     uint32_t idx = wrapAround(hash);
@@ -124,7 +127,8 @@ ValTy getValueOf(uint32_t _handle)
     return m_ukv[_handle].m_val;
 }
 
-ValTy unsafeFind(const void* _key)
+template <typename PtrTy>
+ValTy unsafeFind(const PtrTy* _key)
 {
     return getValueOf(unsafeFindHandleOf(_key));
 }
@@ -138,7 +142,8 @@ ValTy unsafeFind(Ty _key)
     return unsafeFind((const void*)&_key);
 }
 
-uint32_t findIdxOf(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+template <typename PtrTy>
+uint32_t findIdxOf(const PtrTy* _key, uint32_t _lookAhead = UINT32_MAX)
 {
     const uint32_t hash = dm::hash(_key);
     uint32_t idx  = wrapAround(hash);
@@ -165,7 +170,8 @@ uint32_t findIdxOf(Ty _key, uint32_t _lookAhead = UINT32_MAX)
     return findIdxOf((const void*)&_key, _lookAhead);
 }
 
-ValTy find(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+template <typename PtrTy>
+ValTy find(const PtrTy* _key, uint32_t _lookAhead = UINT32_MAX)
 {
     const uint32_t idx = findIdxOf(_key, _lookAhead);
     if (InvalidIdx != idx)
@@ -187,7 +193,8 @@ ValTy find(Ty _key, uint32_t _lookAhead = UINT32_MAX)
     return find((const void*)&_key, _lookAhead);
 }
 
-bool contains(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+template <typename PtrTy>
+bool contains(const PtrTy* _key, uint32_t _lookAhead = UINT32_MAX)
 {
     return (InvalidIdx != findIdxOf(_key, _lookAhead));
 }
@@ -200,7 +207,8 @@ bool contains(Ty _key, uint32_t _lookAhead = UINT32_MAX)
     return contains((const void*)&_key, _lookAhead);
 }
 
-ValTy unsafeRemove(const void* _key)
+template <typename PtrTy>
+ValTy unsafeRemove(const PtrTy* _key)
 {
     const uint32_t idx = unsafeFindHandleOf(_key);
     m_ukv[idx].m_used = Unused;
@@ -216,7 +224,8 @@ ValTy unsafeRemove(Ty _key)
     return unsafeRemove((const void*)&_key);
 }
 
-bool remove(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+template <typename PtrTy>
+bool remove(const PtrTy* _key, uint32_t _lookAhead = UINT32_MAX)
 {
     const uint32_t idx = findIdxOf(_key, _lookAhead);
     if (InvalidIdx != idx)

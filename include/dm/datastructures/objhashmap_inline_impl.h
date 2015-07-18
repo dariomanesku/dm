@@ -3,7 +3,8 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-ValTy* insertNew(const void* _key)
+template <typename PtrTy>
+ValTy* insertNew(const PtrTy* _key)
 {
     const HandleType handle = m_handleAlloc.alloc();
     m_hashMap.insert(_key, handle);
@@ -19,7 +20,8 @@ ValTy* insertNew(Ty _key)
     return insertNew((const void*)&_key);
 }
 
-uint32_t insertObj(const void* _key, const ValTy& _obj)
+template <typename PtrTy>
+uint32_t insertObj(const PtrTy* _key, const ValTy& _obj)
 {
     const HandleType handle = m_handleAlloc.alloc();
     m_hashMap.insert(_key, handle);
@@ -37,7 +39,8 @@ ValTy* insertObj(Ty _key)
     return insertObj((const void*)&_key);
 }
 
-uint32_t unsafeFindHandleOf(const void* _key)
+template <typename PtrTy>
+uint32_t unsafeFindHandleOf(const PtrTy* _key)
 {
     return m_hashMap.unsafeFindHandleOf(_key);
 }
@@ -48,7 +51,7 @@ uint32_t unsafeFindHandleOf(Ty _key)
     dm_staticAssert(is_arithmetic<Ty>::value);
     dm_staticAssert(sizeof(Ty) <= KeyLen);
 
-    return unsafeFindHandleOf(_key);
+    return unsafeFindHandleOf((const void*)&_key);
 }
 
 ValTy* getValueOf(HandleType _handle)
@@ -56,7 +59,8 @@ ValTy* getValueOf(HandleType _handle)
     return &m_objects[_handle];
 }
 
-ValTy* unsafeFind(const void* _key)
+template <typename PtrTy>
+ValTy* unsafeFind(const PtrTy* _key)
 {
     return getValueOf(unsafeFindHandleOf(_key));
 }
@@ -70,7 +74,8 @@ ValTy* unsafeFind(Ty _key)
     return unsafeFind((const void*)&_key);
 }
 
-uint32_t findIdxOf(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+template <typename PtrTy>
+uint32_t findIdxOf(const PtrTy* _key, uint32_t _lookAhead = UINT32_MAX)
 {
     return m_hashMap.findIdxOf(_key, _lookAhead);
 }
@@ -84,7 +89,8 @@ uint32_t findIdxOf(Ty _key, uint32_t _lookAhead = UINT32_MAX)
     return findIdxOf((const void*)&_key, _lookAhead);
 }
 
-ValTy* find(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+template <typename PtrTy>
+ValTy* find(const PtrTy* _key, uint32_t _lookAhead = UINT32_MAX)
 {
     const uint32_t idx = m_hashMap.findIdxOf(_key, _lookAhead);
     if (InvalidIdx != idx)
@@ -99,7 +105,7 @@ ValTy* find(const void* _key, uint32_t _lookAhead = UINT32_MAX)
 }
 
 template <typename Ty>
-ValTy* find(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+ValTy* find(const Ty _key, uint32_t _lookAhead = UINT32_MAX)
 {
     dm_staticAssert(is_arithmetic<Ty>::value);
     dm_staticAssert(sizeof(Ty) <= KeyLen);
@@ -107,7 +113,8 @@ ValTy* find(const void* _key, uint32_t _lookAhead = UINT32_MAX)
     return find((const void*)&_key, _lookAhead);
 }
 
-bool contains(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+template <typename PtrTy>
+bool contains(const PtrTy* _key, uint32_t _lookAhead = UINT32_MAX)
 {
     return (InvalidIdx != findIdxOf(_key, _lookAhead));
 }
@@ -120,7 +127,8 @@ bool contains(Ty _key, uint32_t _lookAhead = UINT32_MAX)
     return contains((const void*)&_key, _lookAhead);
 }
 
-void unsafeRemove(const void* _key)
+template <typename PtrTy>
+void unsafeRemove(const PtrTy* _key)
 {
     const uint32_t idx = m_hashMap.unsafeRemove(_key);
     const HandleType handle = { idx };
@@ -138,7 +146,8 @@ void unsafeRemove(Ty _key)
     unsafeRemove((const void*)&_key);
 }
 
-bool remove(const void* _key, uint32_t _lookAhead = UINT32_MAX)
+template <typename PtrTy>
+bool remove(const PtrTy* _key, uint32_t _lookAhead = UINT32_MAX)
 {
     const HandleType handle = m_hashMap.find(_key, _lookAhead);
     if (InvalidIdx != handle)
