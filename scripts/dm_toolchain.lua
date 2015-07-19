@@ -351,9 +351,7 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
             "WIN32",
             "_WIN32",
             "_HAS_EXCEPTIONS=0",
-            "_HAS_ITERATOR_DEBUGGING=0",
             "_SCL_SECURE=0",
-            "_SECURE_SCL=0",
             "_SCL_SECURE_NO_WARNINGS",
             "_CRT_SECURE_NO_WARNINGS",
             "_CRT_SECURE_NO_DEPRECATE",
@@ -368,12 +366,24 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
         }
 
     configuration { "vs*", "Debug" }
+        defines
+        {
+            "_ITERATOR_DEBUG_LEVEL=2",
+            "_HAS_ITERATOR_DEBUGGING=1",
+            "_SECURE_SCL=1", -- must be 1 because of _ITERATOR_DEBUG_LEVEL=2.
+        }
         buildoptions
         {
             "/Oy-" -- Suppresses creation of frame pointers on the call stack.
         }
 
     configuration { "vs*", "Release" }
+        defines
+        {
+            "_ITERATOR_DEBUG_LEVEL=0",
+            "_HAS_ITERATOR_DEBUGGING=0",
+            "_SECURE_SCL=0",
+        }
         flags
         {
             "NoFramePointer"
