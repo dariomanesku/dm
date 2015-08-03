@@ -23,12 +23,17 @@
 
 namespace dm
 {
-    // Macros.
+    // Macro flags.
     //-----
 
     #ifndef DM_CPP11
     #   define DM_CPP11 (__cplusplus >= 201103L)
     #endif
+
+    // Macro helpers.
+    //-----
+
+    #define DM_OFFSETOF(type, member) ((size_t)&(((type*)0)->member))
 
     // Value.
     //-----
