@@ -16,7 +16,7 @@ namespace dm
         // Sdbm hash from public domain.
 
         uint32_t hash = 0;
-        for (const char* ch = _str; ch; ++ch)
+        for (const char* ch = _str; *ch != '\0'; ++ch)
         {
             hash = uint32_t(*ch) + (hash << 6) + (hash << 16) - hash;
         }
