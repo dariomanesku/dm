@@ -19,6 +19,7 @@
 
 #include "../../3rdparty/bx/os.h"       // bx::pwd()
 #include "../../3rdparty/bx/string.h"   // bx::strlcat()
+#include "../../3rdparty/bx/platform.h" // BX_COMPILER_MSVC_COMPATIBLE
 #include "../../3rdparty/bx/uint32_t.h" // bx::uint32_cntlz(), bx::uint64_cntlz()
 
 namespace dm
@@ -333,6 +334,24 @@ namespace dm
     // String.
     //----
 
+    DM_INLINE int32_t stricmp(const char* _a, const char* _b)
+    {
+        #if BX_COMPILER_MSVC_COMPATIBLE
+            return _stricmp(_a, _b);
+        #else
+            return strcasecmp(_a, _b);
+        #endif // BX_COMPILER_MSVC_COMPATIBLE
+    }
+
+    DM_INLINE int32_t strnicmp(const char* _a, const char* _b, size_t _count)
+    {
+        #if BX_COMPILER_MSVC_COMPATIBLE
+            return _strnicmp(_a, _b, _count);
+        #else
+            return strncasecmp(_a, _b, _count);
+        #endif // BX_COMPILER_MSVC_COMPATIBLE
+    }
+
     DM_INLINE void strscpy(char* _dst, const char* _src, size_t _dstSize)
     {
         _dst[0] = '\0';
@@ -346,6 +365,30 @@ namespace dm
     DM_INLINE void strscpya(char (&_dst)[DstSize], const char* _src)
     {
         strscpy(_dst, _src, DstSize);
+    }
+
+    template <uint32_t CharArraySize>
+    DM_INLINE int strcmpa(char (&_a)[CharArraySize], const char* _b)
+    {
+        return strncmp(_a, _b, CharArraySize);
+    }
+
+    template <uint32_t CharArraySize>
+    DM_INLINE int strcmpa(const char* _a, char (&_b)[CharArraySize])
+    {
+        return strncmp(_a, _b, CharArraySize);
+    }
+
+    template <uint32_t CharArraySize>
+    DM_INLINE int stricmpa(char (&_a)[CharArraySize], const char* _b)
+    {
+        return strnicmp(_a, _b, CharArraySize);
+    }
+
+    template <uint32_t CharArraySize>
+    DM_INLINE int stricmpa(const char* _a, char (&_b)[CharArraySize])
+    {
+        return strnicmp(_a, _b, CharArraySize);
     }
 
     DM_INLINE void strtolower(char* _out, char* _in)
