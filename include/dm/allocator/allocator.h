@@ -1193,9 +1193,10 @@ namespace dm
                 {
                     const __m128i ptrsplat = _mm_set1_epi64x(int64_t(_ptr));
 
-                    uint32_t ii = 0;
-                    const uint32_t count = m_bigFreeSlotsCount;
-                    for (uint32_t end = count-1; ii <= end; ii+=2)
+                    int32_t ii = 0;
+                    const int32_t count = m_bigFreeSlotsCount;
+                    DM_CHECK(0 != count, "There are no big free spaces for removal!");
+                    for (int32_t end = count-1; ii <= end; ii+=2)
                     {
                         const __m128i  ptrs = _mm_load_si128((__m128i*)&m_bigFreeSlotsPtr[ii]);
                         const __m128i  cmp  = _mm_cmpeq_epi64(ptrsplat, ptrs);
@@ -1208,7 +1209,7 @@ namespace dm
                             return true;
                         }
                     }
-                    for (uint32_t end = count; ii < end; ++ii)
+                    for (int32_t end = count; ii < end; ++ii)
                     {
                         if (m_bigFreeSlotsPtr[ii] == _ptr)
                         {
