@@ -29,7 +29,7 @@
     private: void expandIfNecessaryToMakeRoomFor(uint32_t _count)
     {
         const uint32_t needed = m_count + _count;
-        if (needed >= m_max)
+        if (needed > m_max)
         {
             const uint32_t proposedMax = m_max + (m_max>>1);
             const uint32_t newMax = dm::max(proposedMax, needed);
