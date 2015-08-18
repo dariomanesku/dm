@@ -575,11 +575,9 @@ namespace dm
     DM_INLINE void desktopDir(char _path[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
-            strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
-            bx::strlcat(_path, DM_DIRSLASH"Desktop", DM_PATH_LEN);
+            bx::snprintf(_path, DM_PATH_LEN, "%s" DM_DIRSLASH "Desktop", getenv("USERPROFILE"));
         #else // OSX and Linux.
-            strscpy(_path, getenv("HOME"), DM_PATH_LEN);
-            bx::strlcat(_path, DM_DIRSLASH"Desktop", DM_PATH_LEN);
+            bx::snprintf(_path, DM_PATH_LEN, "%s" DM_DIRSLASH "Desktop", getenv("HOME"));
         #endif
     }
 
