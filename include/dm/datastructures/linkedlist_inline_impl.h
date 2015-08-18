@@ -42,7 +42,10 @@ Ty* insertAfter(const Ty* _obj)
 
 Ty* addNew()
 {
-    return insertAfter(m_last);
+    Ty* elem = insertAfter(m_last);
+    elem = ::new (elem) Ty();
+
+    return elem;
 }
 
 Ty* insertAfter(uint16_t _handle)

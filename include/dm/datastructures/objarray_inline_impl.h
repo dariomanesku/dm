@@ -59,6 +59,8 @@ Ty* reserve(uint32_t _count)
 Ty* addNew()
 {
     Ty* elem = this->reserve(1);
+    elem = ::new (elem) Ty();
+
     return elem;
 }
 
