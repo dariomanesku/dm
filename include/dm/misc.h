@@ -18,9 +18,13 @@
 #include "check.h"         // DM_CHECK()
 
 #include "../../3rdparty/bx/os.h"       // bx::pwd()
-#include "../../3rdparty/bx/string.h"   // bx::strlcat()
+#include "../../3rdparty/bx/string.h"   // bx::snprintf()
 #include "../../3rdparty/bx/platform.h" // BX_COMPILER_MSVC_COMPATIBLE
 #include "../../3rdparty/bx/uint32_t.h" // bx::uint32_cntlz(), bx::uint64_cntlz()
+
+#if BX_PLATFORM_LINUX
+#   include "../../3rdparty/realpath/realpath.h"
+#endif // BX_PLATFORM_LINUX
 
 namespace dm
 {
@@ -456,7 +460,7 @@ namespace dm
 
     #if BX_PLATFORM_WINDOWS
     #   define DM_DIRSLASH "\\"
-    #else
+    #else // OSX and Linux.
     #   define DM_DIRSLASH "/"
     #endif
 
@@ -465,7 +469,9 @@ namespace dm
         #if BX_PLATFORM_WINDOWS
             _fullpath(_abs, _rel, DM_PATH_LEN);
         #elif BX_PLATFORM_LINUX
-            bx::snprintf(_abs, DM_PATH_LEN, "%s", _rel); //::realpath is not thread-safe on Linux.
+            // Notice ::realpath() is broken on Linux.
+            // Using a custom implementation instead.
+            ex02_realpath(_rel, _abs);
         #else // OSX
             char* path = ::realpath(_rel, _abs);
             BX_UNUSED(path);
