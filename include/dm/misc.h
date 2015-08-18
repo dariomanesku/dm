@@ -464,6 +464,91 @@ namespace dm
     #   define DM_DIRSLASH "/"
     #endif
 
+    DM_INLINE void fixDirSlash(char* _path)
+    {
+        for (char* ptr = _path; '\0' != *ptr; ++ptr)
+        {
+            #if BX_PLATFORM_WINDOWS
+                if ('/' == *ptr) { *ptr = '\\'; }
+            #else // OSX and Linux.
+                if ('\\' == *ptr) { *ptr = '/'; }
+            #endif //BX_PLATFORM_WINDOWS
+        }
+    }
+
+    /// Gets file name without extension from file path. Examples:
+    ///     /tmp/foo.c -> foo
+    ///     C:\\tmp\\foo.c -> foo
+    DM_INLINE bool basename(char* _out, size_t _outSize, const char* _filePath)
+    {
+        const char* begin;
+        const char* end;
+
+        const char* ptr;
+        begin = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
+              : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
+              : _filePath
+              ;
+
+        end = NULL != (ptr = strrchr(_filePath, '.')) ? ptr : strrchr(_filePath, '\0');
+
+        if (NULL != begin && NULL != end)
+        {
+            const size_t size = dm::min(size_t(end-begin)+1, _outSize);
+            dm::strscpy(_out, begin, size);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// Returns pointer where the file name starts. Examples:
+    ///     /tmp/foo.c -> foo.c
+    ///     C:\\tmp\\foo.c -> foo.c
+    DM_INLINE const char* filenameExt(const char* _filePath)
+    {
+        const char* bs       = strrchr(_filePath, '\\');
+        const char* fs       = strrchr(_filePath, '/');
+        const char* basename = (bs > fs ? bs : fs);
+
+        #if BX_PLATFORM_WINDOWS
+            const char* colon = strrchr(_filePath, ':');
+            basename = basename > colon ? basename : colon;
+        #endif //BX_PLATFORM_WINDOWS
+
+        if (NULL != basename)
+        {
+            return basename+1;
+        }
+
+        return _filePath;
+    }
+
+    /*
+    // Gets the directory from file path. Examples:
+    //    /tmp/foo.c -> /tmp/
+    //    C:\\tmp\\foo.c -> C:\\tmp\\
+    */
+    DM_INLINE bool dirpath(char* _out, size_t _outSize, const char* _filePath)
+    {
+        const char* end;
+
+        const char* ptr;
+        end = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
+            : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
+            : _filePath
+            ;
+
+        if (NULL != end)
+        {
+            const size_t size = dm::min(size_t(end-_filePath)+1, _outSize);
+            dm::strscpy(_out, _filePath, size);
+            return true;
+        }
+
+        return false;
+    }
+
     DM_INLINE void realpath(char _abs[DM_PATH_LEN], const char _rel[DM_PATH_LEN])
     {
         #if BX_PLATFORM_WINDOWS
@@ -535,57 +620,6 @@ namespace dm
     #else
         return 0;
     #endif // BX_PLATFORM_WINDOWS
-    }
-
-    /// Gets file name without extension from file path. Examples:
-    ///     /tmp/foo.c -> foo
-    ///     C:\\tmp\\foo.c -> foo
-    DM_INLINE bool basename(char* _out, size_t _outSize, const char* _filePath)
-    {
-        const char* begin;
-        const char* end;
-
-        const char* ptr;
-        begin = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
-              : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
-              : _filePath
-              ;
-
-        end = NULL != (ptr = strrchr(_filePath, '.')) ? ptr : strrchr(_filePath, '\0');
-
-        if (NULL != begin && NULL != end)
-        {
-            const size_t size = dm::min(size_t(end-begin)+1, _outSize);
-            dm::strscpy(_out, begin, size);
-            return true;
-        }
-
-        return false;
-    }
-
-    /*
-    // Gets the directory from file path. Examples:
-    //    /tmp/foo.c -> /tmp/
-    //    C:\\tmp\\foo.c -> C:\\tmp\\
-    */
-    DM_INLINE bool dirpath(char* _out, size_t _outSize, const char* _filePath)
-    {
-        const char* end;
-
-        const char* ptr;
-        end = NULL != (ptr = strrchr(_filePath, '\\')) ? ++ptr
-            : NULL != (ptr = strrchr(_filePath, '/' )) ? ++ptr
-            : _filePath
-            ;
-
-        if (NULL != end)
-        {
-            const size_t size = dm::min(size_t(end-_filePath)+1, _outSize);
-            dm::strscpy(_out, _filePath, size);
-            return true;
-        }
-
-        return false;
     }
 
     DM_INLINE const char* fileExt(const char* _filePath)
