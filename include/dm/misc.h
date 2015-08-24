@@ -366,6 +366,13 @@ namespace dm
     }
 
     template <uint32_t DstSize>
+    DM_INLINE void stracpy(char (&_dst)[DstSize], const char* _src)
+    {
+        strscpy(_dst, _src, DstSize);
+    }
+
+    // TODO: remove! Use 'stracpy' instead.
+    template <uint32_t DstSize>
     DM_INLINE void strscpya(char (&_dst)[DstSize], const char* _src)
     {
         strscpy(_dst, _src, DstSize);
