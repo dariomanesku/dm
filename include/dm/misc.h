@@ -47,17 +47,17 @@ namespace dm
     #define DM_MAX(_a, _b) ((_a)>(_b)?(_a):(_b))
     #define DM_CLAMP(_val, _min, _max) (DM_MIN(DM_MAX(_val, _min), _max))
 
-    template <typename Ty/*arithmetic type*/>
-    DM_INLINE Ty min(Ty _a, Ty _b)
-    {
-        return  _a < _b ? _a : _b;
-    }
+    // Return type is typeof(_a).
+    template <typename TyA, typename TyB> DM_INLINE TyA mina(TyA _a, TyB _b) { return  _a < _b ? _a : _b; }
+    template <typename TyA, typename TyB> DM_INLINE TyA maxa(TyA _a, TyB _b) { return  _a > _b ? _a : _b; }
 
-    template <typename Ty/*arithmetic type*/>
-    DM_INLINE Ty max(Ty _a, Ty _b)
-    {
-        return  _a > _b ? _a : _b;
-    }
+    // Return type is typeof(_b).
+    template <typename TyA, typename TyB> DM_INLINE TyB minb(TyA _a, TyB _b) { return  _a < _b ? _a : _b; }
+    template <typename TyA, typename TyB> DM_INLINE TyB maxb(TyA _a, TyB _b) { return  _a > _b ? _a : _b; }
+
+    // Default return type is typeof(_a).
+    template <typename TyA, typename TyB> DM_INLINE TyB min(TyA _a, TyB _b) { return  mina(_a, _b); }
+    template <typename TyA, typename TyB> DM_INLINE TyB max(TyA _a, TyB _b) { return  maxa(_a, _b); }
 
     /// Assumes _min < _max.
     template <typename Ty/*arithmetic type*/>
