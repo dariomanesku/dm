@@ -378,6 +378,20 @@ namespace dm
         strscpy(_dst, _src, DstSize);
     }
 
+    DM_INLINE void strscat(char* _dst, const char* _src, size_t _dstSize)
+    {
+        if (NULL != _src)
+        {
+            strncat(_dst, _src, _dstSize-1);
+        }
+    }
+
+    template <uint32_t DstSize>
+    DM_INLINE void stracat(char (&_dst)[DstSize], const char* _src)
+    {
+        strscat(_dst, _src, DstSize);
+    }
+
     template <uint32_t CharArraySize>
     DM_INLINE int strcmpa(char (&_a)[CharArraySize], const char* _b)
     {
