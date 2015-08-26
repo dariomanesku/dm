@@ -336,6 +336,10 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
 
     configuration { "Debug" }
         targetsuffix "Debug"
+        defines
+        {
+            "DM_DEBUG=1"
+        }
 
     configuration { "Release" }
         flags
