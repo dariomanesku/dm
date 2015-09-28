@@ -29,7 +29,7 @@ namespace dm
         // Sdbm hash from public domain.
 
         uint32_t hash = 0;
-        for (uint32_t ii = _size; ii; --ii)
+        for (uint32_t ii = _size; ii--; )
         {
             const uint8_t* bytes = (const uint8_t*)_data;
             hash = uint32_t(bytes[ii]) + (hash << 6) + (hash << 16) - hash;
