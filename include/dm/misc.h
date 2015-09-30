@@ -61,8 +61,8 @@ namespace dm
     template <typename TyA, typename TyB> DM_INLINE TyB max(TyA _a, TyB _b) { return  maxa(_a, _b); }
 
     /// Assumes _min < _max.
-    template <typename Ty/*arithmetic type*/>
-    DM_INLINE Ty clamp(Ty _val, Ty _min, Ty _max)
+    template <typename Ty, typename TyMin, typename TyMax>
+    DM_INLINE Ty clamp(Ty _val, TyMin _min, TyMax _max)
     {
         return ( _val > _max ? _max
                : _val < _min ? _min
