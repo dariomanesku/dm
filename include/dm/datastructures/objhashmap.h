@@ -66,7 +66,7 @@ namespace dm
             m_memoryBlock = NULL;
         }
 
-        ObjHashMap(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, bx::ReallocatorI* _reallocator)
+        ObjHashMap(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, dm::ReallocatorI* _reallocator)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
             DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
@@ -74,7 +74,7 @@ namespace dm
             init(_maxPowTwo, _entriesPerSlotPowTwo, _reallocator);
         }
 
-        ObjHashMap(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, bx::AllocatorI* _allocator)
+        ObjHashMap(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, dm::AllocatorI* _allocator)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
             DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
@@ -109,25 +109,25 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, bx::ReallocatorI* _reallocator)
+        void init(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, dm::ReallocatorI* _reallocator)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
             DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
 
             m_max = _maxPowTwo;
             m_entriesPerSlot = _entriesPerSlotPowTwo;
-            m_memoryBlock = (UsedKeyVal*)BX_ALLOC(_reallocator, sizeFor(_maxPowTwo, _entriesPerSlotPowTwo));
+            m_memoryBlock = (UsedKeyVal*)DM_ALLOC(_reallocator, sizeFor(_maxPowTwo, _entriesPerSlotPowTwo));
             m_reallocator = _reallocator;
             m_cleanup = true;
 
             void* ptr = m_memoryBlock;
-            ptr = m_hashMap.init(_maxPowTwo*_entriesPerSlotPowTwo, ptr, (bx::AllocatorI*)_reallocator);
-            ptr = m_handleAlloc.init(_maxPowTwo, ptr, (bx::AllocatorI*)_reallocator);
+            ptr = m_hashMap.init(_maxPowTwo*_entriesPerSlotPowTwo, ptr, (dm::AllocatorI*)_reallocator);
+            ptr = m_handleAlloc.init(_maxPowTwo, ptr, (dm::AllocatorI*)_reallocator);
             m_objects = (ValTy*)ptr;
         }
 
         // Uses externally allocated memory.
-        void* init(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, bx::AllocatorI* _allocator = NULL)
+        void* init(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, dm::AllocatorI* _allocator = NULL)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
             DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
@@ -152,7 +152,7 @@ namespace dm
             return (NULL != m_memoryBlock);
         }
 
-        void reinit(uint32_t _maxPowTwo, bx::ReallocatorI* _reallocator)
+        void reinit(uint32_t _maxPowTwo, dm::ReallocatorI* _reallocator)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
 
@@ -177,7 +177,7 @@ namespace dm
                 m_hashMap.destroy();
                 if (m_cleanup)
                 {
-                    BX_FREE(m_reallocator, m_memoryBlock);
+                    DM_FREE(m_reallocator, m_memoryBlock);
                 }
                 m_memoryBlock = NULL;
             }
@@ -190,7 +190,7 @@ namespace dm
             return m_max;
         }
 
-        bx::AllocatorI* allocator()
+        dm::AllocatorI* allocator()
         {
             return m_allocator;
         }
@@ -210,8 +210,8 @@ namespace dm
         ValTy* m_objects;
         union
         {
-            bx::AllocatorI*   m_allocator;
-            bx::ReallocatorI* m_reallocator;
+            dm::AllocatorI*   m_allocator;
+            dm::ReallocatorI* m_reallocator;
         };
         bool m_cleanup;
         void* m_memoryBlock;
@@ -219,16 +219,16 @@ namespace dm
 
     /// Notice: used only for Ty == ObjHashMap.
     template <typename Ty>
-    DM_INLINE Ty* create(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, bx::AllocatorI* _memDeallocator)
+    DM_INLINE Ty* create(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, dm::AllocatorI* _memDeallocator)
     {
         return ::new (_mem) Ty(_maxPowTwo, _entriesPerSlotPowTwo, (uint8_t*)_mem + sizeof(Ty), _memDeallocator);
     }
 
     /// Notice: used only for Ty == ObjHashMap.
     template <typename Ty>
-    DM_INLINE Ty* create(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, bx::AllocatorI* _allocator)
+    DM_INLINE Ty* create(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, dm::AllocatorI* _allocator)
     {
-        uint8_t* ptr = (uint8_t*)BX_ALLOC(_allocator, sizeof(Ty) + Ty::sizeFor(_maxPowTwo, _entriesPerSlotPowTwo));
+        uint8_t* ptr = (uint8_t*)DM_ALLOC(_allocator, sizeof(Ty) + Ty::sizeFor(_maxPowTwo, _entriesPerSlotPowTwo));
         return create<Ty>(_maxPowTwo, _entriesPerSlotPowTwo, ptr, _allocator);
     }
 

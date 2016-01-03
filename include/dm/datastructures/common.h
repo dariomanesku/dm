@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include "../common/common.h"               // DM_INLINE
-#include "../../../3rdparty/bx/allocator.h" // bx::AllocatorI
+#include "../../../3rdparty/bx/allocator.h" // dm::AllocatorI
 
 namespace dm
 {
@@ -22,13 +22,13 @@ namespace dm
     ///
 
     template <typename Ty>
-    DM_INLINE Ty* create(uint32_t _max, void* _mem, bx::AllocatorI* _memDeallocator)
+    DM_INLINE Ty* create(uint32_t _max, void* _mem, dm::AllocatorI* _memDeallocator)
     {
         return ::new (_mem) Ty(_max, (uint8_t*)_mem + sizeof(Ty), _memDeallocator);
     }
 
     template <typename Ty>
-    DM_INLINE Ty* create(uint32_t _max, bx::AllocatorI* _allocator)
+    DM_INLINE Ty* create(uint32_t _max, dm::AllocatorI* _allocator)
     {
         uint8_t* ptr = (uint8_t*)BX_ALLOC(_allocator, sizeof(Ty) + Ty::sizeFor(_max));
         return create<Ty>(_max, ptr, _allocator);

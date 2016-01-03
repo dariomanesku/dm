@@ -15,7 +15,7 @@
 #include "../check.h"         // DM_CHECK
 #include "../compiletime.h"   // dm::bestfit_type<>::type, TyInfo<>::Max()
 
-#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
+#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
 
 namespace dm
 {
@@ -59,12 +59,12 @@ namespace dm
             m_indices = NULL;
         }
 
-        HandleAlloc(HandleType _max, bx::ReallocatorI* _reallocator)
+        HandleAlloc(HandleType _max, dm::ReallocatorI* _reallocator)
         {
             init(_max, _reallocator);
         }
 
-        HandleAlloc(HandleType _max, void* _mem, bx::AllocatorI* _allocator)
+        HandleAlloc(HandleType _max, void* _mem, dm::AllocatorI* _allocator)
         {
             init(_max, _mem, _allocator);
         }
@@ -75,10 +75,10 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(HandleType _max, bx::ReallocatorI* _reallocator)
+        void init(HandleType _max, dm::ReallocatorI* _reallocator)
         {
             m_maxHandles = _max;
-            m_handles = (HandleType*)BX_ALLOC(_reallocator, sizeFor(_max));
+            m_handles = (HandleType*)DM_ALLOC(_reallocator, sizeFor(_max));
             m_indices = m_handles + _max;
             m_reallocator = _reallocator;
             m_cleanup = true;
@@ -97,7 +97,7 @@ namespace dm
         }
 
         // Uses externally allocated memory.
-        void* init(HandleType _max, void* _mem, bx::AllocatorI* _allocator = NULL)
+        void* init(HandleType _max, void* _mem, dm::AllocatorI* _allocator = NULL)
         {
             m_maxHandles = _max;
             m_handles = (HandleType*)_mem;
@@ -120,7 +120,7 @@ namespace dm
         {
             if (m_cleanup && NULL != m_handles)
             {
-                BX_FREE(m_reallocator, m_handles);
+                DM_FREE(m_reallocator, m_handles);
                 m_handles = NULL;
                 m_indices = NULL;
             }
@@ -140,7 +140,7 @@ namespace dm
             return m_maxHandles;
         }
 
-        bx::AllocatorI* allocator()
+        dm::AllocatorI* allocator()
         {
             return m_allocator;
         }
@@ -152,8 +152,8 @@ namespace dm
         HandleType* m_indices;
         union
         {
-            bx::AllocatorI*   m_allocator;
-            bx::ReallocatorI* m_reallocator;
+            dm::AllocatorI*   m_allocator;
+            dm::ReallocatorI* m_reallocator;
         };
         bool m_cleanup;
     };
