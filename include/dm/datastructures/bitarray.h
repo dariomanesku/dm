@@ -15,7 +15,7 @@
 #include "../check.h"         // DM_CHECK
 
 #include "../../../3rdparty/bx/uint32_t.h"  // bx::uint64_cnttz(), bx::uint64_cntlz(), bx::uint64_cntbits()
-#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
+#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
 
 namespace dm
 {
@@ -63,12 +63,12 @@ namespace dm
             m_bits = NULL;
         }
 
-        BitArray(uint32_t _max, bx::ReallocatorI* _reallocator)
+        BitArray(uint32_t _max, dm::ReallocatorI* _reallocator)
         {
             init(_max, _reallocator);
         }
 
-        BitArray(uint32_t _max, void* _mem, bx::AllocatorI* _allocator)
+        BitArray(uint32_t _max, void* _mem, dm::AllocatorI* _allocator)
         {
             init(_max, _mem, _allocator);
         }
@@ -84,11 +84,11 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(uint32_t _max, bx::ReallocatorI* _reallocator)
+        void init(uint32_t _max, dm::ReallocatorI* _reallocator)
         {
             m_max = _max;
             m_numSlots = numSlotsFor(_max);
-            m_bits = (uint64_t*)BX_ALLOC(_reallocator, sizeFor(_max));
+            m_bits = (uint64_t*)DM_ALLOC(_reallocator, sizeFor(_max));
             m_reallocator = _reallocator;
             m_cleanup = true;
 
@@ -101,7 +101,7 @@ namespace dm
         }
 
         // Uses externally allocated memory.
-        void* init(uint32_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
+        void* init(uint32_t _max, void* _mem, dm::AllocatorI* _allocator = NULL)
         {
             m_max = _max;
             m_numSlots = numSlotsFor(_max);
@@ -124,7 +124,7 @@ namespace dm
         {
             if (m_cleanup && NULL != m_bits)
             {
-                BX_FREE(m_reallocator, m_bits);
+                DM_FREE(m_reallocator, m_bits);
                 m_bits = NULL;
             }
         }
@@ -141,7 +141,7 @@ namespace dm
             return m_numSlots;
         }
 
-        bx::AllocatorI* allocator()
+        dm::AllocatorI* allocator()
         {
             return m_allocator;
         }
@@ -153,8 +153,8 @@ namespace dm
         uint64_t* m_bits;
         union
         {
-            bx::AllocatorI*   m_allocator;
-            bx::ReallocatorI* m_reallocator;
+            dm::AllocatorI*   m_allocator;
+            dm::ReallocatorI* m_reallocator;
         };
         bool m_cleanup;
     };

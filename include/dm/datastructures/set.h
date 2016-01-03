@@ -14,7 +14,7 @@
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
 
-#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
+#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
 
 namespace dm
 {
@@ -55,12 +55,12 @@ namespace dm
             m_indices = NULL;
         }
 
-        Set(uint16_t _max, bx::ReallocatorI* _reallocator)
+        Set(uint16_t _max, dm::ReallocatorI* _reallocator)
         {
             init(_max, _reallocator);
         }
 
-        Set(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
+        Set(uint16_t _max, void* _mem, dm::AllocatorI* _allocator)
         {
             init(_max, _mem, _allocator);
         }
@@ -71,11 +71,11 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(uint16_t _max, bx::ReallocatorI* _reallocator)
+        void init(uint16_t _max, dm::ReallocatorI* _reallocator)
         {
             m_num = 0;
             m_max = _max;
-            m_values = (uint16_t*)BX_ALLOC(_reallocator, sizeFor(_max));
+            m_values = (uint16_t*)DM_ALLOC(_reallocator, sizeFor(_max));
             m_indices = m_values + _max;
             m_reallocator = _reallocator;
             m_cleanup = true;
@@ -92,7 +92,7 @@ namespace dm
         }
 
         // Uses externally allocated memory.
-        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
+        void* init(uint16_t _max, void* _mem, dm::AllocatorI* _allocator = NULL)
         {
             m_num = 0;
             m_max = _max;
@@ -109,7 +109,7 @@ namespace dm
         {
             if (m_cleanup && NULL != m_values)
             {
-                BX_FREE(m_reallocator, m_values);
+                DM_FREE(m_reallocator, m_values);
                 m_values = NULL;
                 m_indices = NULL;
             }
@@ -132,7 +132,7 @@ namespace dm
             return m_max;
         }
 
-        bx::AllocatorI* allocator()
+        dm::AllocatorI* allocator()
         {
             return m_allocator;
         }
@@ -144,8 +144,8 @@ namespace dm
         uint16_t* m_indices;
         union
         {
-            bx::AllocatorI*   m_allocator;
-            bx::ReallocatorI* m_reallocator;
+            dm::AllocatorI*   m_allocator;
+            dm::ReallocatorI* m_reallocator;
         };
         bool m_cleanup;
     };

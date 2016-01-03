@@ -14,7 +14,7 @@
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
 
-#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
+#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
 
 namespace dm
 {
@@ -52,12 +52,12 @@ namespace dm
             m_values = NULL;
         }
 
-        ObjArray(uint32_t _max, bx::ReallocatorI* _reallocator)
+        ObjArray(uint32_t _max, dm::ReallocatorI* _reallocator)
         {
             init(_max, _reallocator);
         }
 
-        ObjArray(uint32_t _max, void* _mem, bx::AllocatorI* _allocator)
+        ObjArray(uint32_t _max, void* _mem, dm::AllocatorI* _allocator)
         {
             init(_max, _mem, _allocator);
         }
@@ -78,17 +78,17 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(uint32_t _max, bx::ReallocatorI* _reallocator)
+        void init(uint32_t _max, dm::ReallocatorI* _reallocator)
         {
             m_count = 0;
             m_max = _max;
-            m_values = (Ty*)BX_ALLOC(_reallocator, sizeFor(_max));
+            m_values = (Ty*)DM_ALLOC(_reallocator, sizeFor(_max));
             m_reallocator = _reallocator;
             m_cleanup = true;
         }
 
         // Uses externally allocated memory.
-        void* init(uint32_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
+        void* init(uint32_t _max, void* _mem, dm::AllocatorI* _allocator = NULL)
         {
             m_count = 0;
             m_max = _max;
@@ -106,7 +106,7 @@ namespace dm
         }
 
         //TODO: get rid of this or reimplement !
-        void reinit(uint32_t _max, bx::ReallocatorI* _reallocator)
+        void reinit(uint32_t _max, dm::ReallocatorI* _reallocator)
         {
             if (isInitialized())
             {
@@ -120,7 +120,7 @@ namespace dm
         {
             if (m_cleanup && NULL != m_values)
             {
-                BX_FREE(m_reallocator, m_values);
+                DM_FREE(m_reallocator, m_values);
                 m_values = NULL;
             }
 
@@ -140,7 +140,7 @@ namespace dm
             return m_max;
         }
 
-        bx::AllocatorI* allocator()
+        dm::AllocatorI* allocator()
         {
             return m_allocator;
         }
@@ -151,8 +151,8 @@ namespace dm
         Ty* m_values;
         union
         {
-            bx::AllocatorI*   m_allocator;
-            bx::ReallocatorI* m_reallocator;
+            dm::AllocatorI*   m_allocator;
+            dm::ReallocatorI* m_reallocator;
         };
         bool m_cleanup;
     };

@@ -18,7 +18,7 @@
 #include "../hash.h"          // dm::hash
 #include "../misc.h"          // dm::isPowTwo
 
-#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
+#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
 
 namespace dm
 {
@@ -66,14 +66,14 @@ namespace dm
             m_ukv = NULL;
         }
 
-        HashMap(uint32_t _maxPowTwo, bx::ReallocatorI* _reallocator)
+        HashMap(uint32_t _maxPowTwo, dm::ReallocatorI* _reallocator)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
 
             init(_maxPowTwo, _reallocator);
         }
 
-        HashMap(uint32_t _maxPowTwo, void* _mem, bx::AllocatorI* _allocator)
+        HashMap(uint32_t _maxPowTwo, void* _mem, dm::AllocatorI* _allocator)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
 
@@ -105,7 +105,7 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(uint32_t _maxPowTwo, bx::ReallocatorI* _reallocator)
+        void init(uint32_t _maxPowTwo, dm::ReallocatorI* _reallocator)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
 
@@ -118,7 +118,7 @@ namespace dm
         }
 
         // Uses externally allocated memory.
-        void* init(uint32_t _maxPowTwo, void* _mem, bx::AllocatorI* _allocator = NULL)
+        void* init(uint32_t _maxPowTwo, void* _mem, dm::AllocatorI* _allocator = NULL)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
 
@@ -138,7 +138,7 @@ namespace dm
             return (NULL != m_ukv);
         }
 
-        void reinit(uint32_t _maxPowTwo, bx::ReallocatorI* _reallocator)
+        void reinit(uint32_t _maxPowTwo, dm::ReallocatorI* _reallocator)
         {
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
 
@@ -166,7 +166,7 @@ namespace dm
             return m_max;
         }
 
-        bx::AllocatorI* allocator()
+        dm::AllocatorI* allocator()
         {
             return m_allocator;
         }
@@ -183,8 +183,8 @@ namespace dm
         UsedKeyVal* m_ukv;
         union
         {
-            bx::AllocatorI*   m_allocator;
-            bx::ReallocatorI* m_reallocator;
+            dm::AllocatorI*   m_allocator;
+            dm::ReallocatorI* m_reallocator;
         };
         bool m_cleanup;
     };

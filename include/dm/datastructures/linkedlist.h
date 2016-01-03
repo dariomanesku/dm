@@ -14,7 +14,7 @@
 #include "../common/common.h" // DM_INLINE / BX_UNUSED
 #include "../check.h"         // DM_CHECK
 
-#include "../../../3rdparty/bx/allocator.h" // bx::ReallocatorI
+#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
 
 namespace dm
 {
@@ -59,12 +59,12 @@ namespace dm
             m_memoryBlock = NULL;
         }
 
-        LinkedList(uint16_t _max, bx::ReallocatorI* _reallocator)
+        LinkedList(uint16_t _max, dm::ReallocatorI* _reallocator)
         {
             init(_max, _reallocator);
         }
 
-        LinkedList(uint16_t _max, void* _mem, bx::AllocatorI* _allocator)
+        LinkedList(uint16_t _max, void* _mem, dm::AllocatorI* _allocator)
         {
             init(_max, _mem, _allocator);
         }
@@ -80,9 +80,9 @@ namespace dm
         }
 
         // Allocates memory internally.
-        void init(uint16_t _max, bx::ReallocatorI* _reallocator)
+        void init(uint16_t _max, dm::ReallocatorI* _reallocator)
         {
-            m_memoryBlock = BX_ALLOC(_reallocator, sizeFor(_max));
+            m_memoryBlock = DM_ALLOC(_reallocator, sizeFor(_max));
             m_reallocator = _reallocator;
             m_cleanup = true;
 
@@ -95,7 +95,7 @@ namespace dm
         }
 
         // Uses externally allocated memory.
-        void* init(uint16_t _max, void* _mem, bx::AllocatorI* _allocator = NULL)
+        void* init(uint16_t _max, void* _mem, dm::AllocatorI* _allocator = NULL)
         {
             m_memoryBlock = _mem;
             m_allocator = _allocator;
@@ -124,7 +124,7 @@ namespace dm
                 m_handles.destroy();
                 if (m_cleanup)
                 {
-                    BX_FREE(m_reallocator, m_memoryBlock);
+                    DM_FREE(m_reallocator, m_memoryBlock);
                 }
                 m_memoryBlock = NULL;
             }
@@ -147,7 +147,7 @@ namespace dm
             return m_handles.max();
         }
 
-        bx::AllocatorI* allocator()
+        dm::AllocatorI* allocator()
         {
             return m_allocator;
         }
@@ -158,8 +158,8 @@ namespace dm
         void* m_memoryBlock;
         union
         {
-            bx::AllocatorI*   m_allocator;
-            bx::ReallocatorI* m_reallocator;
+            dm::AllocatorI*   m_allocator;
+            dm::ReallocatorI* m_reallocator;
         };
         bool m_cleanup;
         Elem* m_elements;

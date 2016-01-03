@@ -9,19 +9,19 @@
 // Allocator header.
 //-----
 
-#include "../../../3rdparty/bx/allocator.h" //bx::ReallocatorI, BX_ALLOC/BX_FREE/BX_REALLOC
+#include "../../../3rdparty/bx/allocator.h" //dm::ReallocatorI, BX_ALLOC/BX_FREE/BX_REALLOC
 #include "../misc.h"                        //dm::NoCopyNoAssign
 
 #include "../datastructures/bitarray.h"
 #include "../datastructures/oplist.h"
 
-#define DM_ALLOC   BX_ALLOC
-#define DM_FREE    BX_FREE
-#define DM_REALLOC BX_REALLOC
+//#define DM_ALLOC   BX_ALLOC
+//#define DM_FREE    BX_FREE
+//#define DM_REALLOC BX_REALLOC
 
 namespace dm
 {
-    struct BX_NO_VTABLE StackAllocatorI : public bx::ReallocatorI
+    struct BX_NO_VTABLE StackAllocatorI : public dm::ReallocatorI
     {
         virtual void push() = 0;
         virtual void pop() = 0;
@@ -53,12 +53,12 @@ namespace dm
         StackAllocatorI* m_stack;
     };
 
-    extern bx::ReallocatorI* crtAlloc;      // C-runtime allocator.
+    extern dm::ReallocatorI* crtAlloc;      // C-runtime allocator.
     extern StackAllocatorI*  crtStackAlloc; // C-runtime stack allocator.
 
-    extern bx::ReallocatorI* staticAlloc; // Allocated memory is released on exit.
+    extern dm::ReallocatorI* staticAlloc; // Allocated memory is released on exit.
     extern StackAllocatorI*  stackAlloc;  // Used for temporary allocations.
-    extern bx::ReallocatorI* mainAlloc;   // Default allocator.
+    extern dm::ReallocatorI* mainAlloc;   // Default allocator.
 
     bool             allocInit();
     bool             allocContains(void* _ptr);
@@ -1923,7 +1923,7 @@ namespace dm
         };
         static StackList s_stackList;
 
-        struct StaticAllocator : public bx::ReallocatorI
+        struct StaticAllocator : public dm::ReallocatorI
         {
             StaticAllocator()
             {
@@ -2051,7 +2051,7 @@ namespace dm
         };
         static StackAllocator s_stackAllocator;
 
-        struct MainAllocator : public bx::ReallocatorI
+        struct MainAllocator : public dm::ReallocatorI
         {
             virtual ~MainAllocator()
             {
@@ -2196,7 +2196,7 @@ namespace dm
 
     #endif // !DM_ALLOCATOR
 
-    struct CrtAllocator : public bx::ReallocatorI
+    struct CrtAllocator : public dm::ReallocatorI
     {
         virtual ~CrtAllocator()
         {
@@ -2446,17 +2446,17 @@ namespace dm
         #endif //DM_ALLOCATOR
     }
 
-    bx::ReallocatorI* crtAlloc      = &s_crtAllocator;
+    dm::ReallocatorI* crtAlloc      = &s_crtAllocator;
     StackAllocatorI*  crtStackAlloc = &s_crtStackAllocator;
 
     #if DM_ALLOCATOR
-        bx::ReallocatorI* staticAlloc = &s_staticAllocator;
+        dm::ReallocatorI* staticAlloc = &s_staticAllocator;
         StackAllocatorI*  stackAlloc  = &s_stackAllocator;
-        bx::ReallocatorI* mainAlloc   = &s_mainAllocator;
+        dm::ReallocatorI* mainAlloc   = &s_mainAllocator;
     #else
-        bx::ReallocatorI* staticAlloc = &s_crtAllocator;
+        dm::ReallocatorI* staticAlloc = &s_crtAllocator;
         StackAllocatorI*  stackAlloc  = &s_crtStackAllocator;
-        bx::ReallocatorI* mainAlloc   = &s_crtAllocator;
+        dm::ReallocatorI* mainAlloc   = &s_crtAllocator;
     #endif //DM_ALLOCATOR
 
 } //namespace dm
