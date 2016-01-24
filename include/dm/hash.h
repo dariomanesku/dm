@@ -11,7 +11,7 @@
 
 namespace dm
 {
-    DM_INLINE uint32_t hash(const char _str[]) // Null terminated string.
+    DM_INLINE uint32_t hashStr(const char _str[]) // Null terminated string.
     {
         // Sdbm hash from public domain.
 
@@ -24,7 +24,7 @@ namespace dm
         return hash;
     }
 
-    DM_INLINE uint32_t hash(const void* _data, uint32_t _size)
+    DM_INLINE uint32_t hash(const uint8_t* _data, uint32_t _size)
     {
         // Sdbm hash from public domain.
 
@@ -41,7 +41,7 @@ namespace dm
     template <typename Ty>
     DM_INLINE uint32_t hash(const Ty& _val)
     {
-        return dm::hash(reinterpret_cast<const void*>(&_val), sizeof(_val));
+        return dm::hash(reinterpret_cast<const uint8_t*>(&_val), sizeof(Ty));
     }
 
 } // namespace dm
