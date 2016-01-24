@@ -48,7 +48,7 @@ void remove(uint16_t _key)
 {
     DM_CHECK(_key < max(), "kvmapRemove | %d, %d", _key, max());
 
-    remove(_key);
+    m_set.remove(_key);
 }
 
 void reset()
