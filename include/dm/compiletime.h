@@ -41,6 +41,13 @@ namespace dm
     };
     template <uint8_t Base> struct Pow<Base, 0> { enum { value = 1 }; };
 
+    /// Next Pow Two.
+    template <uint32_t Val>
+    struct NextPowTwo
+    {
+        enum { value = 1 << (dm::Log<2, Val-1>::value + 1) };
+    };
+
     /// Type info.
     /// Usage: uint8_t val = TyInfo<uint8_t>::Max();
     /// Alternatively: uint8_t val = TyInfo<uint8_t>::MaxVal;
