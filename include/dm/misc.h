@@ -41,6 +41,17 @@ namespace dm
     #define DM_OFFSETOF(type, member) ((size_t)&(((type*)0)->member))
     #define DM_STATIC_ASSERT(_expr) { typedef int dm_compile_time_assert[1 - 2*!(_expr)]; }
 
+    // Other macros.
+    //-----
+
+    #if defined(__GNUC__) && __GNUC__ >= 4
+    #   define LIKELY(x)   (__builtin_expect((x), 1))
+    #   define UNLIKELY(x) (__builtin_expect((x), 0))
+    #else
+    #   define LIKELY(x) (x)
+    #   define UNLIKELY(x) (x)
+    #endif
+
     // Value.
     //-----
 
