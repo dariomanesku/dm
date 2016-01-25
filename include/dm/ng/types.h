@@ -35,8 +35,8 @@
 // SSS{ SECTION S10 "Define types"
 //------------------------------------------------------------
 #if DM_DEFINE_TYPES_IMPL
-#ifndef DM_NG_TYPES_HEADER_GUARD
-#define DM_NG_TYPES_HEADER_GUARD
+#   ifndef DM_NG_TYPES_HEADER_GUARD
+#   define DM_NG_TYPES_HEADER_GUARD
 
 #include <inttypes.h>
 #include <float.h>
@@ -66,7 +66,7 @@
 #define r64  double
 #define r64c double const
 
-#endif // DM_NG_TYPES_HEADER_GUARD
+#   endif // DM_NG_TYPES_HEADER_GUARD
 #endif // DM_DEFINE_TYPES_IMPL
 //------------------------------------------------------------
 // }SSS ENDSEC S10 "Define types"
@@ -76,8 +76,8 @@
 // SSS{ SECTION S20 "Undefine types"
 //------------------------------------------------------------
 #if DM_UNDEFINE_TYPES_IMPL
-#ifndef DM_NG_TYPES_HEADER_GUARD
-#define DM_NG_TYPES_HEADER_GUARD
+#   ifndef DM_NG_TYPES_HEADER_GUARD
+#   define DM_NG_TYPES_HEADER_GUARD
 
 #undef u8
 #undef u8c
@@ -99,7 +99,7 @@
 #undef r64
 #undef r64c
 
-#endif // DM_NG_TYPES_HEADER_GUARD
+#   endif // DM_NG_TYPES_HEADER_GUARD
 #endif // DM_UNDEFINE_TYPES_IMPL
 //------------------------------------------------------------
 // }SSS ENDSEC S20 "Define types"
