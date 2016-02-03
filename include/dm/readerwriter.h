@@ -75,8 +75,9 @@ namespace dm
             return m_pos;
         }
 
-        virtual int32_t read(void* _data, int32_t _size) BX_OVERRIDE
+        virtual int32_t read(void* _data, int32_t _size, bx::Error* _err = NULL) BX_OVERRIDE
         {
+            (void)_err;
             int64_t reminder = m_top-m_pos;
             int32_t size = bx::uint32_min(_size, int32_t(reminder > INT32_MAX ? INT32_MAX : reminder) );
             memcpy(_data, &m_data[m_pos], size);
@@ -147,8 +148,9 @@ namespace dm
             return ftello64(m_file);
         }
 
-        virtual int32_t read(void* _data, int32_t _size) BX_OVERRIDE
+        virtual int32_t read(void* _data, int32_t _size, bx::Error* _err) BX_OVERRIDE
         {
+            (void)_err;
             return (int32_t)fread(_data, 1, _size, m_file);
         }
 
