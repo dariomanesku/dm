@@ -383,6 +383,12 @@ namespace dm
         strscpy(_dst, _src, DstSize);
     }
 
+    template <uint32_t DstSize>
+    DM_INLINE void stracpy(char (&_dst)[DstSize], const char* _src, uint32_t _len)
+    {
+        strscpy(_dst, _src, dm::min(DstSize, _len));
+    }
+
     // TODO: remove! Use 'stracpy' instead.
     template <uint32_t DstSize>
     DM_INLINE void strscpya(char (&_dst)[DstSize], const char* _src)
