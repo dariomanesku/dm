@@ -350,6 +350,14 @@ namespace dm
     // String.
     //----
 
+    // Compile time strlen for rvalue string literals.
+    // Use as: ctstrlen("foo"); // returns 3.
+    template <uint32_t Len>
+    DM_INLINE uint32_t ctstrlen(const char (&_str)[Len])
+    {
+        return Len-1;
+    }
+
     DM_INLINE int32_t stricmp(const char* _a, const char* _b)
     {
         #if BX_COMPILER_MSVC_COMPATIBLE
