@@ -21,8 +21,8 @@
 
 namespace dm { namespace ng {
 
-template <typename LinkedListStorage>
-struct LinkedListImpl : LinkedListStorage
+template <typename LinkedListStorageTy>
+struct LinkedListImpl : LinkedListStorageTy
 {
     /// Expected interface:
     ///
@@ -43,15 +43,15 @@ struct LinkedListImpl : LinkedListStorage
     ///     HandleAllocType* handles();
     ///     uint16_t max();
     /// };
-    typedef typename LinkedListStorage::ObjectType      ObjTy;
-    typedef typename LinkedListStorage::HandleAllocType HandleAllocTy;
-    typedef typename LinkedListStorage::Node            NodeTy;
-    typedef typename LinkedListStorage::Elem            ElemTy;
-    using LinkedListStorage::elements;
-    using LinkedListStorage::handles;
-    using LinkedListStorage::max;
+    typedef typename LinkedListStorageTy::ObjectType      ObjTy;
+    typedef typename LinkedListStorageTy::HandleAllocType HandleAllocTy;
+    typedef typename LinkedListStorageTy::Node            NodeTy;
+    typedef typename LinkedListStorageTy::Elem            ElemTy;
+    using LinkedListStorageTy::elements;
+    using LinkedListStorageTy::handles;
+    using LinkedListStorageTy::max;
 
-    LinkedListImpl() : LinkedListStorage()
+    LinkedListImpl() : LinkedListStorageTy()
     {
     }
 
@@ -403,10 +403,10 @@ struct LinkedListStorage
         m_elements = NULL;
     }
 
-    void initStorage(uint32_t _max, Allocator* _allocator)
+    void initStorage(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {
         const uint32_t totalSize = sizeFor(_max);
-        void* mem = _allocator->m_allocFunc(totalSize);
+        void* mem = dm_alloc(totalSize, _reallocFn);
 
         uint8_t* elemBegin   = (uint8_t*)mem;
         uint8_t* handleBegin = (uint8_t*)mem + _max*sizeof(Elem);
@@ -415,14 +415,14 @@ struct LinkedListStorage
         m_elements = (Elem*)elemBegin;
         m_handles.init(_max, handleBegin);
 
-        m_freeFunc = _allocator->m_freeFunc;
+        m_reallocFn = _reallocFn;
     }
 
     void destroy()
     {
         if (NULL != m_elements)
         {
-            m_freeFunc(m_elements);
+            dm_free(m_elements, m_reallocFn);
             m_elements = NULL;
         }
     }
@@ -445,7 +445,7 @@ struct LinkedListStorage
     uint16_t m_max;
     Elem* m_elements;
     HandleAllocType m_handles;
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 template <typename ObjTy, uint16_t MaxT>
@@ -478,9 +478,9 @@ struct LinkedList : LinkedListImpl< LinkedListStorage<ObjTy> >
 {
     typedef LinkedListImpl< LinkedListStorage<ObjTy> > Base;
 
-    void init(uint32_t _max, Allocator* _allocator)
+    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {
-        Base::initStorage(_max, _allocator);
+        Base::initStorage(_max, _reallocFn);
         Base::init();
     }
 };
@@ -488,7 +488,7 @@ struct LinkedList : LinkedListImpl< LinkedListStorage<ObjTy> >
 template <typename ObjTy>
 struct LinkedListH : LinkedListExt<ObjTy>
 {
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 } //namespace ng

@@ -15,8 +15,8 @@
 
 namespace dm { namespace ng {
 
-template <typename HashMapStorage>
-struct HashMapImpl : HashMapStorage
+template <typename HashMapStorageTy>
+struct HashMapImpl : HashMapStorageTy
 {
     /// Expected interface:
     ///
@@ -36,11 +36,11 @@ struct HashMapImpl : HashMapStorage
     ///         uint32_t max():
     ///         uint32_t keyLen();
     ///     }
-    typedef typename HashMapStorage::ValueType ValTy;
-    typedef typename HashMapStorage::UsedKeyVal Ukv;
-    using HashMapStorage::ukv;
-    using HashMapStorage::max;
-    using HashMapStorage::keyLen;
+    typedef typename HashMapStorageTy::ValueType ValTy;
+    typedef typename HashMapStorageTy::UsedKeyVal Ukv;
+    using HashMapStorageTy::ukv;
+    using HashMapStorageTy::max;
+    using HashMapStorageTy::keyLen;
 
     enum
     {
@@ -50,7 +50,7 @@ struct HashMapImpl : HashMapStorage
         InvalidHandle = UINT32_MAX,
     };
 
-    HashMapImpl() : HashMapStorage()
+    HashMapImpl() : HashMapStorageTy()
     {
     }
 
@@ -88,7 +88,7 @@ struct HashMapImpl : HashMapStorage
     template <typename Ty>
     uint32_t insert(const Ty& _key, ValTy _val)
     {
-        dm_staticAssert(sizeof(Ty) <= HashMapStorage::KeyLen);
+        dm_staticAssert(sizeof(Ty) <= HashMapStorageTy::KeyLen);
 
         return insert((const uint8_t*)&_key, sizeof(Ty), _val);
     }
@@ -159,7 +159,7 @@ struct HashMapImpl : HashMapStorage
     template <typename Ty>
     IdxDuplicate insertHandleDup(const Ty& _key, ValTy _val)
     {
-        dm_staticAssert(sizeof(Ty) <= HashMapStorage::KeyLen);
+        dm_staticAssert(sizeof(Ty) <= HashMapStorageTy::KeyLen);
         return insertHandleDup((const uint8_t*)&_key, sizeof(Ty), _val);
     }
 
@@ -193,7 +193,7 @@ struct HashMapImpl : HashMapStorage
     template <typename Ty>
     uint32_t findHandleOf(const Ty& _key)
     {
-        dm_staticAssert(sizeof(Ty) <= HashMapStorage::KeyLen);
+        dm_staticAssert(sizeof(Ty) <= HashMapStorageTy::KeyLen);
 
         return findHandleOf((const uint8_t*)&_key, sizeof(Ty));
     }
@@ -219,7 +219,7 @@ struct HashMapImpl : HashMapStorage
     template <typename Ty>
     ValTy find(const Ty& _key)
     {
-        dm_staticAssert(sizeof(Ty) <= HashMapStorage::KeyLen);
+        dm_staticAssert(sizeof(Ty) <= HashMapStorageTy::KeyLen);
         return find((const uint8_t*)&_key, sizeof(Ty));
     }
 
@@ -261,7 +261,7 @@ struct HashMapImpl : HashMapStorage
     template <typename Ty>
     bool remove(const Ty& _key)
     {
-        dm_staticAssert(sizeof(Ty) <= HashMapStorage::KeyLen);
+        dm_staticAssert(sizeof(Ty) <= HashMapStorageTy::KeyLen);
         return remove((const uint8_t*)&_key, sizeof(Ty));
     }
 
@@ -395,22 +395,22 @@ struct HashMapStorage
         destroy();
     }
 
-    void initStorage(uint32_t _maxPowTwo, Allocator* _allocator)
+    void initStorage(uint32_t _maxPowTwo, ReallocFn _reallocFn = &::realloc)
     {
         DM_CHECK(dm::isPowTwo(_maxPowTwo), "HashMapStorage::initStorage() - Invalid value | %d", _maxPowTwo);
 
-        uint8_t* mem = (uint8_t*)_allocator->m_allocFunc(sizeFor(_maxPowTwo));
+        uint8_t* mem = (uint8_t*)dm_alloc(sizeFor(_maxPowTwo), _reallocFn);
 
         m_max = _maxPowTwo;
         m_ukv = (UsedKeyVal*)mem;
-        m_freeFunc = _allocator->m_freeFunc;
+        m_reallocFn = _reallocFn;
     }
 
     void destroy()
     {
         if (NULL != m_ukv)
         {
-            m_freeFunc(m_ukv);
+            dm_free(m_ukv, m_reallocFn);
             m_ukv = NULL;
         }
     }
@@ -433,7 +433,7 @@ struct HashMapStorage
 private:
     UsedKeyVal* m_ukv;
     uint32_t m_max;
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 template <uint8_t KeyLength, typename ValTy, uint32_t MaxT_PowTwo>
@@ -465,9 +465,9 @@ struct HashMap : HashMapImpl< HashMapStorage<KeyLength, ValTy> >
 {
     typedef HashMapImpl< HashMapStorage<KeyLength, ValTy> > Base;
 
-    void init(uint32_t _maxPowTwo, Allocator* _allocator)
+    void init(uint32_t _maxPowTwo, ReallocFn _reallocFn = &::realloc)
     {
-        Base::initStorage(_maxPowTwo, _allocator);
+        Base::initStorage(_maxPowTwo, _reallocFn);
         Base::init();
     }
 };
@@ -475,7 +475,7 @@ struct HashMap : HashMapImpl< HashMapStorage<KeyLength, ValTy> >
 template <uint8_t KeyLength, typename ValTy>
 struct HashMapH : HashMapExt<KeyLength, ValTy>
 {
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 } //namespace ng

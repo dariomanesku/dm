@@ -374,23 +374,23 @@ struct ObjHashMapStorage
         destroy();
     }
 
-    void initStorage(uint32_t _maxPowTwo, Allocator* _allocator)
+    void initStorage(uint32_t _maxPowTwo, ReallocFn _reallocFn = &::realloc)
     {
         DM_CHECK(dm::isPowTwo(_maxPowTwo), "ObjHashMapStorage::initStorage() - Invalid value | %d", _maxPowTwo);
 
-        uint8_t* mem = (uint8_t*)_allocator->m_allocFunc(sizeFor(_maxPowTwo));
+        uint8_t* mem = (uint8_t*)dm_alloc(sizeFor(_maxPowTwo), _reallocFn);
 
         m_max = _maxPowTwo;
         m_uk = (UsedKey*)mem;
         m_objs = (ObjTy*)((uint8_t*)mem + _maxPowTwo*sizeof(UsedKey));
-        m_freeFunc = _allocator->m_freeFunc;
+        m_reallocFn = _reallocFn;
     }
 
     void destroy()
     {
         if (NULL != m_uk)
         {
-            m_freeFunc(m_uk);
+            dm_free(m_uk, m_reallocFn);
             m_uk = NULL;
         }
     }
@@ -419,7 +419,7 @@ private:
     UsedKey* m_uk;
     ObjTy* m_objs;
     uint32_t m_max;
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 template <uint8_t KeyLength, typename ObjTy, uint32_t MaxT_PowTwo>
@@ -451,9 +451,9 @@ struct ObjHashMap : ObjHashMapImpl< ObjHashMapStorage<KeyLength, ObjTy> >
 {
     typedef ObjHashMapImpl< ObjHashMapStorage<KeyLength, ObjTy> > Base;
 
-    void init(uint32_t _maxPowTwo, Allocator* _allocator)
+    void init(uint32_t _maxPowTwo, ReallocFn _reallocFn = &::realloc)
     {
-        Base::initStorage(_maxPowTwo, _allocator);
+        Base::initStorage(_maxPowTwo, _reallocFn);
         Base::init();
     }
 };
@@ -461,7 +461,7 @@ struct ObjHashMap : ObjHashMapImpl< ObjHashMapStorage<KeyLength, ObjTy> >
 template <uint8_t KeyLength, typename ObjTy>
 struct ObjHashMapH : ObjHashMapExt<KeyLength, ObjTy>
 {
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 } //namespace ng

@@ -6,43 +6,26 @@
 #ifndef DM_NG_ALLOCATOR_HEADER_GUARD
 #define DM_NG_ALLOCATOR_HEADER_GUARD
 
-#include <stdlib.h> // malloc(),realloc(),free().
+#include <stdlib.h> // ::realloc().
 
 namespace dm { namespace ng {
 
-typedef void* (*AllocFunc)(size_t _size);
-typedef void* (*ReallocFunc)(void* _ptr, size_t _size);
-typedef void  (*FreeFunc)(void* _ptr);
+typedef void* (*ReallocFn)(void* _ptr, size_t _size);
 
-struct Allocator
+static inline void* dm_alloc(size_t _size, ReallocFn _realloc = &::realloc)
 {
-    AllocFunc m_allocFunc;
-    FreeFunc  m_freeFunc;
-};
+    return _realloc(NULL, _size);
+}
 
-struct Reallocator : Allocator
+static inline void* dm_realloc(void* _ptr, size_t _size, ReallocFn _realloc = &::realloc)
 {
-    ReallocFunc m_reallocFunc;
-};
+    return _realloc(_ptr, _size);
+}
 
-struct CrtAllocator : Allocator
+static inline void* dm_free(void* _ptr, ReallocFn _realloc = &::realloc)
 {
-    CrtAllocator()
-    {
-        m_allocFunc = &::malloc;
-        m_freeFunc  = &::free;
-    }
-};
-
-struct CrtReallocator : Reallocator
-{
-    CrtReallocator()
-    {
-        m_allocFunc   = &::malloc;
-        m_freeFunc    = &::free;
-        m_reallocFunc = &::realloc;
-    }
-};
+    return _realloc(_ptr, 0);
+}
 
 } //namespace ng
 } //namespace dm

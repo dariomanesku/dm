@@ -13,8 +13,8 @@
 
 namespace dm { namespace ng {
 
-template <typename HandleAllocStorage>
-struct HandleAllocImpl : HandleAllocStorage
+template <typename HandleAllocStorageTy>
+struct HandleAllocImpl : HandleAllocStorageTy
 {
     /// Expected interface:
     ///     struct HandleAllocStorageTemplate
@@ -24,12 +24,12 @@ struct HandleAllocImpl : HandleAllocStorage
     ///         HandleType* indices();
     ///         HandleType  max();
     ///     };
-    typedef typename HandleAllocStorage::HandleType HandleTy;
-    using HandleAllocStorage::handles;
-    using HandleAllocStorage::indices;
-    using HandleAllocStorage::max;
+    typedef typename HandleAllocStorageTy::HandleType HandleTy;
+    using HandleAllocStorageTy::handles;
+    using HandleAllocStorageTy::indices;
+    using HandleAllocStorageTy::max;
 
-    HandleAllocImpl() : HandleAllocStorage()
+    HandleAllocImpl() : HandleAllocStorageTy()
     {
     }
 
@@ -197,23 +197,23 @@ struct HandleAllocStorage
         destroy();
     }
 
-    void initStorage(uint32_t _max, Allocator* _allocator)
+    void initStorage(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {
         const uint32_t haSize = _max*sizeof(HandleType);
-        void* mem = _allocator->m_allocFunc(2*haSize);
+        void* mem = dm_alloc(2*haSize, _reallocFn);
 
         m_max = _max;
         m_handles = (HandleType*)mem;
         m_indices = (HandleType*)((uint8_t*)mem + haSize);
 
-        m_freeFunc = _allocator->m_freeFunc;
+        m_reallocFn = _reallocFn;
     }
 
     void destroy()
     {
         if (NULL != m_handles)
         {
-            m_freeFunc(m_handles);
+            dm_free(m_handles, m_reallocFn);
             m_handles = NULL;
             m_indices = NULL;
         }
@@ -238,7 +238,7 @@ private:
     uint32_t m_max;
     HandleType* m_handles;
     HandleType* m_indices;
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 template <uint32_t MaxHandlesT>
@@ -271,9 +271,9 @@ struct HandleAlloc : HandleAllocImpl< HandleAllocStorage<HandleTy> >
 {
     typedef HandleAllocImpl< HandleAllocStorage<HandleTy> > Base;
 
-    void init(uint32_t _max, Allocator* _allocator)
+    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {
-        Base::initStorage(_max, _allocator);
+        Base::initStorage(_max, _reallocFn);
         Base::init();
     }
 };
@@ -281,7 +281,7 @@ struct HandleAlloc : HandleAllocImpl< HandleAllocStorage<HandleTy> >
 template <typename HandleTy=uint16_t>
 struct HandleAllocH : HandleAllocExt<HandleTy>
 {
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 } //namespace ng

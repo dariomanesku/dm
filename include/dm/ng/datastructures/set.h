@@ -204,23 +204,23 @@ struct SetStorage
         destroy();
     }
 
-    void init(uint16_t _max, Allocator* _allocator)
+    void init(uint16_t _max, ReallocFn _reallocFn = &::realloc)
     {
         const uint32_t haSize = _max*sizeof(uint16_t);
-        void* mem = _allocator->m_allocFunc(2*haSize);
+        void* mem = dm_alloc(2*haSize, _reallocFn);
 
         m_max = _max;
         m_values = (uint16_t*)mem;
         m_indices = (uint16_t*)((uint8_t*)mem + haSize);
 
-        m_freeFunc = _allocator->m_freeFunc;
+        m_reallocFn = _reallocFn;
     }
 
     void destroy()
     {
         if (NULL != m_values)
         {
-            m_freeFunc(m_values);
+            dm_free(m_values, m_reallocFn);
             m_values = NULL;
             m_indices = NULL;
         }
@@ -245,13 +245,13 @@ private:
     uint16_t m_max;
     uint16_t* m_values;
     uint16_t* m_indices;
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 template <uint16_t MaxT> struct SetT   : SetImpl< SetStorageT<MaxT> > { };
                          struct SetExt : SetImpl< SetStorageExt     > { };
                          struct Set    : SetImpl< SetStorage        > { };
-                         struct SetH   : SetExt { FreeFunc m_freeFunc; };
+                         struct SetH   : SetExt { ReallocFn m_reallocFn; };
 
 } //namespace ng
 } //namespace dm

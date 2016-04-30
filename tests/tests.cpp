@@ -1,3 +1,9 @@
+#if 0
+    g++ -I../include/ tests.cpp -o tests && ./tests && rm tests
+    #g++ -g -I../include/ tests.cpp -o tests && gdb tests && rm tests
+    exit
+#endif
+
 /*
  * Copyright 2016 Dario Manesku. All rights reserved.
  * License: http://www.opensource.org/licenses/BSD-2-Clause
@@ -14,8 +20,6 @@
 #include <dm/ng/datastructures/handlealloc.h>
 #include <dm/ng/datastructures/set.h>
 #include <dm/ng/datastructures/list.h>
-#include <dm/ng/datastructures/kvmap.h>
-#include <dm/ng/datastructures/oplist.h>
 #include <dm/ng/datastructures/bitarray.h>
 #include <dm/ng/datastructures/hashmap.h>
 #include <dm/ng/datastructures/objhashmap.h>
@@ -56,8 +60,6 @@ void testArrayApi(ArrayTy& _array)
 
 void testArrays()
 {
-    CrtReallocator reallocator;
-
     // Array with fixed size inline memory.
     typedef ArrayT<u32, 64> TestArrayT;
     TestArrayT array0;
@@ -67,20 +69,20 @@ void testArrays()
     typedef ArrayExt<u32> TestArrayExt;
     TestArrayExt array1;
     u32 size = TestArrayExt::sizeFor(64);
-    void* mem = reallocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     array1.init(64, (uint8_t*)mem);
     testArrayApi(array1);
 
     // Array with allocator.
     typedef Array<u32> TestArray;
     TestArray array2;
-    array2.init(64, &reallocator);
+    array2.init(64, &::realloc);
     testArrayApi(array2);
 
     // Array as ptr.
     typedef ArrayH<u32> TestArrayH;
     TestArrayH* array3;
-    array3 = create<TestArrayH>(64, &reallocator);
+    array3 = create<TestArrayH>(64, &::realloc);
     testArrayApi(*array3);
     destroy(array3);
 }
@@ -113,8 +115,6 @@ void testObjArrayApi(FooObjArrayTy& _oa)
 
 void testObjArrays()
 {
-    CrtReallocator reallocator;
-
     // ObjArray with fixed size inline memory.
     typedef ObjArrayT<Foo, 64> TestObjArrayT;
     TestObjArrayT oa0;
@@ -124,20 +124,20 @@ void testObjArrays()
     typedef ObjArrayExt<Foo> TestObjArrayExt;
     TestObjArrayExt oa1;
     u32 size = TestObjArrayExt::sizeFor(64);
-    void* mem = reallocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     oa1.init(64, (uint8_t*)mem);
     testObjArrayApi(oa1);
 
     // ObjArray with allocator.
     typedef ObjArray<Foo> TestObjArray;
     TestObjArray oa2;
-    oa2.init(64, &reallocator);
+    oa2.init(64, &::realloc);
     testObjArrayApi(oa2);
 
     // ObjArray as ptr.
     typedef ObjArrayH<Foo> TestObjArrayH;
     TestObjArrayH* oa3;
-    oa3 = create<TestObjArrayH>(64, &reallocator);
+    oa3 = create<TestObjArrayH>(64, &::realloc);
     testObjArrayApi(*oa3);
     destroy(oa3);
 }
@@ -162,8 +162,6 @@ void testHandleAlloc(HandleAllocTy& _ha)
 
 void testHandleAllocs()
 {
-    CrtAllocator allocator;
-
     // HandleAlloc with fixed size inline memory.
     typedef HandleAllocT<64> TestHandleAllocT;
     TestHandleAllocT ha0;
@@ -173,20 +171,20 @@ void testHandleAllocs()
     typedef HandleAllocExt<u16> TestHandleAllocExt;
     TestHandleAllocExt ha1;
     u32 size = TestHandleAllocExt::sizeFor(64);
-    void* mem = allocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     ha1.init(64, (uint8_t*)mem);
     testHandleAlloc(ha1);
 
     // HandleAlloc with allocator.
     typedef HandleAlloc<u16> TestHandleAlloc;
     TestHandleAlloc ha2;
-    ha2.init(64, &allocator);
+    ha2.init(64, &::realloc);
     testHandleAlloc(ha2);
 
     // HandleAlloc as ptr.
     typedef HandleAllocH<u16> TestHandleAllocH;
     TestHandleAllocH* ha3;
-    ha3 = create<TestHandleAllocH>(64, &allocator);
+    ha3 = create<TestHandleAllocH>(64, &::realloc);
     testHandleAlloc(*ha3);
     destroy(ha3);
 }
@@ -240,8 +238,6 @@ void testBitArrayApi(BitArrayTy& _ba)
 
 void testBitArrays()
 {
-    CrtAllocator allocator;
-
     // BitArray with fixed size inline memory.
     typedef BitArrayT<64> TestBitArrayT;
     TestBitArrayT ba0;
@@ -251,20 +247,20 @@ void testBitArrays()
     typedef BitArrayExt TestBitArrayExt;
     TestBitArrayExt ba1;
     u32 size = TestBitArrayExt::sizeFor(64);
-    void* mem = allocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     ba1.init(64, (uint8_t*)mem);
     testBitArrayApi(ba1);
 
     // BitArray with allocator.
     typedef BitArray TestBitArray;
     TestBitArray ba2;
-    ba2.init(64, &allocator);
+    ba2.init(64, &::realloc);
     testBitArrayApi(ba2);
 
     // BitArray as ptr.
     typedef BitArrayH TestBitArrayH;
     TestBitArrayH* ba3;
-    ba3 = create<TestBitArrayH>(64, &allocator);
+    ba3 = create<TestBitArrayH>(64, &::realloc);
     testBitArrayApi(*ba3);
     destroy(ba3);
 }
@@ -304,8 +300,6 @@ void testSetApi(SetTy& _set)
 
 void testSets()
 {
-    CrtAllocator allocator;
-
     // Set with fixed size inline memory.
     typedef SetT<64> TestSetT;
     TestSetT set0;
@@ -315,20 +309,20 @@ void testSets()
     typedef SetExt TestSetExt;
     TestSetExt set1;
     u32 size = TestSetExt::sizeFor(64);
-    void* mem = allocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     set1.init(64, (uint8_t*)mem);
     testSetApi(set1);
 
     // Set with allocator.
     typedef Set TestSet;
     TestSet set2;
-    set2.init(64, &allocator);
+    set2.init(64, &::realloc);
     testSetApi(set2);
 
     // Set as ptr.
     typedef SetH TestSetH;
     TestSetH* set3;
-    set3 = create<TestSetH>(64, &allocator);
+    set3 = create<TestSetH>(64, &::realloc);
     testSetApi(*set3);
     destroy(set3);
 }
@@ -375,8 +369,6 @@ void testListApi(ListTy& _list)
 
 void testLists()
 {
-    CrtAllocator allocator;
-
     // List with fixed size inline memory.
     typedef ListT<Foo, 64> TestListT;
     TestListT list0;
@@ -386,20 +378,20 @@ void testLists()
     typedef ListExt<Foo> TestListExt;
     TestListExt list1;
     u32 size = TestListExt::sizeFor(64);
-    void* mem = allocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     list1.init(64, (uint8_t*)mem);
     testListApi(list1);
 
     // List with allocator.
     typedef List<Foo> TestList;
     TestList list2;
-    list2.init(64, &allocator);
+    list2.init(64, &::realloc);
     testListApi(list2);
 
     // List as ptr.
     typedef ListH<Foo> TestListH;
     TestListH* list3;
-    list3 = create<TestListH>(64, &allocator);
+    list3 = create<TestListH>(64, &::realloc);
     testListApi(*list3);
     destroy(list3);
 }
@@ -453,8 +445,6 @@ void testLinkedListApi(LinkedListTy& _ll)
 
 void testLinkedLists()
 {
-    CrtAllocator allocator;
-
     // LinkedList with fixed size inline memory.
     typedef LinkedListT<Foo, 64> TestLinkedListT;
     TestLinkedListT list0;
@@ -464,131 +454,22 @@ void testLinkedLists()
     typedef LinkedListExt<Foo> TestLinkedListExt;
     TestLinkedListExt list1;
     u32 size = TestLinkedListExt::sizeFor(64);
-    void* mem = allocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     list1.init(64, (uint8_t*)mem);
     testLinkedListApi(list1);
 
     // LinkedList with allocator.
     typedef LinkedList<Foo> TestLinkedList;
     TestLinkedList list2;
-    list2.init(64, &allocator);
+    list2.init(64, &::realloc);
     testLinkedListApi(list2);
 
     // LinkedList as ptr.
     typedef LinkedListH<Foo> TestLinkedListH;
     TestLinkedListH* list3;
-    list3 = create<TestLinkedListH>(64, &allocator);
+    list3 = create<TestLinkedListH>(64, &::realloc);
     testLinkedListApi(*list3);
     destroy(list3);
-}
-
-template <typename KvMapTy>
-void testKvMapApi(KvMapTy& _kvm)
-{
-    _kvm.insert(11, 22);
-    bool b0 = _kvm.contains(11);
-    u32 v0 = _kvm.valueOf(11);
-    u16 key = _kvm.getKeyAt(0);
-    u32 v1 = _kvm.getValueAt(0);
-    _kvm.remove(11);
-    u16 cnt = _kvm.count();
-    printf("Key Value map %d %d %d %d %d\n", b0, v0, key, v1, cnt);
-}
-
-void testKvMaps()
-{
-    CrtAllocator allocator;
-
-    // KvMap with fixed size inline memory.
-    typedef KvMapT<u32, 64> TestKvMapT;
-    TestKvMapT kvm0;
-    testKvMapApi(kvm0);
-
-    // KvMap with external memory.
-    typedef KvMapExt<u32> TestKvMapExt;
-    TestKvMapExt kvm1;
-    u32 size = TestKvMapExt::sizeFor(64);
-    void* mem = allocator.m_allocFunc(size);
-    kvm1.init(64, (uint8_t*)mem);
-    testKvMapApi(kvm1);
-
-    // KvMap with allocator.
-    typedef KvMap<u32> TestKvMap;
-    TestKvMap kvm2;
-    kvm2.init(64, &allocator);
-    testKvMapApi(kvm2);
-
-    // KvMap as ptr.
-    typedef KvMapH<u32> TestKvMapH;
-    TestKvMapH* kvm3;
-    kvm3 = create<TestKvMapH>(64, &allocator);
-    testKvMapApi(*kvm3);
-    destroy(kvm3);
-}
-
-template <typename FooOpListTy>
-void testOpListApi(FooOpListTy& _opl)
-{
-    Foo foo = { 23, 55 };
-    Foo* f0 = _opl.addNew();
-    f0->m_a = 111;
-    f0->m_b = 222;
-
-    u16 v0 = _opl.addCopy(&foo);
-    _opl.removeAt(0);
-    _opl.getAt(0)->m_a = 51;
-    _opl[0].m_a = 66;
-    u16 at = _opl.getHandleAt(0);
-    u16 handle = _opl.getHandleOf(f0);
-
-    Foo* f1 = _opl.getFromHandle(handle);
-
-    bool b0 = _opl.contains(handle);
-    bool b1 = _opl.contains(0);
-    bool b2 = _opl.containsObj(f0);
-    bool b3 = _opl.containsObj(NULL);
-
-    u32 cnt = _opl.count();
-
-    (void)f0;
-    (void)f1;
-
-    printf("OpList out %d %d %d | %d %d %d %d | %d\n"
-         , v0, at, handle
-         , b0, b1, b2, b3
-         , cnt
-         );
-}
-
-void testOpLists()
-{
-    CrtAllocator allocator;
-
-    // OpList with fixed size inline memory.
-    typedef OpListT<Foo, 64> TestOpListT;
-    TestOpListT opl0;
-    testOpListApi(opl0);
-
-    // OpList with external memory.
-    typedef OpListExt<Foo> TestOpListExt;
-    TestOpListExt opl1;
-    u32 size = TestOpListExt::sizeFor(64);
-    void* mem = allocator.m_allocFunc(size);
-    opl1.init(64, (uint8_t*)mem);
-    testOpListApi(opl1);
-
-    // OpList with allocator.
-    typedef OpList<Foo> TestOpList;
-    TestOpList opl2;
-    opl2.init(64, &allocator);
-    testOpListApi(opl2);
-
-    // OpList as ptr.
-    typedef OpListH<Foo> TestOpListH;
-    TestOpListH* opl3;
-    opl3 = create<TestOpListH>(64, &allocator);
-    testOpListApi(*opl3);
-    destroy(opl3);
 }
 
 template <typename HashMapTy>
@@ -611,8 +492,6 @@ void testHashMapApi(HashMapTy& _hm)
 
 void testHashMaps()
 {
-    CrtAllocator allocator;
-
     // HashMap with fixed size inline memory.
     typedef HashMapT<sizeof(float), uint32_t, 256> TestHashMapT;
     TestHashMapT hm0;
@@ -622,20 +501,20 @@ void testHashMaps()
     typedef HashMapExt<sizeof(float), uint32_t> TestHashMapExt;
     TestHashMapExt hm1;
     u32 size = TestHashMapExt::sizeFor(256);
-    void* mem = allocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     hm1.init(256, (uint8_t*)mem);
     testHashMapApi(hm1);
 
     // HashMap with allocator.
     typedef HashMap<sizeof(float), uint32_t> TestHashMap;
     TestHashMap hm2;
-    hm2.init(256, &allocator);
+    hm2.init(256, &::realloc);
     testHashMapApi(hm2);
 
     // HashMap as ptr.
     typedef HashMapH<sizeof(float), uint32_t> TestHashMapH;
     TestHashMapH* hm3;
-    hm3 = create<TestHashMapH>(256, &allocator);
+    hm3 = create<TestHashMapH>(256, &::realloc);
     testHashMapApi(*hm3);
     destroy(hm3);
 }
@@ -661,8 +540,6 @@ void testObjHashMapApi(FooHashMapTy& _ohm)
 
 void testObjHashMaps()
 {
-    CrtAllocator allocator;
-
     // ObjHashMap with fixed size inline memory.
     typedef ObjHashMapT<sizeof(float), Foo, 256> TestObjHashMapT;
     TestObjHashMapT ohm0;
@@ -672,20 +549,20 @@ void testObjHashMaps()
     typedef ObjHashMapExt<sizeof(float), Foo> TestObjHashMapExt;
     TestObjHashMapExt ohm1;
     u32 size = TestObjHashMapExt::sizeFor(256);
-    void* mem = allocator.m_allocFunc(size);
+    void* mem = dm_alloc(size, &::realloc);
     ohm1.init(256, (uint8_t*)mem);
     testObjHashMapApi(ohm1);
 
     // ObjHashMap with allocator.
     typedef ObjHashMap<sizeof(float), Foo> TestObjHashMap;
     TestObjHashMap ohm2;
-    ohm2.init(256, &allocator);
+    ohm2.init(256, &::realloc);
     testObjHashMapApi(ohm2);
 
     // ObjHashMap as ptr.
     typedef ObjHashMapH<sizeof(float), Foo> TestObjHashMapH;
     TestObjHashMapH* ohm3;
-    ohm3 = create<TestObjHashMapH>(256, &allocator);
+    ohm3 = create<TestObjHashMapH>(256, &::realloc);
     testObjHashMapApi(*ohm3);
     destroy(ohm3);
 }
@@ -699,8 +576,6 @@ void testApi()
     testSets();
     testLists();
     testLinkedLists();
-    testKvMaps();
-    testOpLists();
     testHashMaps();
     testObjHashMaps();
 }

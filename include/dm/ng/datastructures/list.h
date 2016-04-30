@@ -13,8 +13,8 @@
 
 namespace dm { namespace ng {
 
-template <typename ListStorage>
-struct ListImpl : ListStorage
+template <typename ListStorageTy>
+struct ListImpl : ListStorageTy
 {
     /// Expected interface:
     ///
@@ -28,13 +28,13 @@ struct ListImpl : ListStorage
     ///         HandleAllocType* handles();
     ///         uint32_t max();
     ///     };
-    typedef typename ListStorage::ObjectType      ObjTy;
-    typedef typename ListStorage::HandleAllocType HandleAllocTy;
-    using ListStorage::objects;
-    using ListStorage::handles;
-    using ListStorage::max;
+    typedef typename ListStorageTy::ObjectType      ObjTy;
+    typedef typename ListStorageTy::HandleAllocType HandleAllocTy;
+    using ListStorageTy::objects;
+    using ListStorageTy::handles;
+    using ListStorageTy::max;
 
-    ListImpl() : ListStorage()
+    ListImpl() : ListStorageTy()
     {
     }
 
@@ -255,10 +255,10 @@ struct ListStorage
         m_objects = NULL;
     }
 
-    void init(uint32_t _max, Allocator* _allocator)
+    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {
         const uint32_t totalSize = sizeFor(_max);
-        void* mem = _allocator->m_allocFunc(totalSize);
+        void* mem = dm_alloc(totalSize, _reallocFn);
 
         uint8_t* objBegin   = (uint8_t*)mem;
         uint8_t* handleBegin = (uint8_t*)mem + _max*sizeof(ObjTy);
@@ -267,14 +267,14 @@ struct ListStorage
         m_objects = (ObjTy*)objBegin;
         m_handles.init(_max, handleBegin);
 
-        m_freeFunc = _allocator->m_freeFunc;
+        m_reallocFn = _reallocFn;
     }
 
     void destroy()
     {
         if (NULL != m_objects)
         {
-            m_freeFunc(m_objects);
+            dm_free(m_objects, m_reallocFn);
             m_objects = NULL;
         }
     }
@@ -297,13 +297,13 @@ struct ListStorage
     uint32_t m_max;
     ObjTy* m_objects;
     HandleAllocType m_handles;
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 template <typename ObjTy, uint32_t MaxT> struct ListT   : ListImpl< ListStorageT<ObjTy, MaxT> > { };
 template <typename ObjTy>                struct ListExt : ListImpl< ListStorageExt<ObjTy>     > { };
 template <typename ObjTy>                struct List    : ListImpl< ListStorage<ObjTy>        > { };
-template <typename ObjTy>                struct ListH   : ListExt<ObjTy> { FreeFunc m_freeFunc; };
+template <typename ObjTy>                struct ListH   : ListExt<ObjTy> { ReallocFn m_reallocFn; };
 
 } //namespace ng
 } //namespace dm

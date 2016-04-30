@@ -13,8 +13,8 @@
 
 namespace dm { namespace ng {
 
-template <typename BitArrayStorage>
-struct BitArrayImpl : BitArrayStorage
+template <typename BitArrayStorageTy>
+struct BitArrayImpl : BitArrayStorageTy
 {
     /// Expected interface:
     ///
@@ -27,11 +27,11 @@ struct BitArrayImpl : BitArrayStorage
     ///         Ty* elements();
     ///         uint32_t max();
     ///     };
-    using BitArrayStorage::bits;
-    using BitArrayStorage::numSlots;
-    using BitArrayStorage::max;
+    using BitArrayStorageTy::bits;
+    using BitArrayStorageTy::numSlots;
+    using BitArrayStorageTy::max;
 
-    BitArrayImpl() : BitArrayStorage()
+    BitArrayImpl() : BitArrayStorageTy()
     {
     }
 
@@ -329,22 +329,22 @@ struct BitArrayStorage
         m_max = 0;
     }
 
-    void init(uint32_t _max, Allocator* _allocator)
+    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {
-        void* mem = _allocator->m_allocFunc(sizeFor(_max));
+        void* mem = dm_alloc(sizeFor(_max), _reallocFn);
 
         m_bits = (uint64_t*)mem;
         m_numSlots = numSlotsFor(_max);
         m_max = _max;
 
-        m_freeFunc = _allocator->m_freeFunc;
+        m_reallocFn = _reallocFn;
     }
 
     void destroy()
     {
         if (NULL != m_bits)
         {
-            m_freeFunc(m_bits);
+            dm_free(m_bits, m_reallocFn);
             m_bits = NULL;
         }
     }
@@ -367,7 +367,7 @@ struct BitArrayStorage
     uint64_t* m_bits;
     uint32_t m_numSlots;
     uint32_t m_max;
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 template <uint32_t MaxTy>
@@ -398,16 +398,16 @@ struct BitArray : BitArrayImpl<BitArrayStorage>
 {
     typedef BitArrayImpl<BitArrayStorage> Base;
 
-    void init(uint32_t _max, Allocator* _allocator)
+    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {
-        Base::init(_max, _allocator);
+        Base::init(_max, _reallocFn);
         Base::reset();
     }
 };
 
 struct BitArrayH : BitArrayExt
 {
-    FreeFunc m_freeFunc;
+    ReallocFn m_reallocFn;
 };
 
 } //namespace ng

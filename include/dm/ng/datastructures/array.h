@@ -13,8 +13,8 @@
 
 namespace dm { namespace ng {
 
-template <typename ArrayStorage>
-struct ArrayImpl : ArrayStorage
+template <typename ArrayStorageTy>
+struct ArrayImpl : ArrayStorageTy
 {
     /// Expected interface:
     ///
@@ -27,13 +27,13 @@ struct ArrayImpl : ArrayStorage
     ///         Ty* elements();
     ///         uint32_t max();
     ///     };
-    typedef typename ArrayStorage::ElementType ElemTy;
-    using ArrayStorage::isResizable;
-    using ArrayStorage::resize;
-    using ArrayStorage::elements;
-    using ArrayStorage::max;
+    typedef typename ArrayStorageTy::ElementType ElemTy;
+    using ArrayStorageTy::isResizable;
+    using ArrayStorageTy::resize;
+    using ArrayStorageTy::elements;
+    using ArrayStorageTy::max;
 
-    ArrayImpl() : ArrayStorage()
+    ArrayImpl() : ArrayStorageTy()
     {
         m_count = 0;
     }
@@ -152,16 +152,16 @@ private:
     uint32_t m_count;
 };
 
-template <typename ArrayStorage>
-struct ObjArrayImpl : ArrayStorage
+template <typename ArrayStorageTy>
+struct ObjArrayImpl : ArrayStorageTy
 {
-    typedef typename ArrayStorage::ElementType ElemTy;
-    using ArrayStorage::isResizable;
-    using ArrayStorage::resize;
-    using ArrayStorage::elements;
-    using ArrayStorage::max;
+    typedef typename ArrayStorageTy::ElementType ElemTy;
+    using ArrayStorageTy::isResizable;
+    using ArrayStorageTy::resize;
+    using ArrayStorageTy::elements;
+    using ArrayStorageTy::max;
 
-    ObjArrayImpl() : ArrayStorage()
+    ObjArrayImpl() : ArrayStorageTy()
     {
         m_count = 0;
     }
@@ -377,9 +377,9 @@ struct ArrayStorage
         m_max = 0;
     }
 
-    ArrayStorage(uint32_t _max, Reallocator* _reallocator)
+    ArrayStorage(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
-        init(_max, _reallocator);
+        init(_max, _reallocFn);
     }
 
     ~ArrayStorage()
@@ -387,20 +387,18 @@ struct ArrayStorage
         destroy();
     }
 
-    void init(uint32_t _max, Reallocator* _reallocator)
+    void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
-        m_elements = (Ty*)_reallocator->m_allocFunc(_max*sizeof(Ty));
+        m_elements = (Ty*)dm_alloc(_max*sizeof(Ty), _reallocFn);
         m_max = _max;
-        m_reallocator.m_allocFunc   = _reallocator->m_allocFunc;
-        m_reallocator.m_reallocFunc = _reallocator->m_reallocFunc;
-        m_reallocator.m_freeFunc    = _reallocator->m_freeFunc;
+        m_reallocFn = _reallocFn;
     }
 
     void destroy()
     {
         if (NULL != m_elements)
         {
-            m_reallocator.m_freeFunc(m_elements);
+            dm_free(m_elements, m_reallocFn);
             m_elements = NULL;
         }
     }
@@ -412,7 +410,7 @@ struct ArrayStorage
 
     bool resize(uint32_t _max)
     {
-        m_elements = (Ty*)m_reallocator.m_reallocFunc(m_elements, _max*sizeof(Ty));
+        m_elements = (Ty*)dm_realloc(m_elements, _max*sizeof(Ty), m_reallocFn);
         m_max = _max;
 
         return true;
@@ -430,18 +428,18 @@ struct ArrayStorage
 
     Ty* m_elements;
     uint32_t m_max;
-    Reallocator m_reallocator;
+    ReallocFn m_reallocFn;
 };
 
 template <typename Ty, uint32_t MaxTy> struct ArrayT   : ArrayImpl< ArrayStorageT<Ty, MaxTy> > { };
 template <typename Ty>                 struct ArrayExt : ArrayImpl< ArrayStorageExt<Ty>      > { };
 template <typename Ty>                 struct Array    : ArrayImpl< ArrayStorage<Ty>         > { };
-template <typename Ty>                 struct ArrayH   : ArrayExt<Ty> { FreeFunc m_freeFunc; };
+template <typename Ty>                 struct ArrayH   : ArrayExt<Ty> { ReallocFn m_reallocFn; };
 
 template <typename Ty, uint32_t MaxTy> struct ObjArrayT   : ObjArrayImpl< ArrayStorageT<Ty, MaxTy> > { };
 template <typename Ty>                 struct ObjArrayExt : ObjArrayImpl< ArrayStorageExt<Ty>      > { };
 template <typename Ty>                 struct ObjArray    : ObjArrayImpl< ArrayStorage<Ty>         > { };
-template <typename Ty>                 struct ObjArrayH   : ObjArrayExt<Ty> { FreeFunc m_freeFunc; };
+template <typename Ty>                 struct ObjArrayH   : ObjArrayExt<Ty> { ReallocFn m_reallocFn; };
 
 } //namespace ng
 } //namespace dm
