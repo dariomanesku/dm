@@ -12,30 +12,30 @@
 
 namespace dm { namespace ng {
 
-template <typename SetStorage>
-struct SetImpl : SetStorage
+template <typename DenseSetStorageTy>
+struct DenseSetImpl : DenseSetStorageTy
 {
     /// Expected interface:
     ///
-    ///     struct SetStorageTemplate
+    ///     struct DenseSetStorageTemplate
     ///     {
     ///         uint16_t* values();
     ///         uint16_t* indices();
     ///         uint16_t  max();
     ///     };
-    using SetStorage::values;
-    using SetStorage::indices;
-    using SetStorage::max;
+    using DenseSetStorageTy::values;
+    using DenseSetStorageTy::indices;
+    using DenseSetStorageTy::max;
 
-    SetImpl() : SetStorage()
+    DenseSetImpl() : DenseSetStorageTy()
     {
         m_num = 0;
     }
 
     uint16_t insert(uint16_t _val)
     {
-        DM_CHECK(m_num < max(), "SetImpl::insert() - 0 | %d, %d", m_num, max());
-        DM_CHECK(_val < max(),  "SetImpl::insert() - 1 | %d, %d", _val,  max());
+        DM_CHECK(m_num < max(), "DenseSetImpl::insert() - 0 | %d, %d", m_num, max());
+        DM_CHECK(_val < max(),  "DenseSetImpl::insert() - 1 | %d, %d", _val,  max());
 
         if (contains(_val))
         {
@@ -61,7 +61,7 @@ struct SetImpl : SetStorage
 
     bool contains(uint16_t _val)
     {
-        DM_CHECK(_val < max(), "SetImpl::contains() - 0 | %d, %d", _val, max());
+        DM_CHECK(_val < max(), "DenseSetImpl::contains() - 0 | %d, %d", _val, max());
 
         const uint16_t index = indices()[_val];
 
@@ -70,22 +70,22 @@ struct SetImpl : SetStorage
 
     uint16_t indexOf(uint16_t _val)
     {
-        DM_CHECK(_val < max(), "SetImpl::indexOf() | %d, %d", _val, max());
+        DM_CHECK(_val < max(), "DenseSetImpl::indexOf() | %d, %d", _val, max());
 
         return indices()[_val];
     }
 
     uint16_t getValueAt(uint16_t _idx)
     {
-        DM_CHECK(_idx < max(), "SetImpl::getValueAt() | %d, %d", _idx, max());
+        DM_CHECK(_idx < max(), "DenseSetImpl::getValueAt() | %d, %d", _idx, max());
 
         return values()[_idx];
     }
 
     void remove(uint16_t _val)
     {
-        DM_CHECK(_val < max(), "SetImpl::remove() - 0 | %d, %d", _val, max());
-        DM_CHECK(m_num < max(), "SetImpl::remove() - 1 | %d, %d", m_num, max());
+        DM_CHECK(_val < max(), "DenseSetImpl::remove() - 0 | %d, %d", _val, max());
+        DM_CHECK(m_num < max(), "DenseSetImpl::remove() - 1 | %d, %d", m_num, max());
 
         if (!contains(_val))
         {
@@ -95,8 +95,8 @@ struct SetImpl : SetStorage
         const uint16_t index = indices()[_val];
         const uint16_t last = values()[--m_num];
 
-        DM_CHECK(index < max(), "SetImpl::remove() - 2 | %d, %d", index, max());
-        DM_CHECK(last < max(), "SetImpl::remove() - 3 | %d, %d", last, max());
+        DM_CHECK(index < max(), "DenseSetImpl::remove() - 2 | %d, %d", index, max());
+        DM_CHECK(last < max(), "DenseSetImpl::remove() - 3 | %d, %d", last, max());
 
         values()[index] = last;
         indices()[last] = index;
@@ -117,7 +117,7 @@ private:
 };
 
 template <uint16_t MaxT>
-struct SetStorageT
+struct DenseSetStorageT
 {
     uint16_t* values()
     {
@@ -139,14 +139,14 @@ private:
     uint16_t m_indices[MaxT];
 };
 
-struct SetStorageExt
+struct DenseSetStorageExt
 {
     static uint32_t sizeFor(uint16_t _max)
     {
         return 2*_max*sizeof(uint16_t);
     }
 
-    SetStorageExt()
+    DenseSetStorageExt()
     {
         m_max = 0;
         m_values = NULL;
@@ -185,21 +185,21 @@ private:
     uint16_t* m_indices;
 };
 
-struct SetStorage
+struct DenseSetStorage
 {
     static uint32_t sizeFor(uint16_t _max)
     {
         return 2*_max*sizeof(uint16_t);
     }
 
-    SetStorage()
+    DenseSetStorage()
     {
         m_max = 0;
         m_values = NULL;
         m_indices = NULL;
     }
 
-    ~SetStorage()
+    ~DenseSetStorage()
     {
         destroy();
     }
@@ -248,10 +248,10 @@ private:
     ReallocFn m_reallocFn;
 };
 
-template <uint16_t MaxT> struct SetT   : SetImpl< SetStorageT<MaxT> > { };
-                         struct SetExt : SetImpl< SetStorageExt     > { };
-                         struct Set    : SetImpl< SetStorage        > { };
-                         struct SetH   : SetExt { ReallocFn m_reallocFn; };
+template <uint16_t MaxT> struct DenseSetT   : DenseSetImpl< DenseSetStorageT<MaxT> > { };
+                         struct DenseSetExt : DenseSetImpl< DenseSetStorageExt     > { };
+                         struct DenseSet    : DenseSetImpl< DenseSetStorage        > { };
+                         struct DenseSetH   : DenseSetExt { ReallocFn m_reallocFn; };
 
 } //namespace ng
 } //namespace dm

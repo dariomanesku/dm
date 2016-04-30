@@ -18,7 +18,7 @@
 #include <dm/ng/datastructures/array.h>
 #include <dm/ng/datastructures/linkedlist.h>
 #include <dm/ng/datastructures/handlealloc.h>
-#include <dm/ng/datastructures/set.h>
+#include <dm/ng/datastructures/denseset.h>
 #include <dm/ng/datastructures/list.h>
 #include <dm/ng/datastructures/bitarray.h>
 #include <dm/ng/datastructures/hashmap.h>
@@ -265,8 +265,8 @@ void testBitArrays()
     destroy(ba3);
 }
 
-template <typename SetTy>
-void testSetApi(SetTy& _set)
+template <typename DenseSetTy>
+void testDenseSetApi(DenseSetTy& _set)
 {
     _set.insert(12);
     _set.insert(22);
@@ -290,7 +290,7 @@ void testSetApi(SetTy& _set)
     u32 idx = _set.indexOf(22);
     u32 val = _set.getValueAt(2);
 
-    printf("Set output %d %d %d %d %d | %d %d %d\n"
+    printf("DenseSet output %d %d %d %d %d | %d %d %d\n"
           , s0, s1, s2, s3, s4
           , idx
           , val
@@ -298,32 +298,32 @@ void testSetApi(SetTy& _set)
           );
 }
 
-void testSets()
+void testDenseSets()
 {
-    // Set with fixed size inline memory.
-    typedef SetT<64> TestSetT;
-    TestSetT set0;
-    testSetApi(set0);
+    // DenseSet with fixed size inline memory.
+    typedef DenseSetT<64> TestDenseSetT;
+    TestDenseSetT set0;
+    testDenseSetApi(set0);
 
-    // Set with external memory.
-    typedef SetExt TestSetExt;
-    TestSetExt set1;
-    u32 size = TestSetExt::sizeFor(64);
+    // DenseSet with external memory.
+    typedef DenseSetExt TestDenseSetExt;
+    TestDenseSetExt set1;
+    u32 size = TestDenseSetExt::sizeFor(64);
     void* mem = dm_alloc(size, &::realloc);
     set1.init(64, (uint8_t*)mem);
-    testSetApi(set1);
+    testDenseSetApi(set1);
 
-    // Set with allocator.
-    typedef Set TestSet;
-    TestSet set2;
+    // DenseSet with allocator.
+    typedef DenseSet TestDenseSet;
+    TestDenseSet set2;
     set2.init(64, &::realloc);
-    testSetApi(set2);
+    testDenseSetApi(set2);
 
-    // Set as ptr.
-    typedef SetH TestSetH;
-    TestSetH* set3;
-    set3 = create<TestSetH>(64, &::realloc);
-    testSetApi(*set3);
+    // DenseSet as ptr.
+    typedef DenseSetH TestDenseSetH;
+    TestDenseSetH* set3;
+    set3 = create<TestDenseSetH>(64, &::realloc);
+    testDenseSetApi(*set3);
     destroy(set3);
 }
 
@@ -573,7 +573,7 @@ void testApi()
     testObjArrays();
     testHandleAllocs();
     testBitArrays();
-    testSets();
+    testDenseSets();
     testLists();
     testLinkedLists();
     testHashMaps();
