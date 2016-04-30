@@ -582,8 +582,6 @@ void testApi()
 
 int main()
 {
-    u32 macka = 0;
-    u32c macka2 = macka;
     testApi();
-    return macka2;
+    return 0;
 }
