@@ -3,8 +3,8 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#ifndef DM_NG_LIST_HEADER_GUARD
-#define DM_NG_LIST_HEADER_GUARD
+#ifndef DM_NG_SPARSEARRAY_HEADER_GUARD
+#define DM_NG_SPARSEARRAY_HEADER_GUARD
 
 #include <new>
 #include <dm/check.h>
@@ -13,13 +13,13 @@
 
 namespace dm { namespace ng {
 
-template <typename ListStorageTy>
-struct ListImpl : ListStorageTy
+template <typename SparseArrayStorageTy>
+struct SparseArrayImpl : SparseArrayStorageTy
 {
     /// Expected interface:
     ///
     ///     template <typename ObjTy>
-    ///     struct ListStorageT
+    ///     struct SparseArrayStorageT
     ///     {
     ///         typedef ObjTy ObjectType;
     ///         typedef IdxAllocT<MaxT> IdxAllocType;
@@ -28,20 +28,20 @@ struct ListImpl : ListStorageTy
     ///         IdxAllocType* indices();
     ///         uint32_t max();
     ///     };
-    typedef typename ListStorageTy::ObjectType   ObjTy;
-    typedef typename ListStorageTy::IdxAllocType IdxAllocTy;
-    using ListStorageTy::objects;
-    using ListStorageTy::indices;
-    using ListStorageTy::max;
+    typedef typename SparseArrayStorageTy::ObjectType   ObjTy;
+    typedef typename SparseArrayStorageTy::IdxAllocType IdxAllocTy;
+    using SparseArrayStorageTy::objects;
+    using SparseArrayStorageTy::indices;
+    using SparseArrayStorageTy::max;
 
-    ListImpl() : ListStorageTy()
+    SparseArrayImpl() : SparseArrayStorageTy()
     {
     }
 
     ObjTy* addNew()
     {
         const uint32_t idx = (uint32_t)indices()->alloc();
-        DM_CHECK(idx < max(), "ListImpl::addNew() | %d, %d", idx, max());
+        DM_CHECK(idx < max(), "SparseArrayImpl::addNew() | %d, %d", idx, max());
 
         ObjTy* dst = &objects()[idx];
         dst = ::new (dst) ObjTy();
@@ -51,7 +51,7 @@ struct ListImpl : ListStorageTy
     uint32_t addCopy(const ObjTy* _obj)
     {
         const uint32_t idx = (uint32_t)indices()->alloc();
-        DM_CHECK(idx < max(), "ListImpl::addCopy() | %d, %d", idx, max());
+        DM_CHECK(idx < max(), "SparseArrayImpl::addCopy() | %d, %d", idx, max());
 
         ObjTy* dst = &objects()[idx];
         dst = ::new (dst) ObjTy(*_obj);
@@ -65,16 +65,16 @@ struct ListImpl : ListStorageTy
 
     uint32_t getIdxOfObj(const ObjTy* _obj)
     {
-        DM_CHECK(contains(_obj), "ListImpl::getIdxOf() | Object not from the list.");
+        DM_CHECK(contains(_obj), "SparseArrayImpl::getIdxOf() | Object not from the list.");
 
         return uint32_t(_obj - objects());
     }
 
     uint32_t getIdxOf(uint32_t _handle)
     {
-        DM_CHECK(_handle < max(), "ListImpl::getIdxOf() #1 | %d, %d", _handle, max());
+        DM_CHECK(_handle < max(), "SparseArrayImpl::getIdxOf() #1 | %d, %d", _handle, max());
         const uint32_t idx = (uint32_t)indices()->getAt(_handle);
-        DM_CHECK(idx < max(), "ListImpl::getIdxOf() #2 | %d, %d", idx, max());
+        DM_CHECK(idx < max(), "SparseArrayImpl::getIdxOf() #2 | %d, %d", idx, max());
 
         return idx;
     }
@@ -89,7 +89,7 @@ struct ListImpl : ListStorageTy
     private:
     ObjTy* getObjAt_impl(uint32_t _idx)
     {
-        DM_CHECK(_idx < max(), "ListImpl::getObjAt_impl() | %d, %d", _idx, max());
+        DM_CHECK(_idx < max(), "SparseArrayImpl::getObjAt_impl() | %d, %d", _idx, max());
 
         return &objects()[_idx];
     } public:
@@ -111,7 +111,7 @@ struct ListImpl : ListStorageTy
 
     void removeAt(uint32_t _idx)
     {
-        DM_CHECK(_idx < max(), "ListImpl::removeAt() | %d, %d", _idx, max());
+        DM_CHECK(_idx < max(), "SparseArrayImpl::removeAt() | %d, %d", _idx, max());
 
         objects()[_idx].~ObjTy();
         indices()->removeAt(_idx);
@@ -221,7 +221,7 @@ struct ListImpl : ListStorageTy
 };
 
 template <typename ObjTy, uint32_t MaxT>
-struct ListStorageT
+struct SparseArrayStorageT
 {
     typedef ObjTy ObjectType;
     typedef IdxAllocT<MaxT> IdxAllocType;
@@ -246,7 +246,7 @@ struct ListStorageT
 };
 
 template <typename ObjTy>
-struct ListStorageExt
+struct SparseArrayStorageExt
 {
     typedef ObjTy ObjectType;
     typedef IdxAllocExt<uint32_t> IdxAllocType;
@@ -256,7 +256,7 @@ struct ListStorageExt
         return _max*sizeof(ObjTy) + IdxAllocType::sizeFor(_max);
     }
 
-    ListStorageExt()
+    SparseArrayStorageExt()
     {
         m_max = 0;
         m_objects = NULL;
@@ -295,7 +295,7 @@ struct ListStorageExt
 };
 
 template <typename ObjTy>
-struct ListStorage
+struct SparseArrayStorage
 {
     typedef ObjTy ObjectType;
     typedef IdxAllocExt<uint32_t> IdxAllocType;
@@ -305,7 +305,7 @@ struct ListStorage
         return _max*sizeof(ObjTy) + IdxAllocType::sizeFor(_max);
     }
 
-    ListStorage()
+    SparseArrayStorage()
     {
         m_max = 0;
         m_objects = NULL;
@@ -356,14 +356,14 @@ struct ListStorage
     ReallocFn m_reallocFn;
 };
 
-template <typename ObjTy, uint32_t MaxT> struct ListT   : ListImpl< ListStorageT<ObjTy, MaxT> > { };
-template <typename ObjTy>                struct ListExt : ListImpl< ListStorageExt<ObjTy>     > { };
-template <typename ObjTy>                struct List    : ListImpl< ListStorage<ObjTy>        > { };
-template <typename ObjTy>                struct ListH   : ListExt<ObjTy> { ReallocFn m_reallocFn; };
+template <typename ObjTy, uint32_t MaxT> struct SparseArrayT   : SparseArrayImpl< SparseArrayStorageT<ObjTy, MaxT> > { };
+template <typename ObjTy>                struct SparseArrayExt : SparseArrayImpl< SparseArrayStorageExt<ObjTy>     > { };
+template <typename ObjTy>                struct SparseArray    : SparseArrayImpl< SparseArrayStorage<ObjTy>        > { };
+template <typename ObjTy>                struct SparseArrayH   : SparseArrayExt<ObjTy> { ReallocFn m_reallocFn; };
 
 } //namespace ng
 } //namespace dm
 
-#endif // DM_NG_LIST_HEADER_GUARD
+#endif // DM_NG_SPARSEARRAY_HEADER_GUARD
 
 /* vim: set sw=4 ts=4 expandtab: */

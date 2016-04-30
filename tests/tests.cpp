@@ -384,8 +384,8 @@ void testDenseSets()
     destroy(set3);
 }
 
-template <typename ListTy>
-void testListApi(ListTy& _list)
+template <typename SparseArrayTy>
+void testSparseArrayApi(SparseArrayTy& _list)
 {
     Foo* foo;
     foo = _list.addNew();
@@ -402,7 +402,7 @@ void testListApi(ListTy& _list)
     const bool b0 = _list.contains(foo);
     u32c idx = _list.getIdxOfObj(foo);
 
-    printf("List");
+    printf("SparseArray");
     for (uint32_t hh = 0, end = _list.count(); hh < end; ++hh)
     {
         Foo* foo = _list.get(hh);
@@ -444,32 +444,32 @@ void testListApi(ListTy& _list)
     printf(" # %d %d %d\n", b0, idx, cnt);
 }
 
-void testLists()
+void testSparseArrays()
 {
-    // List with fixed size inline memory.
-    typedef ListT<Foo, 64> TestListT;
-    TestListT list0;
-    testListApi(list0);
+    // SparseArray with fixed size inline memory.
+    typedef SparseArrayT<Foo, 64> TestSparseArrayT;
+    TestSparseArrayT list0;
+    testSparseArrayApi(list0);
 
-    // List with external memory.
-    typedef ListExt<Foo> TestListExt;
-    TestListExt list1;
-    u32 size = TestListExt::sizeFor(64);
+    // SparseArray with external memory.
+    typedef SparseArrayExt<Foo> TestSparseArrayExt;
+    TestSparseArrayExt list1;
+    u32 size = TestSparseArrayExt::sizeFor(64);
     void* mem = dm_alloc(size, &::realloc);
     list1.init(64, (uint8_t*)mem);
-    testListApi(list1);
+    testSparseArrayApi(list1);
 
-    // List with allocator.
-    typedef List<Foo> TestList;
-    TestList list2;
+    // SparseArray with allocator.
+    typedef SparseArray<Foo> TestSparseArray;
+    TestSparseArray list2;
     list2.init(64, &::realloc);
-    testListApi(list2);
+    testSparseArrayApi(list2);
 
-    // List as ptr.
-    typedef ListH<Foo> TestListH;
-    TestListH* list3;
-    list3 = create<TestListH>(64, &::realloc);
-    testListApi(*list3);
+    // SparseArray as ptr.
+    typedef SparseArrayH<Foo> TestSparseArrayH;
+    TestSparseArrayH* list3;
+    list3 = create<TestSparseArrayH>(64, &::realloc);
+    testSparseArrayApi(*list3);
     destroy(list3);
 }
 
@@ -652,7 +652,7 @@ void testApi()
     testIdxAllocs();
     testBitArrays();
     testDenseSets();
-    testLists();
+    testSparseArrays();
     testLinkedLists();
     testHashMaps();
     testObjHashMaps();
