@@ -18,6 +18,7 @@
 #include <dm/ng/datastructures/array.h>
 #include <dm/ng/datastructures/linkedlist.h>
 #include <dm/ng/datastructures/handlealloc.h>
+#include <dm/ng/datastructures/idxalloc.h>
 #include <dm/ng/datastructures/denseset.h>
 #include <dm/ng/datastructures/list.h>
 #include <dm/ng/datastructures/bitarray.h>
@@ -186,6 +187,62 @@ void testHandleAllocs()
     TestHandleAllocH* ha3;
     ha3 = create<TestHandleAllocH>(64, &::realloc);
     testHandleAlloc(*ha3);
+    destroy(ha3);
+}
+
+template <typename IdxAllocTy>
+void testIdxAlloc(IdxAllocTy& _ia)
+{
+    _ia.alloc();
+    _ia.alloc();
+    _ia.removeAt(0);
+    _ia.alloc();
+    _ia.removeAt(1);
+    _ia.alloc();
+    _ia.alloc();
+    u32 count = _ia.count();
+
+    printf("IdxAlloc out %d %d %d |"
+          , _ia[0]
+          , _ia[1]
+          , _ia[2]
+          );
+
+    _ia.sort();
+
+    printf("%d %d %d\n"
+          , _ia[0]
+          , _ia[1]
+          , _ia[2]
+          );
+}
+
+void testIdxAllocs()
+{
+    // IdxAlloc with fixed size inline memory.
+    typedef IdxAllocT<64> TestIdxAllocT;
+    TestIdxAllocT ha0;
+    testIdxAlloc(ha0);
+
+    // IdxAlloc with external memory.
+    typedef IdxAllocExt<u16> TestIdxAllocExt;
+    TestIdxAllocExt ha1;
+    u32 size = TestIdxAllocExt::sizeFor(64);
+    void* mem = dm_alloc(size, &::realloc);
+    ha1.init(64, (uint8_t*)mem);
+    testIdxAlloc(ha1);
+
+    // IdxAlloc with allocator.
+    typedef IdxAlloc<u16> TestIdxAlloc;
+    TestIdxAlloc ha2;
+    ha2.init(64, &::realloc);
+    testIdxAlloc(ha2);
+
+    // IdxAlloc as ptr.
+    typedef IdxAllocH<u16> TestIdxAllocH;
+    TestIdxAllocH* ha3;
+    ha3 = create<TestIdxAllocH>(64, &::realloc);
+    testIdxAlloc(*ha3);
     destroy(ha3);
 }
 
@@ -572,6 +629,7 @@ void testApi()
     testArrays();
     testObjArrays();
     testHandleAllocs();
+    testIdxAllocs();
     testBitArrays();
     testDenseSets();
     testLists();
