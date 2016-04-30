@@ -3,8 +3,8 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#ifndef DM_NG_SET_HEADER_GUARD
-#define DM_NG_SET_HEADER_GUARD
+#ifndef DM_NG_DENSESET_HEADER_GUARD
+#define DM_NG_DENSESET_HEADER_GUARD
 
 #include <stdint.h>
 #include <dm/check.h>
@@ -256,6 +256,6 @@ template <uint16_t MaxT> struct DenseSetT   : DenseSetImpl< DenseSetStorageT<Max
 } //namespace ng
 } //namespace dm
 
-#endif // DM_NG_SET_HEADER_GUARD
+#endif // DM_NG_DENSESET_HEADER_GUARD
 
 /* vim: set sw=4 ts=4 expandtab: */
