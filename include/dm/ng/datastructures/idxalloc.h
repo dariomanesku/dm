@@ -33,6 +33,11 @@ struct IdxAllocImpl : IdxAllocStorageTy
 
     void init()
     {
+        doReset();
+    }
+
+    void doReset()
+    {
         m_count = 0;
         for (IdxTy ii = 0, end = max(); ii < end; ++ii)
         {
