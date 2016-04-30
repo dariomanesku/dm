@@ -1,6 +1,6 @@
 #if 0
     g++ -I../include/ tests.cpp -o tests && ./tests && rm tests
-    #g++ -g -I../include/ tests.cpp -o tests && gdb tests && rm tests
+    #g++ -g -I../include/ tests.cpp -o tests && gdb --eval-command="run" tests && rm tests
     exit
 #endif
 
@@ -387,41 +387,61 @@ void testDenseSets()
 template <typename ListTy>
 void testListApi(ListTy& _list)
 {
-    Foo foo = { 23, 55 };
-    _list.fillWith(&foo);
-    _list.addCopy(&foo);
+    Foo* foo;
+    foo = _list.addNew();
+    foo->m_a = 111;
+    foo->m_b = 222;
 
-    Foo* f0 = _list.addNew();
-    f0->m_a = 111;
-    f0->m_b = 222;
+    foo = _list.addNew();
+    foo->m_a = 333;
+    foo->m_b = 444;
 
-    u16 handle = _list.getHandleOf(f0);
-    bool b0 = _list.contains(handle);
-    bool b1 = _list.contains(0);
-    bool b2 = _list.containsObj(f0);
-    bool b3 = _list.containsObj(NULL);
+    Foo ff = { 23, 55 };
+    _list.addCopy(&ff);
 
-    u16 at = _list.getHandleAt(0);
+    const bool b0 = _list.contains(foo);
+    u32c idx = _list.getIdxOfObj(foo);
 
-    Foo* f1 = _list.get(handle);
-    Foo* f2 = _list.getAt(0);
-    _list[0].m_a = 22;
+    printf("List");
+    for (uint32_t hh = 0, end = _list.count(); hh < end; ++hh)
+    {
+        Foo* foo = _list.get(hh);
+        printf(" %u/%u", foo->m_a, foo->m_b);
+    }
+    printf(" |");
 
-    _list.remove(handle);
-    _list.removeObj(f0);
     _list.removeAt(0);
+    for (uint32_t hh = 0, end = _list.count(); hh < end; ++hh)
+    {
+        Foo* foo = _list.get(hh);
+        printf(" %u/%u", foo->m_a, foo->m_b);
+    }
+    printf(" |");
+
+    _list.sort();
+    for (uint32_t hh = 0, end = _list.count(); hh < end; ++hh)
+    {
+        Foo* foo = _list.get(hh);
+        printf(" %u/%u", foo->m_a, foo->m_b);
+    }
+
+    printf(" | at");
+    for (uint32_t ii = 0, end = 3; ii < end; ++ii)
+    {
+        Foo* foo = _list.getAt(ii);
+        printf(" %u/%u", foo->m_a, foo->m_b);
+    }
+
+    _list.compact();
+    printf(" | comp");
+    for (uint32_t ii = 0, end = 3; ii < end; ++ii)
+    {
+        Foo* foo = _list.getAt(ii);
+        printf(" %u/%u", foo->m_a, foo->m_b);
+    }
 
     u32 cnt = _list.count();
-
-    (void)f0;
-    (void)f1;
-    (void)f2;
-
-    printf("List out %d %d | %d %d %d %d | %d\n"
-         , handle, at
-         , b0, b1, b2, b3
-         , cnt
-         );
+    printf(" # %d %d %d\n", b0, idx, cnt);
 }
 
 void testLists()

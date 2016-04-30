@@ -39,7 +39,7 @@ struct IdxAllocImpl : IdxAllocStorageTy
     void doReset()
     {
         m_count = 0;
-        for (IdxTy ii = 0, end = max(); ii < end; ++ii)
+        for (uint32_t ii = 0, end = max(); ii < end; ++ii)
         {
             indices()[ii] = ii;
         }
@@ -50,6 +50,15 @@ struct IdxAllocImpl : IdxAllocStorageTy
         DM_CHECK(m_count < max(), "IdxAllocImpl::alloc() | %d, %d", m_count, max());
 
         return indices()[m_count++];
+    }
+
+    IdxTy* alloc(uint32_t _count)
+    {
+        DM_CHECK((m_count + _count) < max(), "IdxAllocImpl::alloc(_count) | %d, %d", m_count + _count, max());
+
+        const uint32_t curr = m_count;
+        m_count += _count;
+        return &indices()[curr];
     }
 
     void removeAt(uint32_t _at)
@@ -67,10 +76,15 @@ struct IdxAllocImpl : IdxAllocStorageTy
 
     void sort()
     {
+        if (m_count <= 1)
+        {
+            return;
+        }
+
         qsort(indices(), m_count, sizeof(IdxTy), cmpAsc);
     }
 
-    IdxTy get(uint32_t _idx)
+    IdxTy getAt(uint32_t _idx)
     {
         DM_CHECK(_idx < max(), "IdxAllocImpl::get() | %d, %d", _idx, max());
 
@@ -80,6 +94,13 @@ struct IdxAllocImpl : IdxAllocStorageTy
     IdxTy& operator[](uint32_t _idx)
     {
         DM_CHECK(_idx < max(), "IdxAllocImpl::operator[]() ref | %d, %d", _idx, max());
+
+        return indices()[_idx];
+    }
+
+    const IdxTy& operator[](uint32_t _idx) const
+    {
+        DM_CHECK(_idx < max(), "IdxAllocImpl::operator[]() const | %d, %d", _idx, max());
 
         return indices()[_idx];
     }

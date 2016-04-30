@@ -22,42 +22,25 @@ struct ListImpl : ListStorageTy
     ///     struct ListStorageT
     ///     {
     ///         typedef ObjTy ObjectType;
-    ///         typedef HandleAllocT<MaxT> HandleAllocType;
+    ///         typedef IdxAllocT<MaxT> IdxAllocType;
     ///
     ///         ObjTy* objects();
-    ///         HandleAllocType* handles();
+    ///         IdxAllocType* indices();
     ///         uint32_t max();
     ///     };
-    typedef typename ListStorageTy::ObjectType      ObjTy;
-    typedef typename ListStorageTy::HandleAllocType HandleAllocTy;
+    typedef typename ListStorageTy::ObjectType   ObjTy;
+    typedef typename ListStorageTy::IdxAllocType IdxAllocTy;
     using ListStorageTy::objects;
-    using ListStorageTy::handles;
+    using ListStorageTy::indices;
     using ListStorageTy::max;
 
     ListImpl() : ListStorageTy()
     {
     }
 
-    void fillWith(const ObjTy* _obj)
-    {
-        for (uint32_t ii = count(); ii--; )
-        {
-            ::new (&objects()[ii]) ObjTy(*_obj);
-        }
-    }
-
-    uint32_t addCopy(const ObjTy* _obj)
-    {
-        const uint32_t idx = handles()->alloc();
-
-        ObjTy* dst = &objects()[idx];
-        dst = ::new (dst) ObjTy(*_obj);
-        return idx;
-    }
-
     ObjTy* addNew()
     {
-        const uint32_t idx = handles()->alloc();
+        const uint32_t idx = (uint32_t)indices()->alloc();
         DM_CHECK(idx < max(), "ListImpl::addNew() | %d, %d", idx, max());
 
         ObjTy* dst = &objects()[idx];
@@ -65,33 +48,42 @@ struct ListImpl : ListStorageTy
         return dst;
     }
 
-    bool contains(uint32_t _handle)
+    uint32_t addCopy(const ObjTy* _obj)
     {
-        return handles()->contains(_handle);
+        const uint32_t idx = (uint32_t)indices()->alloc();
+        DM_CHECK(idx < max(), "ListImpl::addCopy() | %d, %d", idx, max());
+
+        ObjTy* dst = &objects()[idx];
+        dst = ::new (dst) ObjTy(*_obj);
+        return idx;
     }
 
-    bool containsObj(const ObjTy* _obj)
+    bool contains(const ObjTy* _obj)
     {
         return (&objects()[0] <= _obj && _obj < &objects()[max()]);
     }
 
-    uint32_t getHandleOf(const ObjTy* _obj)
+    uint32_t getIdxOfObj(const ObjTy* _obj)
     {
-        DM_CHECK(containsObj(_obj), "ListImpl::getHandleOf() | Object not from the list.");
+        DM_CHECK(contains(_obj), "ListImpl::getIdxOf() | Object not from the list.");
 
         return uint32_t(_obj - objects());
     }
 
-    uint32_t getHandleAt(uint32_t _idx)
+    uint32_t getIdxOf(uint32_t _handle)
     {
-        return handles()->getHandleAt(_idx);
+        DM_CHECK(_handle < max(), "ListImpl::getIdxOf() #1 | %d, %d", _handle, max());
+        const uint32_t idx = (uint32_t)indices()->getAt(_handle);
+        DM_CHECK(idx < max(), "ListImpl::getIdxOf() #2 | %d, %d", idx, max());
+
+        return idx;
     }
 
     ObjTy* get(uint32_t _handle)
     {
-        DM_CHECK(_handle < max(), "ListImpl::getObjFromHandle() | %d, %d", _handle, max());
+        const uint32_t idx = getIdxOf(_handle);
 
-        return &objects()[_handle];
+        return &objects()[idx];
     }
 
     private:
@@ -99,8 +91,7 @@ struct ListImpl : ListStorageTy
     {
         DM_CHECK(_idx < max(), "ListImpl::getObjAt_impl() | %d, %d", _idx, max());
 
-        const uint32_t handle = handles()->getHandleAt(_idx);
-        return get(handle);
+        return &objects()[_idx];
     } public:
 
     ObjTy* getAt(uint32_t _idx)
@@ -118,66 +109,131 @@ struct ListImpl : ListStorageTy
         return *getObjAt_impl(_idx);
     }
 
-    void remove(uint32_t _handle)
-    {
-        DM_CHECK(_handle < max(), "ListImpl::remove() | %d, %d", _handle, max());
-
-        objects()[_handle].~ObjTy();
-        handles()->free(_handle);
-    }
-
-    uint32_t removeObj(ObjTy* _obj)
-    {
-        const uint32_t handle = getHandleOf(_obj);
-        remove(handle);
-        return handle;
-    }
-
     void removeAt(uint32_t _idx)
     {
         DM_CHECK(_idx < max(), "ListImpl::removeAt() | %d, %d", _idx, max());
 
-        const uint32_t handle = handles()->getHandleAt(_idx);
-        remove(handle);
+        objects()[_idx].~ObjTy();
+        indices()->removeAt(_idx);
+    }
+
+    void removeObj(ObjTy* _obj)
+    {
+        const uint32_t idx = getIdxOfObj(_obj);
+        removeAt(idx);
+    }
+
+    void remove(uint32_t _handle)
+    {
+        const uint32_t idx = getIdxOf(_handle);
+        removeAt(idx);
     }
 
     void removeAll()
     {
-        for (uint32_t ii = count(); ii--; )
+        for (uint32_t hh = count(); hh--; )
         {
-            getAt(ii)->~ObjTy();
+            remove(hh);
         }
-        handles()->reset();
     }
 
-    void reset()
+    void sort()
     {
-        handles()->reset();
+        indices()->sort();
+    }
+
+    void compact()
+    {
+        const uint32_t end = count();
+        if (end <= 1)
+        {
+            return;
+        }
+
+        sort();
+
+        uint32_t idx = 0;
+        uint32_t prev;
+        uint32_t curr = indices()->getAt(0);
+
+        bool inOrder = (0 == curr);
+        for (;;)
+        {
+            prev = curr;
+
+            if (inOrder)
+            {
+                idx++;
+            }
+            else
+            {
+                uint32_t dst = 0;
+                uint32_t src = curr;
+
+                uint32_t cnt = 1;
+                for (; cnt < end; ++cnt)
+                {
+                    const uint32_t next = indices()->getAt(cnt);
+                    if (next-prev != 1)
+                    {
+                        break;
+                    }
+                    prev = next;
+                }
+
+                if (cnt > curr)
+                {
+                    memmove(&objects()[dst], &objects()[src], cnt*sizeof(ObjTy));
+                }
+                else
+                {
+                    memcpy(&objects()[dst], &objects()[src], cnt*sizeof(ObjTy));
+                }
+
+                idx += cnt;
+            }
+
+            if (idx >= end)
+            {
+                break;
+            }
+
+            curr = indices()->getAt(idx);
+            const uint32_t diff = curr - prev;
+            inOrder = (1 == diff);
+        }
+    }
+
+    void zero()
+    {
+        memset(objects(), 0, max()*sizeof(ObjTy));
+    }
+
+    void doReset()
+    {
+        indices()->doReset();
     }
 
     uint32_t count()
     {
-        return handles()->count();
+        return indices()->count();
     }
-
-private:
-    uint32_t m_last;
 };
 
 template <typename ObjTy, uint32_t MaxT>
 struct ListStorageT
 {
     typedef ObjTy ObjectType;
-    typedef HandleAllocT<MaxT> HandleAllocType;
+    typedef IdxAllocT<MaxT> IdxAllocType;
 
     ObjTy* objects()
     {
         return m_objects;
     }
 
-    HandleAllocType* handles()
+    IdxAllocType* indices()
     {
-        return &m_handles;
+        return &m_indices;
     }
 
     uint32_t max()
@@ -185,7 +241,7 @@ struct ListStorageT
         return MaxT;
     }
 
-    HandleAllocType m_handles;
+    IdxAllocType m_indices;
     ObjTy m_objects[MaxT];
 };
 
@@ -193,11 +249,11 @@ template <typename ObjTy>
 struct ListStorageExt
 {
     typedef ObjTy ObjectType;
-    typedef HandleAllocExt<uint32_t> HandleAllocType;
+    typedef IdxAllocExt<uint32_t> IdxAllocType;
 
     static uint32_t sizeFor(uint32_t _max)
     {
-        return _max*sizeof(ObjTy) + HandleAllocType::sizeFor(_max);
+        return _max*sizeof(ObjTy) + IdxAllocType::sizeFor(_max);
     }
 
     ListStorageExt()
@@ -213,7 +269,7 @@ struct ListStorageExt
 
         m_max = _max;
         m_objects = (ObjTy*)objBegin;
-        uint8_t* end = m_handles.init(_max, handleBegin);
+        uint8_t* end = m_indices.init(_max, handleBegin);
 
         return end;
     }
@@ -223,9 +279,9 @@ struct ListStorageExt
         return m_objects;
     }
 
-    HandleAllocType* handles()
+    IdxAllocType* indices()
     {
-        return &m_handles;
+        return &m_indices;
     }
 
     uint32_t max()
@@ -235,18 +291,18 @@ struct ListStorageExt
 
     uint32_t m_max;
     ObjTy* m_objects;
-    HandleAllocType m_handles;
+    IdxAllocType m_indices;
 };
 
 template <typename ObjTy>
 struct ListStorage
 {
     typedef ObjTy ObjectType;
-    typedef HandleAllocExt<uint32_t> HandleAllocType;
+    typedef IdxAllocExt<uint32_t> IdxAllocType;
 
     static uint32_t sizeFor(uint32_t _max)
     {
-        return _max*sizeof(ObjTy) + HandleAllocType::sizeFor(_max);
+        return _max*sizeof(ObjTy) + IdxAllocType::sizeFor(_max);
     }
 
     ListStorage()
@@ -260,12 +316,12 @@ struct ListStorage
         const uint32_t totalSize = sizeFor(_max);
         void* mem = dm_alloc(totalSize, _reallocFn);
 
-        uint8_t* objBegin   = (uint8_t*)mem;
+        uint8_t* objBegin    = (uint8_t*)mem;
         uint8_t* handleBegin = (uint8_t*)mem + _max*sizeof(ObjTy);
 
         m_max = _max;
         m_objects = (ObjTy*)objBegin;
-        m_handles.init(_max, handleBegin);
+        m_indices.init(_max, handleBegin);
 
         m_reallocFn = _reallocFn;
     }
@@ -284,9 +340,9 @@ struct ListStorage
         return m_objects;
     }
 
-    HandleAllocType* handles()
+    IdxAllocType* indices()
     {
-        return &m_handles;
+        return &m_indices;
     }
 
     uint32_t max()
@@ -296,7 +352,7 @@ struct ListStorage
 
     uint32_t m_max;
     ObjTy* m_objects;
-    HandleAllocType m_handles;
+    IdxAllocType m_indices;
     ReallocFn m_reallocFn;
 };
 

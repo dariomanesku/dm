@@ -166,14 +166,28 @@ struct ObjArrayImpl : ArrayStorageTy
         m_count = 0;
     }
 
-    ElemTy* addNew(uint32_t _count = 1)
+    ElemTy* addNew()
+    {
+        if (isResizable())
+        {
+            expandIfNecessaryToMakeRoomFor(1);
+        }
+
+        DM_CHECK(m_count < max(), "ObjArrayImpl::addNew() | %d, %d", m_count, max());
+
+        ElemTy* elem = &elements()[m_count++];
+        elem = ::new (elem) ElemTy();
+        return elem;
+    }
+
+    ElemTy* addNew(uint32_t _count)
     {
         if (isResizable())
         {
             expandIfNecessaryToMakeRoomFor(_count);
         }
 
-        DM_CHECK(m_count < max(), "ObjArrayImpl::addNew() | %d, %d", m_count, max());
+        DM_CHECK((m_count + _count) < max(), "ObjArrayImpl::addNew(_count) | %d, %d", m_count + _count, max());
 
         const uint32_t curr = m_count;
         m_count += _count;
