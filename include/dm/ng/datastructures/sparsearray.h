@@ -93,6 +93,7 @@ struct SparseArrayImpl : SparseArrayStorageTy
         return getObjAt_impl(_handle);
     }
 
+    /// Used for iteration over all elements.
     ObjTy* getFromHandleAt(uint32_t _idx)
     {
         const uint32_t handle = handles()->getHandleAt(_idx);
