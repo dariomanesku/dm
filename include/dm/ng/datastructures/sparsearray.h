@@ -114,9 +114,9 @@ struct SparseArrayImpl : SparseArrayStorageTy
         remove(handle);
     }
 
-    void removeObj(ObjTy* _obj)
+    void removeObj(const ObjTy* _obj)
     {
-        const uint32_t handle = getIdxOfObj(_obj);
+        const uint32_t handle = getHandleOf(_obj);
         remove(handle);
     }
 
