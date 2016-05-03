@@ -192,8 +192,8 @@ struct SparseArrayImpl : SparseArrayStorageTy
         // Reset handle alloc.
         typename HandleAllocTy::HandleTy* han = handles()->handles();
         typename HandleAllocTy::HandleTy* ind = handles()->indices();
-        for (uint32_t ii = 0; ii < end; ++ii) { han[ii] = ii; }
-        for (uint32_t ii = 0; ii < end; ++ii) { ind[ii] = ii; }
+        for (uint32_t ii = 0, iiEnd = handles()->max(); ii < iiEnd; ++ii) { han[ii] = ii; }
+        for (uint32_t ii = 0; ii < end; ++ii)                             { ind[ii] = ii; }
     }
 
     void zero()
