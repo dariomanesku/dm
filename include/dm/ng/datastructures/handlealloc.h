@@ -92,6 +92,27 @@ struct HandleAllocImpl : HandleAllocStorageTy
         return indices()[_handle];
     }
 
+    static int cmpAsc(const void* _a, const void* _b)
+    {
+        return (*(HandleTy*)_a - *(HandleTy*)_b);
+    }
+
+    void sort()
+    {
+        if (m_numHandles <= 1)
+        {
+            return;
+        }
+
+        qsort(handles(), m_numHandles, sizeof(HandleTy), cmpAsc);
+
+        for (uint32_t ii = 0, end = m_numHandles; ii < end; ++ii)
+        {
+            HandleTy handle = handles()[ii];
+            indices()[handle] = ii;
+        }
+    }
+
     HandleTy count()
     {
         return m_numHandles;

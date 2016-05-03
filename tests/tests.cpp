@@ -20,7 +20,7 @@
 #include <dm/ng/datastructures/handlealloc.h>
 #include <dm/ng/datastructures/idxalloc.h>
 #include <dm/ng/datastructures/denseset.h>
-#include <dm/ng/datastructures/list.h>
+#include <dm/ng/datastructures/sparsearray.h>
 #include <dm/ng/datastructures/bitarray.h>
 #include <dm/ng/datastructures/hashmap.h>
 #include <dm/ng/datastructures/objhashmap.h>
@@ -385,62 +385,54 @@ void testDenseSets()
 }
 
 template <typename SparseArrayTy>
-void testSparseArrayApi(SparseArrayTy& _list)
+void testSparseArrayApi(SparseArrayTy& _sa)
 {
     Foo* foo;
-    foo = _list.addNew();
+    foo = _sa.addNew();
     foo->m_a = 111;
     foo->m_b = 222;
 
-    foo = _list.addNew();
+    foo = _sa.addNew();
     foo->m_a = 333;
     foo->m_b = 444;
 
     Foo ff = { 23, 55 };
-    _list.addCopy(&ff);
+    _sa.addCopy(&ff);
 
-    const bool b0 = _list.contains(foo);
-    u32c idx = _list.getIdxOfObj(foo);
+    const bool b0 = _sa.contains(foo);
+    u32c idx = _sa.getHandleOf(foo);
 
     printf("SparseArray");
-    for (uint32_t hh = 0, end = _list.count(); hh < end; ++hh)
+    for (uint32_t hh = 0, end = _sa.count(); hh < end; ++hh)
     {
-        Foo* foo = _list.get(hh);
+        Foo* foo = _sa.getFromHandleAt(hh);
         printf(" %u/%u", foo->m_a, foo->m_b);
     }
     printf(" |");
 
-    _list.removeAt(0);
-    for (uint32_t hh = 0, end = _list.count(); hh < end; ++hh)
+    _sa.removeFromHandleAt(0);
+    for (uint32_t hh = 0, end = _sa.count(); hh < end; ++hh)
     {
-        Foo* foo = _list.get(hh);
-        printf(" %u/%u", foo->m_a, foo->m_b);
-    }
-    printf(" |");
-
-    _list.sort();
-    for (uint32_t hh = 0, end = _list.count(); hh < end; ++hh)
-    {
-        Foo* foo = _list.get(hh);
+        Foo* foo = _sa.getFromHandleAt(hh);
         printf(" %u/%u", foo->m_a, foo->m_b);
     }
 
     printf(" | at");
     for (uint32_t ii = 0, end = 3; ii < end; ++ii)
     {
-        Foo* foo = _list.getAt(ii);
+        Foo* foo = _sa.get(ii);
         printf(" %u/%u", foo->m_a, foo->m_b);
     }
 
-    _list.compact();
+    _sa.compact();
     printf(" | comp");
     for (uint32_t ii = 0, end = 3; ii < end; ++ii)
     {
-        Foo* foo = _list.getAt(ii);
+        Foo* foo = _sa.getFromHandleAt(ii);
         printf(" %u/%u", foo->m_a, foo->m_b);
     }
 
-    u32 cnt = _list.count();
+    u32 cnt = _sa.count();
     printf(" # %d %d %d\n", b0, idx, cnt);
 }
 
