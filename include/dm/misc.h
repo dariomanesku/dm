@@ -40,6 +40,7 @@ namespace dm
 
     #define DM_OFFSETOF(type, member) ((size_t)&(((type*)0)->member))
     #define DM_STATIC_ASSERT(_expr) { typedef int dm_compile_time_assert[1 - 2*!(_expr)]; }
+    #define DM_STRINGIFY(_val) #_val
 
     // Other macros.
     //-----
