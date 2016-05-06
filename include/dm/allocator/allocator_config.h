@@ -65,7 +65,7 @@ DM_ALLOC_DEF(9,   32) // for region: 1024MB
 
     #define DM_MEM_MIN_SIZE            DM_MEGABYTES(512)
     #define DM_MEM_DEFAULT_SIZE        DM_MEGABYTES(1536)
-    #define DM_MEM_STATIC_STORAGE_SIZE DM_MEGABYTES(32)
+    #define DM_MEM_STATIC_STORAGE_SIZE DM_MEGABYTES(64)
 
     // To override default preallocated memory size:
     //     #define DM_MEM_SIZE_FUNC memSizeFunc
