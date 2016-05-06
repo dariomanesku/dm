@@ -110,7 +110,7 @@ namespace dm
             DM_ASSERT(dm::isPowTwo(_maxPowTwo));
 
             m_max = _maxPowTwo;
-            m_ukv = (UsedKeyVal*)BX_ALLOC(_reallocator, sizeFor(_maxPowTwo));
+            m_ukv = (UsedKeyVal*)DM_ALLOC(_reallocator, sizeFor(_maxPowTwo));
             m_reallocator = _reallocator;
             m_cleanup = true;
 

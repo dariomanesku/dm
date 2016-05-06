@@ -67,7 +67,7 @@ namespace dm
         // Allocates memory internally.
         void init(uint16_t _max, dm::ReallocatorI* _reallocator)
         {
-            m_memoryBlock = BX_ALLOC(_reallocator, sizeFor(_max));
+            m_memoryBlock = DM_ALLOC(_reallocator, sizeFor(_max));
             m_reallocator = _reallocator;
             m_cleanup = true;
 

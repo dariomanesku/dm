@@ -354,7 +354,7 @@ namespace dm
     // Compile time strlen for rvalue string literals.
     // Use as: ctstrlen("foo"); // returns 3.
     template <uint32_t Len>
-    DM_INLINE uint32_t ctstrlen(const char (&_str)[Len])
+    DM_INLINE uint32_t ctstrlen(const char (&/*_str*/)[Len])
     {
         return Len-1;
     }
