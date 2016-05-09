@@ -24,8 +24,8 @@ struct ArrayImpl : ArrayStorageTy
     ///         typedef Ty ElementType;
     ///         bool isResizable();
     ///         bool resize(uint32_t _max);
-    ///         Ty* elements();
-    ///         uint32_t max();
+    ///         Ty* elements() const;
+    ///         uint32_t max() cosnt;
     ///     };
     typedef typename ArrayStorageTy::ElementType ElemTy;
     using ArrayStorageTy::isResizable;
@@ -112,6 +112,13 @@ struct ArrayImpl : ArrayStorageTy
         return elements()[_idx];
     }
 
+    const ElemTy& operator[](uint32_t _idx) const
+    {
+        DM_CHECK(_idx < max(), "ArrayImpl::operator[]() const ref | %d, %d", _idx, max());
+
+        return elements()[_idx];
+    }
+
     void zero()
     {
         memset(elements(), 0, max()*sizeof(ElemTy));
@@ -130,7 +137,7 @@ struct ArrayImpl : ArrayStorageTy
         m_count = 0;
     }
 
-    uint32_t count()
+    uint32_t count() const
     {
         return m_count;
     }
@@ -319,12 +326,12 @@ struct ArrayStorageT
         return false;
     }
 
-    Ty* elements()
+    Ty* elements() const
     {
         return m_elements;
     }
 
-    uint32_t max()
+    uint32_t max() const
     {
         return MaxT;
     }
@@ -366,12 +373,12 @@ struct ArrayStorageExt
         return false;
     }
 
-    Ty* elements()
+    Ty* elements() const
     {
         return m_elements;
     }
 
-    uint32_t max()
+    uint32_t max() const
     {
         return m_max;
     }
@@ -430,12 +437,12 @@ struct ArrayStorage
         return true;
     }
 
-    Ty* elements()
+    Ty* elements() const
     {
         return m_elements;
     }
 
-    uint32_t max()
+    uint32_t max() const
     {
         return m_max;
     }
