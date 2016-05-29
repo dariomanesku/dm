@@ -24,12 +24,15 @@ struct SparseArrayImpl : SparseArrayStorageTy
     ///         typedef ObjTy ObjectType;
     ///         typedef HandleAllocT<MaxT> HandleAllocType;
     ///
+    ///         bool isResizable() const;
     ///         ObjTy* objects();
     ///         HandleAllocType* handles();
     ///         uint32_t max();
     ///     };
     typedef typename SparseArrayStorageTy::ObjectType ObjTy;
     typedef typename SparseArrayStorageTy::HandleAllocType HandleAllocTy;
+    using SparseArrayStorageTy::isResizable;
+    using SparseArrayStorageTy::resize;
     using SparseArrayStorageTy::objects;
     using SparseArrayStorageTy::handles;
     using SparseArrayStorageTy::max;
@@ -40,6 +43,17 @@ struct SparseArrayImpl : SparseArrayStorageTy
 
     ObjTy* addNew()
     {
+        if (isResizable())
+        {
+            const uint32_t maxObj = max();
+
+            if (count() == maxObj)
+            {
+                const uint32_t newMax = maxObj+(maxObj>>1);
+                resize(newMax);
+            }
+        }
+
         const uint32_t handle = (uint32_t)handles()->alloc();
         DM_CHECK(handle < max(), "SparseArrayImpl::addNew() | %d, %d", handle, max());
 
@@ -50,6 +64,17 @@ struct SparseArrayImpl : SparseArrayStorageTy
 
     uint32_t addCopy(const ObjTy* _obj)
     {
+        if (isResizable())
+        {
+            const uint32_t maxObj = max();
+
+            if (count() == maxObj)
+            {
+                const uint32_t newMax = maxObj+(maxObj>>1);
+                resize(newMax);
+            }
+        }
+
         const uint32_t handle = (uint32_t)handles()->alloc();
         DM_CHECK(handle < max(), "SparseArrayImpl::addCopy() | %d, %d", handle, max());
 
@@ -91,6 +116,12 @@ struct SparseArrayImpl : SparseArrayStorageTy
     ObjTy* get(uint32_t _handle)
     {
         return getObjAt_impl(_handle);
+    }
+
+    /// Used for iteration over all elements.
+    uint32_t getHandleAt(uint32_t _idx)
+    {
+        return handles()->getHandleAt(_idx);
     }
 
     /// Used for iteration over all elements.
@@ -214,6 +245,15 @@ struct SparseArrayStorageT
     typedef ObjTy ObjectType;
     typedef HandleAllocT<MaxT> HandleAllocType;
 
+    bool isResizable() const
+    {
+        return false;
+    }
+
+    void resize(uint32_t /*_max*/)
+    {
+    }
+
     ObjTy* objects()
     {
         return m_objects;
@@ -238,6 +278,15 @@ struct SparseArrayStorageExt
 {
     typedef ObjTy ObjectType;
     typedef HandleAllocExt<uint32_t> HandleAllocType;
+
+    bool isResizable() const
+    {
+        return false;
+    }
+
+    void resize(uint32_t /*_max*/)
+    {
+    }
 
     static uint32_t sizeFor(uint32_t _max)
     {
@@ -287,6 +336,15 @@ struct SparseArrayStorage
 {
     typedef ObjTy ObjectType;
     typedef HandleAllocExt<uint32_t> HandleAllocType;
+
+    bool isResizable() const
+    {
+        return false;
+    }
+
+    void resize(uint32_t /*_max*/)
+    {
+    }
 
     static uint32_t sizeFor(uint32_t _max)
     {
@@ -344,9 +402,76 @@ struct SparseArrayStorage
     ReallocFn m_reallocFn;
 };
 
+template <typename ObjTy>
+struct SparseArrayStorageRes
+{
+    typedef ObjTy ObjectType;
+    typedef HandleAllocRes<uint32_t> HandleAllocType;
+
+    SparseArrayStorageRes()
+    {
+        m_max = 0;
+        m_objects = NULL;
+    }
+
+    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    {
+        const uint32_t size = _max*sizeof(ObjTy);
+
+        m_max = _max;
+        m_objects = (ObjTy*)dm_alloc(size, _reallocFn);
+        m_handles.init(_max, _reallocFn);
+
+        m_reallocFn = _reallocFn;
+    }
+
+    bool isResizable() const
+    {
+        return true;
+    }
+
+    void resize(uint32_t _newMax)
+    {
+        const uint32_t size = _newMax*sizeof(ObjTy);
+        m_max = _newMax;
+        m_objects = (ObjTy*)dm_realloc(size, m_reallocFn);
+        m_handles.resize(_newMax);
+    }
+
+    void destroy()
+    {
+        if (NULL != m_objects)
+        {
+            dm_free(m_objects, m_reallocFn);
+            m_objects = NULL;
+        }
+    }
+
+    ObjTy* objects()
+    {
+        return m_objects;
+    }
+
+    HandleAllocType* handles()
+    {
+        return &m_handles;
+    }
+
+    uint32_t max()
+    {
+        return m_max;
+    }
+
+    uint32_t m_max;
+    ObjTy* m_objects;
+    HandleAllocType m_handles;
+    ReallocFn m_reallocFn;
+};
+
 template <typename ObjTy, uint32_t MaxT> struct SparseArrayT   : SparseArrayImpl< SparseArrayStorageT<ObjTy, MaxT> > { };
 template <typename ObjTy>                struct SparseArrayExt : SparseArrayImpl< SparseArrayStorageExt<ObjTy>     > { };
 template <typename ObjTy>                struct SparseArray    : SparseArrayImpl< SparseArrayStorage<ObjTy>        > { };
+template <typename ObjTy>                struct SparseArrayRes : SparseArrayImpl< SparseArrayStorage<ObjTy>        > { };
 template <typename ObjTy>                struct SparseArrayH   : SparseArrayExt<ObjTy> { ReallocFn m_reallocFn; };
 
 } //namespace ng

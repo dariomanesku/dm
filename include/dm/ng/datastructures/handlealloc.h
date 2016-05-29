@@ -137,7 +137,7 @@ struct HandleAllocStorageT
         return m_indices;
     }
 
-    HandleType max()
+    HandleType max() const
     {
         return MaxHandlesT;
     }
@@ -185,7 +185,7 @@ struct HandleAllocStorageExt
         return m_indices;
     }
 
-    HandleType max()
+    HandleType max() const
     {
         return m_max;
     }
@@ -250,7 +250,86 @@ struct HandleAllocStorage
         return m_indices;
     }
 
-    HandleType max()
+    HandleType max() const
+    {
+        return m_max;
+    }
+
+private:
+    uint32_t m_max;
+    HandleType* m_handles;
+    HandleType* m_indices;
+    ReallocFn m_reallocFn;
+};
+
+template <typename HandleTy=uint16_t>
+struct HandleAllocStorageRes
+{
+    typedef HandleTy HandleType;
+
+    static uint32_t sizeFor(uint32_t _max)
+    {
+        return 2*_max*sizeof(HandleType);
+    }
+
+    HandleAllocStorageRes()
+    {
+        m_max = 0;
+        m_handles = NULL;
+        m_indices = NULL;
+    }
+
+    ~HandleAllocStorageRes()
+    {
+        destroy();
+    }
+
+    void initStorage(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    {
+        const uint32_t haSize = _max*sizeof(HandleType);
+
+        m_max = _max;
+        m_handles = (HandleType*)dm_alloc(haSize, _reallocFn);
+        m_indices = (HandleType*)dm_alloc(haSize, _reallocFn);
+        m_reallocFn = _reallocFn;
+    }
+
+    void resize(uint32_t _newMax)
+    {
+        const uint32_t haSize = _newMax*sizeof(HandleType);
+        m_max = _newMax;
+        m_handles = (HandleType*)dm_realloc(haSize, m_reallocFn);
+        m_indices = (HandleType*)dm_realloc(haSize, m_reallocFn);
+    }
+
+    void expand()
+    {
+        const uint32_t newMax = m_max+(m_max>>1);
+        resize(newMax);
+    }
+
+    void destroy()
+    {
+        if (NULL != m_handles)
+        {
+            dm_free(m_handles, m_reallocFn);
+            m_handles = NULL;
+            dm_free(m_indices, m_reallocFn);
+            m_indices = NULL;
+        }
+    }
+
+    HandleType* handles()
+    {
+        return m_handles;
+    }
+
+    HandleType* indices()
+    {
+        return m_indices;
+    }
+
+    HandleType max() const
     {
         return m_max;
     }
@@ -291,6 +370,18 @@ template <typename HandleTy=uint16_t>
 struct HandleAlloc : HandleAllocImpl< HandleAllocStorage<HandleTy> >
 {
     typedef HandleAllocImpl< HandleAllocStorage<HandleTy> > Base;
+
+    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    {
+        Base::initStorage(_max, _reallocFn);
+        Base::init();
+    }
+};
+
+template <typename HandleTy=uint16_t>
+struct HandleAllocRes : HandleAllocImpl< HandleAllocStorageRes<HandleTy> >
+{
+    typedef HandleAllocImpl< HandleAllocStorageRes<HandleTy> > Base;
 
     void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {

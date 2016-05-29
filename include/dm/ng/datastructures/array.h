@@ -25,7 +25,7 @@ struct ArrayImpl : ArrayStorageTy
     ///         bool isResizable();
     ///         bool resize(uint32_t _max);
     ///         Ty* elements() const;
-    ///         uint32_t max() cosnt;
+    ///         uint32_t max() const;
     ///     };
     typedef typename ArrayStorageTy::ElementType ElemTy;
     using ArrayStorageTy::isResizable;
