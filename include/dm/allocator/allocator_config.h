@@ -63,9 +63,17 @@ DM_ALLOC_DEF(9,   32) // for region: 1024MB
 
     // Use #define DM_ALLOCATOR 0 to fallback to default c-runtime allocator.
 
-    #define DM_MEM_MIN_SIZE            DM_MEGABYTES(512)
-    #define DM_MEM_DEFAULT_SIZE        DM_MEGABYTES(1536)
-    #define DM_MEM_STATIC_STORAGE_SIZE DM_MEGABYTES(64)
+    #ifndef DM_MEM_MIN_SIZE
+    #   define DM_MEM_MIN_SIZE DM_MEGABYTES(512)
+    #endif // DM_MEM_MIN_SIZE
+
+    #ifndef DM_MEM_DEFAULT_SIZE
+    #   define DM_MEM_DEFAULT_SIZE DM_MEGABYTES(1536)
+    #endif // DM_MEM_DEFAULT_SIZE
+
+    #ifndef DM_MEM_STATIC_STORAGE_SIZE
+    #   define DM_MEM_STATIC_STORAGE_SIZE DM_MEGABYTES(64)
+    #endif // DM_MEM_STATIC_STORAGE_SIZE
 
     // To override default preallocated memory size:
     //     #define DM_MEM_SIZE_FUNC memSizeFunc
