@@ -9,13 +9,13 @@
 #include <stdint.h> // uint32_t
 #include <new>      // placement-new
 
+#include "../../../3rdparty/bx/uint32_t.h"  // bx::uint64_cnttz(), bx::uint64_cntlz(), bx::uint64_cntbits()
+#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
+
 #include "common.h" // Heap alloc utils.
 
 #include "../common/common.h" // DM_INLINE
 #include "../check.h"         // DM_CHECK
-
-#include "../../../3rdparty/bx/uint32_t.h"  // bx::uint64_cnttz(), bx::uint64_cntlz(), bx::uint64_cntbits()
-#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
 
 namespace dm
 {

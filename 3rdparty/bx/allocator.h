@@ -143,6 +143,11 @@ namespace bx
 
 } // namespace bx
 
+#endif // BX_ALLOCATOR_H_HEADER_GUARD
+
+#ifndef DM_ALLOCATOR_IMPL_H_HEADER_GUARD
+#define DM_ALLOCATOR_IMPL_H_HEADER_GUARD
+
 /*
  * Copyright 2016 Dario Manesku. All rights reserved.
  * License: http://www.opensource.org/licenses/BSD-2-Clause
@@ -283,4 +288,4 @@ namespace dm
 
 } // namespace dm
 
-#endif // BX_ALLOCATOR_H_HEADER_GUARD
+#endif // DM_ALLOCATOR_IMPL_H_HEADER_GUARD

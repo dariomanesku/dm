@@ -6,6 +6,8 @@
 #ifndef DM_PI_H_HEADER_GUARD
 #define DM_PI_H_HEADER_GUARD
 
+#include "common/common.h" // DM_INLINE()
+
 namespace dm
 {
     static const float pi        = 3.14159265358979323846f;

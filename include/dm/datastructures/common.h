@@ -7,8 +7,8 @@
 #define DM_DATASTRUCTURES_COMMON_H_HEADER_GUARD
 
 #include <stdint.h>
+#include "../../../3rdparty/bx/allocator.h" // dm::AllocatorI //TODO: get rid of this !
 #include "../common/common.h"               // DM_INLINE
-#include "../../../3rdparty/bx/allocator.h" // dm::AllocatorI
 
 namespace dm
 {
