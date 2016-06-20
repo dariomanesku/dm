@@ -22,7 +22,7 @@
 namespace dm { namespace ng {
 
 /// https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-inline uint32_t u32_cntbits_ref(uint32_t _val)
+inline uint32_t cntbits_u32_ref(uint32_t _val)
 {
     _val = _val - ((_val >> 1) & 0x55555555);
     _val = (_val & 0x33333333) + ((_val >> 2) & 0x33333333);
@@ -31,34 +31,34 @@ inline uint32_t u32_cntbits_ref(uint32_t _val)
     return cnt;
 }
 
-inline uint32_t u32_cntlz_ref(uint32_t _val)
+inline uint32_t cntlz_u32_ref(uint32_t _val)
 {
     _val |= _val >> 1;
     _val |= _val >> 2;
     _val |= _val >> 4;
     _val |= _val >> 8;
     _val |= _val >> 16;
-    return u32_cntbits_ref(~_val);
+    return cntbits_u32_ref(~_val);
 }
 
-inline uint32_t u32_cnttz_ref(uint32_t _val)
+inline uint32_t cnttz_u32_ref(uint32_t _val)
 {
     uint32_t to = (~_val)&(_val-1);
-    return u32_cntbits_ref(to);
+    return cntbits_u32_ref(to);
 }
 
-inline uint64_t u64_cntbits_ref(uint64_t _val)
+inline uint64_t cntbits_u64_ref(uint64_t _val)
 {
     uint32_t lo = uint32_t(_val&UINT32_MAX);
     uint32_t hi = uint32_t(_val>>32);
 
-    uint32_t total = u32_cntbits_ref(lo)
-                   + u32_cntbits_ref(hi);
+    uint32_t total = cntbits_u32_ref(lo)
+                   + cntbits_u32_ref(hi);
 
     return total;
 }
 
-inline uint32_t u32_cntlz(uint32_t _val)
+inline uint32_t cntlz_u32(uint32_t _val)
 {
 #if DM_COMPILER_GCC || DM_COMPILER_CLANG
     return __builtin_clz(_val);
@@ -67,11 +67,11 @@ inline uint32_t u32_cntlz(uint32_t _val)
     _BitScanReverse(&idx, _val);
     return 31 - idx;
 #else
-    return u32_cntlz_ref(_val);
+    return cntlz_u32_ref(_val);
 #endif // DM_COMPILER_
 }
 
-inline uint32_t u32_cnttz(uint32_t _val)
+inline uint32_t cnttz_u32(uint32_t _val)
 {
 #if DM_COMPILER_GCC || DM_COMPILER_CLANG
     return __builtin_ctz(_val);
@@ -80,49 +80,49 @@ inline uint32_t u32_cnttz(uint32_t _val)
     _BitScanForward(&idx, _val);
     return idx;
 #else
-    return u32_cnttz_ref(_val);
+    return cnttz_u32_ref(_val);
 #endif // DM_COMPILER_
 }
 
-inline uint32_t u64_cntlz_ref(uint64_t _val)
+inline uint32_t cntlz_u64_ref(uint64_t _val)
 {
     return (_val & UINT64_C(0xffffffff00000000))
-         ? u32_cntlz(uint32_t(_val>>32))
-         : u32_cntlz(uint32_t(_val)) + 32
+         ? cntlz_u32(uint32_t(_val>>32))
+         : cntlz_u32(uint32_t(_val)) + 32
          ;
 }
 
-inline uint32_t u64_cnttz_ref(uint64_t _val)
+inline uint32_t cnttz_u64_ref(uint64_t _val)
 {
     return (_val & UINT64_C(0xffffffff))
-        ? u32_cnttz(uint32_t(_val))
-        : u32_cnttz(uint32_t(_val>>32)) + 32
+        ? cnttz_u32(uint32_t(_val))
+        : cnttz_u32(uint32_t(_val>>32)) + 32
         ;
 }
 
-inline uint32_t u32_cntbits(uint32_t _val)
+inline uint32_t cntbits_u32(uint32_t _val)
 {
 #if DM_COMPILER_GCC || DM_COMPILER_CLANG
     return __builtin_popcount(_val);
 #elif DM_COMPILER_MSVC && DM_PLATFORM_WINDOWS
     return __popcnt(_val);
 #else
-    return u32_cntbits_ref(_val);
+    return cntbits_u32_ref(_val);
 #endif // DM_COMPILER_
 }
 
-inline uint64_t u64_cntbits(uint64_t _val)
+inline uint64_t cntbits_u64(uint64_t _val)
 {
 #if DM_COMPILER_GCC || DM_COMPILER_CLANG
     return __builtin_popcountll(_val);
 #elif DM_COMPILER_MSVC && DM_ARCH_64BIT
     return __popcnt64(_val);
 #else
-    return u64_cntbits_ref(_val);
+    return cntbits_ref(_val);
 #endif // DM_COMPILER_
 }
 
-inline uint64_t u64_cntlz(uint64_t _val)
+inline uint64_t cntlz_u64(uint64_t _val)
 {
 #if DM_COMPILER_GCC || DM_COMPILER_CLANG
     return __builtin_clzll(_val);
@@ -131,11 +131,11 @@ inline uint64_t u64_cntlz(uint64_t _val)
     _BitScanReverse64(&idx, _val);
     return 63 - idx;
 #else
-    return u64_cntlz_ref(_val);
+    return cntlz_ref(_val);
 #endif // DM_COMPILER_
 }
 
-inline uint64_t u64_cnttz(uint64_t _val)
+inline uint64_t cnttz_u64(uint64_t _val)
 {
 #if DM_COMPILER_GCC || DM_COMPILER_CLANG
     return __builtin_ctzll(_val);
@@ -144,7 +144,7 @@ inline uint64_t u64_cnttz(uint64_t _val)
     _BitScanForward64(&idx, _val);
     return idx;
 #else
-    return u64_cnttz_ref(_val);
+    return cnttz_ref(_val);
 #endif // DM_COMPILER_
 }
 

@@ -87,7 +87,7 @@ struct BitArrayImpl : BitArrayStorageTy
         const uint64_t rightmost = bits()[_slot]+1;
         bits()[_slot] |= rightmost;
 
-        const uint32_t pos = uint32_t(u64_cnttz(rightmost));
+        const uint32_t pos = uint32_t(cnttz_u64(rightmost));
         const uint32_t idx = (_slot<<6)+pos;
         const uint32_t maxIdx = this->max();
         return idx < maxIdx ? idx : maxIdx;
@@ -152,7 +152,7 @@ struct BitArrayImpl : BitArrayStorageTy
             const bool hasSetBits = (0 != bits()[ii]);
             if (hasSetBits)
             {
-                const uint32_t pos = uint32_t(u64_cnttz(bits()[ii]));
+                const uint32_t pos = uint32_t(cnttz_u64(bits()[ii]));
                 return (ii<<6)+pos;
             }
         }
@@ -168,7 +168,7 @@ struct BitArrayImpl : BitArrayStorageTy
             if (hasUnsetBits)
             {
                 const uint64_t sel = markFirstUnsetBit(bits()[ii]);
-                const uint32_t pos = uint32_t(u64_cnttz(sel));
+                const uint32_t pos = uint32_t(cnttz_u64(sel));
                 return (ii<<6)+pos;
             }
         }
@@ -192,7 +192,7 @@ struct BitArrayImpl : BitArrayStorageTy
                 else
                 {
                     const uint64_t sel = markFirstUnsetBit(bits()[ii]);
-                    const uint64_t leading = u64_cntlz(sel);
+                    const uint64_t leading = cntlz_u64(sel);
                     const uint32_t pos = 63-uint32_t(leading);
                     return ((ii)<<6)+pos;
                 }
@@ -209,7 +209,7 @@ struct BitArrayImpl : BitArrayStorageTy
             const bool hasSetBits = (0 != bits()[ii]);
             if (hasSetBits)
             {
-                const uint64_t leading = u64_cntlz(bits()[ii]);
+                const uint64_t leading = cntlz_u64(bits()[ii]);
                 const uint32_t pos = 63-uint32_t(leading);
                 return (ii<<6)+pos;
             }
@@ -224,7 +224,7 @@ struct BitArrayImpl : BitArrayStorageTy
         for (uint32_t ii = numSlots(); ii--; )
         {
             const uint64_t curr = bits()[ii];
-            count += u64_cntbits(curr);
+            count += cntbits_u64(curr);
         }
 
         return uint32_t(count);
