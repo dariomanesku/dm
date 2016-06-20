@@ -179,7 +179,7 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
         end
 
         if "linux-gcc" == _OPTIONS["gcc"] then
-            location (path.join(_projDir, _ACTION .. "-linux"))
+            location (path.join(_projDir, _ACTION .. "-linux-gcc"))
         end
 
         if "linux-clang" == _OPTIONS["gcc"] then
