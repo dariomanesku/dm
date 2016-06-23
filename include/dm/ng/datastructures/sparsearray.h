@@ -228,6 +228,11 @@ struct SparseArrayImpl : SparseArrayStorageTy
         for (uint32_t ii = 0; ii < end; ++ii)                             { ind[ii] = ii; }
     }
 
+    void reset()
+    {
+        handles().reset();
+    }
+
     void zero()
     {
         memset(objects(), 0, max()*sizeof(ObjTy));

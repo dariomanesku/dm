@@ -113,6 +113,11 @@ struct HandleAllocImpl : HandleAllocStorageTy
         }
     }
 
+    void reset()
+    {
+        m_numHandles = 0;
+    }
+
     HandleTy count()
     {
         return m_numHandles;
