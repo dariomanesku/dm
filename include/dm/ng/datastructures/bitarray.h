@@ -303,10 +303,16 @@ struct BitArrayImpl : BitArrayStorageTy
         return uint32_t(count);
     }
 
-    void reset(uint32_t _startBucket = 0, uint32_t _endBucket = numSlots())
+    void reset(uint32_t _startBucket, uint32_t _endBucket)
     {
         m_last = 0;
         memset(bits()+_startBucket, 0, (_endBucket-_startBucket)*sizeof(uint64_t));
+    }
+
+    void reset()
+    {
+        m_last = 0;
+        memset(bits(), 0, numSlots()*sizeof(uint64_t));
     }
 
 private:
