@@ -19,10 +19,12 @@ struct DenseSetImpl : DenseSetStorageTy
     ///
     ///     struct DenseSetStorageTemplate
     ///     {
-    ///         uint16_t* values();
-    ///         uint16_t* indices();
-    ///         uint16_t  max();
+    ///         typedef typename dm::bestfit_type<MaxElementsT>::type ElementType;
+    ///         ElementType* values();
+    ///         ElementType* indices();
+    ///         ElementType  max();
     ///     };
+    typedef typename DenseSetStorageTy::ElementType ElemTy;
     using DenseSetStorageTy::values;
     using DenseSetStorageTy::indices;
     using DenseSetStorageTy::max;
@@ -32,7 +34,7 @@ struct DenseSetImpl : DenseSetStorageTy
         m_num = 0;
     }
 
-    uint16_t insert(uint16_t _val)
+    ElemTy insert(ElemTy _val)
     {
         DM_CHECK(m_num < max(), "DenseSetImpl::insert() - 0 | %d, %d", m_num, max());
         DM_CHECK(_val < max(),  "DenseSetImpl::insert() - 1 | %d, %d", _val,  max());
@@ -42,47 +44,47 @@ struct DenseSetImpl : DenseSetStorageTy
             return indexOf(_val);
         }
 
-        const uint16_t index = m_num++;
+        const ElemTy index = m_num++;
         values()[index] = _val;
         indices()[_val] = index;
 
         return index;
     }
 
-    uint16_t safeInsert(uint16_t _val)
+    ElemTy safeInsert(ElemTy _val)
     {
         if (_val < max())
         {
             return insert(_val);
         }
 
-        return UINT16_MAX;
+        return TyInfo<ElemTy>::Max();
     }
 
-    bool contains(uint16_t _val)
+    bool contains(ElemTy _val)
     {
         DM_CHECK(_val < max(), "DenseSetImpl::contains() - 0 | %d, %d", _val, max());
 
-        const uint16_t index = indices()[_val];
+        const ElemTy index = indices()[_val];
 
         return (index < m_num && values()[index] == _val);
     }
 
-    uint16_t indexOf(uint16_t _val)
+    ElemTy indexOf(ElemTy _val)
     {
         DM_CHECK(_val < max(), "DenseSetImpl::indexOf() | %d, %d", _val, max());
 
         return indices()[_val];
     }
 
-    uint16_t getValueAt(uint16_t _idx)
+    ElemTy getValueAt(ElemTy _idx)
     {
         DM_CHECK(_idx < max(), "DenseSetImpl::getValueAt() | %d, %d", _idx, max());
 
         return values()[_idx];
     }
 
-    void remove(uint16_t _val)
+    void remove(ElemTy _val)
     {
         DM_CHECK(_val < max(), "DenseSetImpl::remove() - 0 | %d, %d", _val, max());
         DM_CHECK(m_num < max(), "DenseSetImpl::remove() - 1 | %d, %d", m_num, max());
@@ -92,8 +94,8 @@ struct DenseSetImpl : DenseSetStorageTy
             return;
         }
 
-        const uint16_t index = indices()[_val];
-        const uint16_t last = values()[--m_num];
+        const ElemTy index = indices()[_val];
+        const ElemTy last = values()[--m_num];
 
         DM_CHECK(index < max(), "DenseSetImpl::remove() - 2 | %d, %d", index, max());
         DM_CHECK(last < max(), "DenseSetImpl::remove() - 3 | %d, %d", last, max());
@@ -102,7 +104,7 @@ struct DenseSetImpl : DenseSetStorageTy
         indices()[last] = index;
     }
 
-    uint16_t count()
+    uint32_t count()
     {
         return m_num;
     }
@@ -113,37 +115,42 @@ struct DenseSetImpl : DenseSetStorageTy
     }
 
 private:
-    uint16_t m_num;
+    uint32_t m_num;
 };
 
-template <uint16_t MaxT>
+template <typename ElemTy, uint32_t MaxT>
 struct DenseSetStorageT
 {
-    uint16_t* values()
+    typedef ElemTy ElementType;
+
+    ElemTy* values()
     {
         return m_values;
     }
 
-    uint16_t* indices()
+    ElemTy* indices()
     {
         return m_indices;
     }
 
-    uint16_t max()
+    ElemTy max()
     {
         return MaxT;
     }
 
 private:
-    uint16_t m_values[MaxT];
-    uint16_t m_indices[MaxT];
+    ElemTy m_values[MaxT];
+    ElemTy m_indices[MaxT];
 };
 
+template <typename ElemTy>
 struct DenseSetStorageExt
 {
-    static uint32_t sizeFor(uint16_t _max)
+    typedef ElemTy ElementType;
+
+    static uint32_t sizeFor(uint32_t _max)
     {
-        return 2*_max*sizeof(uint16_t);
+        return 2*_max*sizeof(ElemTy);
     }
 
     DenseSetStorageExt()
@@ -153,43 +160,46 @@ struct DenseSetStorageExt
         m_indices = NULL;
     }
 
-    uint8_t* init(uint16_t _max, uint8_t* _mem)
+    uint8_t* init(uint32_t _max, uint8_t* _mem)
     {
-        const uint32_t haSize = _max*sizeof(uint16_t);
+        const uint32_t haSize = _max*sizeof(ElemTy);
 
         m_max = _max;
-        m_values = (uint16_t*)_mem;
-        m_indices = (uint16_t*)((uint8_t*)_mem + haSize);
+        m_values = (ElemTy*)_mem;
+        m_indices = (ElemTy*)((uint8_t*)_mem + haSize);
 
         return _mem + 2*haSize;
     }
 
-    uint16_t* values()
+    ElemTy* values()
     {
         return m_values;
     }
 
-    uint16_t* indices()
+    ElemTy* indices()
     {
         return m_indices;
     }
 
-    uint16_t max()
+    uint32_t max()
     {
         return m_max;
     }
 
 private:
-    uint16_t m_max;
-    uint16_t* m_values;
-    uint16_t* m_indices;
+    uint32_t m_max;
+    ElemTy* m_values;
+    ElemTy* m_indices;
 };
 
+template <typename ElemTy>
 struct DenseSetStorage
 {
-    static uint32_t sizeFor(uint16_t _max)
+    typedef ElemTy ElementType;
+
+    static uint32_t sizeFor(uint32_t _max)
     {
-        return 2*_max*sizeof(uint16_t);
+        return 2*_max*sizeof(ElemTy);
     }
 
     DenseSetStorage()
@@ -204,14 +214,14 @@ struct DenseSetStorage
         destroy();
     }
 
-    void init(uint16_t _max, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
     {
-        const uint32_t haSize = _max*sizeof(uint16_t);
+        const uint32_t haSize = _max*sizeof(ElemTy);
         void* mem = dm_alloc(2*haSize, _reallocFn);
 
         m_max = _max;
-        m_values = (uint16_t*)mem;
-        m_indices = (uint16_t*)((uint8_t*)mem + haSize);
+        m_values = (ElemTy*)mem;
+        m_indices = (ElemTy*)((uint8_t*)mem + haSize);
 
         m_reallocFn = _reallocFn;
     }
@@ -226,32 +236,33 @@ struct DenseSetStorage
         }
     }
 
-    uint16_t* values()
+    ElemTy* values()
     {
         return m_values;
     }
 
-    uint16_t* indices()
+    ElemTy* indices()
     {
         return m_indices;
     }
 
-    uint16_t max()
+    uint32_t max()
     {
         return m_max;
     }
 
 private:
-    uint16_t m_max;
-    uint16_t* m_values;
-    uint16_t* m_indices;
+    uint32_t m_max;
+    ElemTy* m_values;
+    ElemTy* m_indices;
     ReallocFn m_reallocFn;
 };
 
-template <uint16_t MaxT> struct DenseSetT   : DenseSetImpl< DenseSetStorageT<MaxT> > { };
-                         struct DenseSetExt : DenseSetImpl< DenseSetStorageExt     > { };
-                         struct DenseSet    : DenseSetImpl< DenseSetStorage        > { };
-                         struct DenseSetH   : DenseSetExt { ReallocFn m_reallocFn; };
+template <uint32_t MaxT>                  struct DenseSetT   : DenseSetImpl< DenseSetStorageT<typename dm::bestfit_type<MaxT>::type, MaxT> > { };
+template <typename ElemTy, uint32_t MaxT> struct DenseSetTy  : DenseSetImpl< DenseSetStorageT<ElemTy, MaxT> > { };
+template <typename ElemTy>                struct DenseSetExt : DenseSetImpl< DenseSetStorageExt<ElemTy> > { };
+template <typename ElemTy>                struct DenseSet    : DenseSetImpl< DenseSetStorage<ElemTy> > { };
+template <typename ElemTy>                struct DenseSetH   : DenseSetExt<ElemTy> { ReallocFn m_reallocFn; };
 
 } //namespace ng
 } //namespace dm
