@@ -31,6 +31,8 @@ struct BitArrayImpl : BitArrayStorageTy
     using BitArrayStorageTy::numSlots;
     using BitArrayStorageTy::max;
 
+    /// Notice: requires zero initialization!
+    /// Either call reset() or use it as static object.
     BitArrayImpl() : BitArrayStorageTy()
     {
     }
@@ -49,17 +51,88 @@ struct BitArrayImpl : BitArrayStorageTy
     {
         DM_CHECK(_bit < max(), "BitArray::set() | %d, %d", _bit, max());
 
-        const uint32_t bucket = _bit>>6;
-        const uint64_t bit    = UINT64_C(1)<<(_bit&63);
+        const size_t bucket = _bit>>6;
+        const uint64_t bit  = UINT64_C(1)<<(_bit&63);
         bits()[bucket] |= bit;
+    }
+
+    void setRange(uint32_t _begin, uint32_t _end)
+    {
+        DM_CHECK(_begin < max(), "BitArray::setRange() begin | %d, %d", _begin, max());
+        DM_CHECK(_end < max(), "BitArray::setRange() end | %d, %d", _end, max());
+
+        const size_t bucketBegin = _begin>>6;
+        const size_t bucketEnd   = _end>>6;
+
+        const uint64_t bitBegin = UINT64_C(1)<<(_begin&63);
+        uint64_t valBegin = bitBegin;
+        valBegin |= valBegin >>  1;
+        valBegin |= valBegin >>  2;
+        valBegin |= valBegin >>  4;
+        valBegin |= valBegin >>  8;
+        valBegin |= valBegin >> 16;
+        valBegin |= valBegin >> 32;
+        bits()[bucketBegin] |= valBegin;
+
+        const uint64_t bitEnd = UINT64_C(1)<<(_end&63);
+        uint64_t valEnd = bitEnd;
+        valEnd |= valEnd <<  1;
+        valEnd |= valEnd <<  2;
+        valEnd |= valEnd <<  4;
+        valEnd |= valEnd <<  8;
+        valEnd |= valEnd << 16;
+        valEnd |= valEnd << 32;
+        bits()[bucketEnd] |= valEnd;
+
+        const uint32_t numBucketsToSet = (bucketEnd-bucketBegin);
+        memset(bits()+bucketBegin, -1, numBucketsToSet*sizeof(uint64_t));
+
+        if (_begin <= m_last && m_last <= _end)
+        {
+            m_last = _end;
+        }
+    }
+
+    void unsetRange(uint32_t _begin, uint32_t _end)
+    {
+        DM_CHECK(_begin < max(), "BitArray::unsetRange() begin | %d, %d", _begin, max());
+        DM_CHECK(_end < max(), "BitArray::unsetRange() end | %d, %d", _end, max());
+
+        const size_t bucketBegin = _begin>>6;
+        const size_t bucketEnd   = _end>>6;
+
+        const uint64_t bitBegin = UINT64_C(1)<<(_begin&63);
+        uint64_t valBegin = bitBegin;
+        valBegin |= valBegin >>  1;
+        valBegin |= valBegin >>  2;
+        valBegin |= valBegin >>  4;
+        valBegin |= valBegin >>  8;
+        valBegin |= valBegin >> 16;
+        valBegin |= valBegin >> 32;
+        bits()[bucketBegin] &= ~valBegin;
+
+        const uint64_t bitEnd = UINT64_C(1)<<(_end&63);
+        uint64_t valEnd = bitEnd;
+        valEnd |= valEnd <<  1;
+        valEnd |= valEnd <<  2;
+        valEnd |= valEnd <<  4;
+        valEnd |= valEnd <<  8;
+        valEnd |= valEnd << 16;
+        valEnd |= valEnd << 32;
+        bits()[bucketEnd] &= ~valEnd;
+
+        const uint32_t numBucketsToSet = (bucketEnd-bucketBegin);
+        memset(bits()+bucketBegin, 0, numBucketsToSet*sizeof(uint64_t));
+
+        m_last = _begin;
     }
 
     void unset(uint32_t _bit)
     {
         DM_CHECK(_bit < max(), "BitArray::unset() | %d, %d", _bit, max());
 
-        const uint32_t bucket = _bit>>6;
-        const uint64_t bit    = UINT64_C(1)<<(_bit&63);
+        const size_t bucket = _bit>>6;
+        const uint64_t bit  = UINT64_C(1)<<(_bit&63);
         bits()[bucket] &= ~bit;
     }
 
@@ -67,8 +140,8 @@ struct BitArrayImpl : BitArrayStorageTy
     {
         DM_CHECK(_bit < max(), "BitArray::toggle() | %d, %d", _bit, max());
 
-        const uint32_t bucket = _bit>>6;
-        const uint64_t bit    = UINT64_C(1)<<(_bit&63);
+        const size_t bucket = _bit>>6;
+        const uint64_t bit  = UINT64_C(1)<<(_bit&63);
         bits()[bucket] ^= bit;
     }
 
@@ -76,8 +149,8 @@ struct BitArrayImpl : BitArrayStorageTy
     {
         DM_CHECK(_bit < max(), "BitArray::isSet() | %d, %d", _bit, max());
 
-        const uint32_t bucket = _bit>>6;
-        const uint64_t bit    = UINT64_C(1)<<(_bit&63);
+        const size_t bucket = _bit>>6;
+        const uint64_t bit  = UINT64_C(1)<<(_bit&63);
         return (0 != (bits()[bucket] & bit));
     }
 
@@ -230,10 +303,10 @@ struct BitArrayImpl : BitArrayStorageTy
         return uint32_t(count);
     }
 
-    void reset() // Notice: Has to be called on initialization.
+    void reset(uint32_t _startBucket = 0, uint32_t _endBucket = numSlots())
     {
         m_last = 0;
-        memset(bits(), 0, numSlots()*sizeof(uint64_t));
+        memset(bits()+_startBucket, 0, (_endBucket-_startBucket)*sizeof(uint64_t));
     }
 
 private:
