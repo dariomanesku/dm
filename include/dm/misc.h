@@ -7,6 +7,7 @@
 #define DM_MISC_H_HEADER_GUARD
 
 #include <stdint.h>
+#include <stddef.h>  // offsetof()
 #include <stdlib.h>  // _fullpath
 #include <ctype.h>   // toupper()
 #include <math.h>    // logf()
@@ -229,6 +230,13 @@ namespace dm
 
     // Align.
     //-----
+
+    template <typename Ty>
+    DM_INLINE uint32_t alignOf()
+    {
+        struct Tmp { char _c; Ty _m; };
+        return offsetof(Tmp, _m);
+    }
 
     DM_INLINE uint32_t align(uint32_t _val, uint32_t _alignPwrTwo)
     {
