@@ -403,7 +403,7 @@ struct LinkedListStorage
         m_elements = NULL;
     }
 
-    void initStorage(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void initStorage(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         const uint32_t totalSize = sizeFor(_max);
         void* mem = dm_alloc(totalSize, _reallocFn);
@@ -478,7 +478,7 @@ struct LinkedList : LinkedListImpl< LinkedListStorage<ObjTy> >
 {
     typedef LinkedListImpl< LinkedListStorage<ObjTy> > Base;
 
-    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         Base::initStorage(_max, _reallocFn);
         Base::init();

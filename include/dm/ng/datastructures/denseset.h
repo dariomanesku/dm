@@ -214,7 +214,7 @@ struct DenseSetStorage
         destroy();
     }
 
-    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         const uint32_t haSize = _max*sizeof(ElemTy);
         void* mem = dm_alloc(2*haSize, _reallocFn);

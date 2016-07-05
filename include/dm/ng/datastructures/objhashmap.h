@@ -374,7 +374,7 @@ struct ObjHashMapStorage
         destroy();
     }
 
-    void initStorage(uint32_t _maxPowTwo, ReallocFn _reallocFn = &::realloc)
+    void initStorage(uint32_t _maxPowTwo, ReallocFn _reallocFn = ::realloc)
     {
         DM_CHECK(dm::isPowTwo(_maxPowTwo), "ObjHashMapStorage::initStorage() - Invalid value | %d", _maxPowTwo);
 
@@ -451,7 +451,7 @@ struct ObjHashMap : ObjHashMapImpl< ObjHashMapStorage<KeyLength, ObjTy> >
 {
     typedef ObjHashMapImpl< ObjHashMapStorage<KeyLength, ObjTy> > Base;
 
-    void init(uint32_t _maxPowTwo, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _maxPowTwo, ReallocFn _reallocFn = ::realloc)
     {
         Base::initStorage(_maxPowTwo, _reallocFn);
         Base::init();

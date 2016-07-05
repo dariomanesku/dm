@@ -12,7 +12,7 @@
 namespace dm { namespace ng {
 
 template <typename DataStructureH>
-DM_INLINE DataStructureH* create(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+DM_INLINE DataStructureH* create(uint32_t _max, ReallocFn _reallocFn = ::realloc)
 {
     uint8_t* ptr = (uint8_t*)dm_alloc(sizeof(DataStructureH) + DataStructureH::sizeFor(_max), _reallocFn);
 

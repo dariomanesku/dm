@@ -223,7 +223,7 @@ struct HandleAllocStorage
         destroy();
     }
 
-    void initStorage(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void initStorage(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         const uint32_t haSize = _max*sizeof(HandleType);
         void* mem = dm_alloc(2*haSize, _reallocFn);
@@ -289,7 +289,7 @@ struct HandleAllocStorageRes
         destroy();
     }
 
-    void initStorage(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void initStorage(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         const uint32_t haSize = _max*sizeof(HandleType);
 
@@ -376,7 +376,7 @@ struct HandleAlloc : HandleAllocImpl< HandleAllocStorage<HandleTy> >
 {
     typedef HandleAllocImpl< HandleAllocStorage<HandleTy> > Base;
 
-    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         Base::initStorage(_max, _reallocFn);
         Base::init();
@@ -388,7 +388,7 @@ struct HandleAllocRes : HandleAllocImpl< HandleAllocStorageRes<HandleTy> >
 {
     typedef HandleAllocImpl< HandleAllocStorageRes<HandleTy> > Base;
 
-    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         Base::initStorage(_max, _reallocFn);
         Base::init();

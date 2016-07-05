@@ -12,17 +12,17 @@ namespace dm { namespace ng {
 
 typedef void* (*ReallocFn)(void* _ptr, size_t _size);
 
-static inline void* dm_alloc(size_t _size, ReallocFn _realloc = &::realloc)
+static inline void* dm_alloc(size_t _size, ReallocFn _realloc = ::realloc)
 {
     return _realloc(NULL, _size);
 }
 
-static inline void* dm_realloc(void* _ptr, size_t _size, ReallocFn _realloc = &::realloc)
+static inline void* dm_realloc(void* _ptr, size_t _size, ReallocFn _realloc = ::realloc)
 {
     return _realloc(_ptr, _size);
 }
 
-static inline void* dm_free(void* _ptr, ReallocFn _realloc = &::realloc)
+static inline void* dm_free(void* _ptr, ReallocFn _realloc = ::realloc)
 {
     return _realloc(_ptr, 0);
 }

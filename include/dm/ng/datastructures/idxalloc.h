@@ -195,7 +195,7 @@ struct IdxAllocStorage
         destroy();
     }
 
-    void initStorage(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void initStorage(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         const uint32_t idxSize = _max*sizeof(IdxType);
         void* mem = dm_alloc(idxSize, _reallocFn);
@@ -261,7 +261,7 @@ struct IdxAlloc : IdxAllocImpl< IdxAllocStorage<IdxTy> >
 {
     typedef IdxAllocImpl< IdxAllocStorage<IdxTy> > Base;
 
-    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         Base::initStorage(_max, _reallocFn);
         Base::init();

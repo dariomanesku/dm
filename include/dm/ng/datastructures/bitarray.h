@@ -408,7 +408,7 @@ struct BitArrayStorage
         m_max = 0;
     }
 
-    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         void* mem = dm_alloc(sizeFor(_max), _reallocFn);
 
@@ -477,7 +477,7 @@ struct BitArray : BitArrayImpl<BitArrayStorage>
 {
     typedef BitArrayImpl<BitArrayStorage> Base;
 
-    void init(uint32_t _max, ReallocFn _reallocFn = &::realloc)
+    void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
         Base::init(_max, _reallocFn);
         Base::reset();
