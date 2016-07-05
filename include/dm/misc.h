@@ -236,7 +236,7 @@ namespace dm
     DM_INLINE uint32_t alignOf()
     {
         struct Tmp { char _c; Ty _m; };
-        return offsetof(Tmp, _m);
+        return DM_OFFSETOF(Tmp, _m);
     }
 
     DM_INLINE uint32_t align(uint32_t _val, uint32_t _alignPwrTwo)
