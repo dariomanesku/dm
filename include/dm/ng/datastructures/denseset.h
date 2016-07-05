@@ -165,10 +165,10 @@ struct DenseSetStorageExt
         const uint32_t haSize = _max*sizeof(ElemTy);
 
         m_max = _max;
-        m_values = (ElemTy*)_mem;
+        m_values  = (ElemTy*)_mem;
         m_indices = (ElemTy*)((uint8_t*)_mem + haSize);
 
-        return _mem + 2*haSize;
+        return ((uint8_t*)_mem + 2*haSize);
     }
 
     ElemTy* values()
