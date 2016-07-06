@@ -148,9 +148,14 @@ struct DenseSetStorageExt
 {
     typedef ElemTy ElementType;
 
+    enum
+    {
+        SizePerElement = 2*sizeof(ElemTy)
+    };
+
     static uint32_t sizeFor(uint32_t _max)
     {
-        return 2*_max*sizeof(ElemTy);
+        return _max*SizePerElement;
     }
 
     DenseSetStorageExt()
@@ -197,9 +202,14 @@ struct DenseSetStorage
 {
     typedef ElemTy ElementType;
 
+    enum
+    {
+        SizePerElement = 2*sizeof(ElemTy)
+    };
+
     static uint32_t sizeFor(uint32_t _max)
     {
-        return 2*_max*sizeof(ElemTy);
+        return _max*SizePerElement;
     }
 
     DenseSetStorage()
