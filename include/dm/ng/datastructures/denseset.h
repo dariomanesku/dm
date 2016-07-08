@@ -77,9 +77,9 @@ struct DenseSetImpl : DenseSetStorageTy
         return indices()[_val];
     }
 
-    ElemTy getValueAt(ElemTy _idx)
+    ElemTy getValueAt(size_t _idx)
     {
-        DM_CHECK(_idx < max(), "DenseSetImpl::getValueAt() | %d, %d", _idx, max());
+        DM_CHECK(_idx < max(), "DenseSetImpl::getValueAt() | %zu, %d", _idx, max());
 
         return values()[_idx];
     }
