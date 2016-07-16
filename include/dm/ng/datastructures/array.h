@@ -424,7 +424,12 @@ struct ArrayStorage
         }
     }
 
-    bool isResizable()
+    bool isInitialized() const
+    {
+        return (NULL != m_elements);
+    }
+
+    bool isResizable() const
     {
         return true;
     }
