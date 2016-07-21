@@ -107,9 +107,9 @@
 #undef DM_PLATFORM_POSIX
 #define DM_PLATFORM_POSIX (DM_PLATFORM_LINUX || DM_PLATFORM_APPLE || DM_PLATFORM_UNIX)
 
-#undef DM_CPP11 0
+#undef DM_CPP11
 #define DM_CPP11 (__cplusplus >= 201103L)
-#undef DM_CPP14 0
+#undef DM_CPP14
 #define DM_CPP14 (__cplusplus >= 201402L)
 
 #endif //DM_NG_PLATFORM_HEADER_GUARD

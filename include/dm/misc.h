@@ -29,13 +29,6 @@
 
 namespace dm
 {
-    // Macro flags.
-    //-----
-
-    #ifndef DM_CPP11
-    #   define DM_CPP11 (__cplusplus >= 201103L)
-    #endif
-
     // Macro helpers.
     //-----
 

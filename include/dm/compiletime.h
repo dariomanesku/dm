@@ -9,9 +9,7 @@
 #include <stdint.h>
 #include <limits.h>  // CHAR_MAX
 
-#ifndef DM_CPP11
-#   define DM_CPP11 (__cplusplus >= 201103L)
-#endif
+#include "ng/platform.h" // DM_CPP11
 
 namespace dm
 {
