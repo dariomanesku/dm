@@ -24,7 +24,7 @@ namespace dm
         return hash;
     }
 
-    DM_INLINE uint32_t hash(const uint8_t* _data, uint32_t _size)
+    DM_INLINE uint32_t hash(const void* _data, uint32_t _size)
     {
         // Sdbm hash from public domain.
 

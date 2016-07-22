@@ -56,10 +56,15 @@ struct HashMapImpl : HashMapStorageTy
 
     void init()
     {
+        reset();
+    }
+
+    void reset()
+    {
         memset(ukv(), Unused, max()*sizeof(Ukv));
     }
 
-    uint32_t insert(const uint8_t* _key, uint8_t _keyLen, ValTy _val)
+    uint32_t insert(const void* _key, uint8_t _keyLen, ValTy _val)
     {
         DM_CHECK(_keyLen <= keyLen(), "HashMapImpl::insert() - Invalid key length | %d, %d", _keyLen, keyLen());
 
@@ -112,7 +117,7 @@ struct HashMapImpl : HashMapStorageTy
         }
     };
 
-    IdxDuplicate insertHandleDup(const uint8_t* _key, uint8_t _keyLen, ValTy _val)
+    IdxDuplicate insertHandleDup(const void* _key, uint8_t _keyLen, ValTy _val)
     {
         DM_CHECK(_keyLen <= keyLen(), "HashMapImpl::insertHandleDup() - Invalid key length | %d, %d", _keyLen, keyLen());
 
@@ -163,7 +168,7 @@ struct HashMapImpl : HashMapStorageTy
         return insertHandleDup((const uint8_t*)&_key, sizeof(Ty), _val);
     }
 
-    uint32_t findHandleOf(const uint8_t* _key, uint8_t _keyLen)
+    uint32_t findHandleOf(const void* _key, uint8_t _keyLen)
     {
         DM_CHECK(_keyLen <= keyLen(), "HashMapImpl::findHandleOf() - Invalid key length | %d, %d", _keyLen, keyLen());
 
@@ -195,7 +200,7 @@ struct HashMapImpl : HashMapStorageTy
     {
         dm_staticAssert(sizeof(Ty) <= HashMapStorageTy::KeyLen);
 
-        return findHandleOf((const uint8_t*)&_key, sizeof(Ty));
+        return findHandleOf((const void*)&_key, sizeof(Ty));
     }
 
     ValTy getValueOf(uint32_t _handle)
@@ -203,7 +208,7 @@ struct HashMapImpl : HashMapStorageTy
         return ukv()[_handle].m_val;
     }
 
-    ValTy find(const uint8_t* _key, uint8_t _keyLen)
+    ValTy find(const void* _key, uint8_t _keyLen)
     {
         DM_CHECK(_keyLen <= keyLen(), "HashMapImpl::find() - Invalid key length | %d, %d", _keyLen, keyLen());
 
@@ -213,17 +218,17 @@ struct HashMapImpl : HashMapStorageTy
 
     ValTy find(const char* _key)
     {
-        return find((const uint8_t*)_key, strlen(_key));
+        return find((const void*)_key, strlen(_key));
     }
 
     template <typename Ty>
     ValTy find(const Ty& _key)
     {
         dm_staticAssert(sizeof(Ty) <= HashMapStorageTy::KeyLen);
-        return find((const uint8_t*)&_key, sizeof(Ty));
+        return find((const void*)&_key, sizeof(Ty));
     }
 
-    bool remove(const uint8_t* _key, uint8_t _keyLen)
+    bool remove(const void* _key, uint8_t _keyLen)
     {
         DM_CHECK(_keyLen <= keyLen(), "HashMapImpl::remove() - Invalid key length | %d, %d", _keyLen, keyLen());
 
@@ -255,14 +260,14 @@ struct HashMapImpl : HashMapStorageTy
 
     bool remove(const char* _key)
     {
-        return remove((const uint8_t*)_key, strlen(_key));
+        return remove((const void*)_key, strlen(_key));
     }
 
     template <typename Ty>
     bool remove(const Ty& _key)
     {
         dm_staticAssert(sizeof(Ty) <= HashMapStorageTy::KeyLen);
-        return remove((const uint8_t*)&_key, sizeof(Ty));
+        return remove((const void*)&_key, sizeof(Ty));
     }
 
 private:
