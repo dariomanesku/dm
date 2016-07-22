@@ -354,11 +354,11 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
         {
             "WIN32",
             "_WIN32",
-            "_HAS_EXCEPTIONS=0",
             "_SCL_SECURE=0",
             "_SCL_SECURE_NO_WARNINGS",
             "_CRT_SECURE_NO_WARNINGS",
             "_CRT_SECURE_NO_DEPRECATE",
+            --"_HAS_EXCEPTIONS=0", // This is perhaps causing "error C3861: '__uncaught_exception': identifier not found".
         }
         buildoptions
         {
