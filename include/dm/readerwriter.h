@@ -8,9 +8,19 @@
 
 #include <stdint.h>
 
+#include "../dm/ng/platform.h"
+
 #include "../../3rdparty/bx/macros.h"       // BX_NO_VTABLE
 #include "../../3rdparty/bx/uint32_t.h"     // bx::int64_clamp(), bx::uint32_min()
 #include "../../3rdparty/bx/readerwriter.h" // bx::ReaderI, bx::SeekerI
+
+#if DM_COMPILER_MSVC
+#   define fseeko64 _fseeki64
+#   define ftello64 _ftelli64
+#elif DM_PLATFORM_UNIX || DM_PLATFORM_POSIX || DM_PLATFORM_LINUX || DM_PLATFORM_APPLE
+#   define fseeko64 fseeko
+#   define ftello64 ftello
+#endif // DM_
 
 namespace dm
 {
