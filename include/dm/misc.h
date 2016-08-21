@@ -34,18 +34,31 @@ namespace dm
 
     #define DM_COUNTOF(_arr) ((int)(sizeof(_arr)/sizeof(*_arr)))
     #define DM_OFFSETOF(type, member) ((size_t)&(((type*)0)->member))
-    #define DM_STATIC_ASSERT(_expr) { typedef int dm_compile_time_assert[1 - 2*!(_expr)]; }
-    #define DM_STRINGIFY(_val) #_val
+
+    #define DM_STRINGIZE(_x) DM_STRINGIZE_(_x)
+    #define DM_STRINGIZE_(_x) #_x
+
+    #define DM_CONCATENATE(_x, _y) DM_CONCATENATE_(_x, _y)
+    #define DM_CONCATENATE_(_x, _y) _x ## _y
+
+    #define DM_FILE_LINE "" __FILE__ "(" DM_STRINGIZE(__LINE__) ")"
+
+    #define DM_STATIC_ASSERT(_expr) { typedef int DM_CONCATENATE(dm_compile_time_assert_, __LINE__)[1 - 2*!(_expr)]; }
+
+    #define DM_MAKEFOURCC(_a, _b, _c, _d) ( ((uint32_t(_a)&0xff)        \
+                                          | ((uint32_t(_b)&0xff) <<  8) \
+                                          | ((uint32_t(_c)&0xff) << 16) \
+                                          | ((uint32_t(_d)&0xff) << 24) )
 
     // Other macros.
     //-----
 
     #if defined(__GNUC__) && __GNUC__ >= 4
-    #   define LIKELY(x)   (__builtin_expect((x), 1))
-    #   define UNLIKELY(x) (__builtin_expect((x), 0))
+    #   define DM_LIKELY(x)   (__builtin_expect((x), 1))
+    #   define DM_UNLIKELY(x) (__builtin_expect((x), 0))
     #else
-    #   define LIKELY(x) (x)
-    #   define UNLIKELY(x) (x)
+    #   define DM_LIKELY(x) (x)
+    #   define DM_UNLIKELY(x) (x)
     #endif
 
     // Value.
