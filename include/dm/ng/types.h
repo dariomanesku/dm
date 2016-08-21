@@ -8,9 +8,9 @@
 
   You MUST
 
-      Define desired flags before including this file.
-          #define DM_DEFINE_TYPES
-          #define DM_UNDEFINE_TYPES
+  Define desired flags before including this file.
+      #define DM_DEFINE_TYPES
+      #define DM_UNDEFINE_TYPES
 
   Contents (SSS):
       SECTION S10 "Define types"
@@ -51,6 +51,7 @@
 #define i16  int16_t
 #define i16c int16_t const
 
+#define b32  uint32_t
 #define u32  uint32_t
 #define u32c uint32_t const
 #define i32  int32_t
