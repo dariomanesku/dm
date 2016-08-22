@@ -274,7 +274,14 @@ struct ObjArrayImpl : ArrayStorageTy
 
     ElemTy& operator[](uint32_t _idx)
     {
-        DM_CHECK(_idx < max(), "ObjArrayImpl::operator[]() ref | %d, %d", _idx, max());
+        DM_CHECK(_idx < max(), "ObjArrayImpl::operator[]() | %d, %d", _idx, max());
+
+        return elements()[_idx];
+    }
+
+    const ElemTy& operator[](uint32_t _idx) const
+    {
+        DM_CHECK(_idx < max(), "ObjArrayImpl::operator[]() const | %d, %d", _idx, max());
 
         return elements()[_idx];
     }
@@ -289,7 +296,7 @@ struct ObjArrayImpl : ArrayStorageTy
         m_count = 0;
     }
 
-    uint32_t count()
+    uint32_t count() const
     {
         return m_count;
     }
@@ -417,7 +424,8 @@ struct ArrayStorage
 
     void destroy()
     {
-        if (NULL != m_elements)
+        if (NULL != m_elements
+        &&  NULL != m_reallocFn)
         {
             dm_free(m_elements, m_reallocFn);
             m_elements = NULL;
