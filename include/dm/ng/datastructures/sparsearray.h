@@ -18,22 +18,22 @@ struct SparseArrayImpl : SparseArrayStorageTy
 {
     /// Expected interface:
     ///
-    ///     template <typename ObjTy>
+    ///     template <typename Ty>
     ///     struct SparseArrayStorageT
     ///     {
-    ///         typedef ObjTy ObjectType;
+    ///         typedef Ty ObjectType;
     ///         typedef HandleAllocT<MaxT> HandleAllocType;
     ///
     ///         bool isResizable() const;
-    ///         ObjTy* objects();
+    ///         Ty* elements();
     ///         HandleAllocType* handles();
-    ///         uint32_t max();
+    ///         uint32_t max() const;
     ///     };
-    typedef typename SparseArrayStorageTy::ObjectType ObjTy;
+    typedef typename SparseArrayStorageTy::ObjectType Ty;
     typedef typename SparseArrayStorageTy::HandleAllocType HandleAllocTy;
     using SparseArrayStorageTy::isResizable;
     using SparseArrayStorageTy::resize;
-    using SparseArrayStorageTy::objects;
+    using SparseArrayStorageTy::elements;
     using SparseArrayStorageTy::handles;
     using SparseArrayStorageTy::max;
 
@@ -41,7 +41,7 @@ struct SparseArrayImpl : SparseArrayStorageTy
     {
     }
 
-    ObjTy* addNew()
+    Ty* addNew()
     {
         if (isResizable())
         {
@@ -57,12 +57,12 @@ struct SparseArrayImpl : SparseArrayStorageTy
         const uint32_t handle = (uint32_t)handles()->alloc();
         DM_CHECK(handle < max(), "SparseArrayImpl::addNew() | %d, %d", handle, max());
 
-        ObjTy* dst = &objects()[handle];
-        dst = ::new (dst) ObjTy();
+        Ty* dst = &elements()[handle];
+        dst = ::new (dst) Ty();
         return dst;
     }
 
-    uint32_t addCopy(const ObjTy* _obj)
+    uint32_t addObj(const Ty* _obj)
     {
         if (isResizable())
         {
@@ -78,44 +78,69 @@ struct SparseArrayImpl : SparseArrayStorageTy
         const uint32_t handle = (uint32_t)handles()->alloc();
         DM_CHECK(handle < max(), "SparseArrayImpl::addCopy() | %d, %d", handle, max());
 
-        ObjTy* dst = &objects()[handle];
-        dst = ::new (dst) ObjTy(*_obj);
+        Ty* dst = &elements()[handle];
+        dst = ::new (dst) Ty(*_obj);
         return handle;
     }
 
-    bool contains(const ObjTy* _obj)
+    uint32_t addVal(Ty _val)
     {
-        return (&objects()[0] <= _obj && _obj < &objects()[max()]);
+        if (isResizable())
+        {
+            const uint32_t maxObj = max();
+
+            if (count() == maxObj)
+            {
+                const uint32_t newMax = maxObj+(maxObj>>1);
+                resize(newMax);
+            }
+        }
+
+        const uint32_t handle = (uint32_t)handles()->alloc();
+        DM_CHECK(handle < max(), "SparseArrayImpl::addCopy() | %d, %d", handle, max());
+
+        elements()[handle] = _val;
+        return handle;
     }
 
-    uint32_t getHandleOf(const ObjTy* _obj)
+    bool contains(const Ty* _obj)
+    {
+        return (&elements()[0] <= _obj && _obj < &elements()[max()]);
+    }
+
+    uint32_t getHandleOf(const Ty* _obj)
     {
         DM_CHECK(contains(_obj), "SparseArrayImpl::getHandleOf() | Object not from the list.");
 
-        return uint32_t(_obj - objects());
+        return uint32_t(_obj - elements());
     }
 
-    private:
-    ObjTy* getObjAt_impl(uint32_t _handle)
+    Ty& operator[](uint32_t _handle)
     {
-        DM_CHECK(_handle < max(), "SparseArrayImpl::getObjAt_impl() | %d, %d", _handle, max());
+        DM_CHECK(_handle < max(), "SparseArrayImpl::operator[]() | %d, %d", _handle, max());
 
-        return &objects()[_handle];
-    } public:
-
-    ObjTy& operator[](uint32_t _handle)
-    {
-        return *getObjAt_impl(_handle);
+        return elements()[_handle];
     }
 
-    const ObjTy& operator[](uint32_t _handle) const
+    const Ty& operator[](uint32_t _handle) const
     {
-        return *getObjAt_impl(_handle);
+        DM_CHECK(_handle < max(), "SparseArrayImpl::operator[]() const | %d, %d", _handle, max());
+
+        return elements()[_handle];
     }
 
-    ObjTy* get(uint32_t _handle)
+    Ty* getObj(uint32_t _handle)
     {
-        return getObjAt_impl(_handle);
+        DM_CHECK(_handle < max(), "SparseArrayImpl::getObj() | %d, %d", _handle, max());
+
+        return &elements()[_handle];
+    }
+
+    Ty getVal(uint32_t _handle)
+    {
+        DM_CHECK(_handle < max(), "SparseArrayImpl::getVal() | %d, %d", _handle, max());
+
+        return elements()[_handle];
     }
 
     /// Used for iteration over all elements.
@@ -125,17 +150,24 @@ struct SparseArrayImpl : SparseArrayStorageTy
     }
 
     /// Used for iteration over all elements.
-    ObjTy* getFromHandleAt(uint32_t _idx)
+    Ty* getObjFromHandleAt(uint32_t _idx)
     {
         const uint32_t handle = handles()->getHandleAt(_idx);
-        return getObjAt_impl(handle);
+        return getObj(handle);
+    }
+
+    /// Used for iteration over all elements.
+    Ty* getValFromHandleAt(uint32_t _idx)
+    {
+        const uint32_t handle = handles()->getHandleAt(_idx);
+        return getVal(handle);
     }
 
     void remove(uint32_t _handle)
     {
         DM_CHECK(_handle < max(), "SparseArrayImpl::removeAt() | %d, %d", _handle, max());
 
-        objects()[_handle].~ObjTy();
+        elements()[_handle].~Ty();
         handles()->free(_handle);
     }
 
@@ -145,7 +177,7 @@ struct SparseArrayImpl : SparseArrayStorageTy
         remove(handle);
     }
 
-    void removeObj(const ObjTy* _obj)
+    void removeObj(const Ty* _obj)
     {
         const uint32_t handle = getHandleOf(_obj);
         remove(handle);
@@ -201,11 +233,11 @@ struct SparseArrayImpl : SparseArrayStorageTy
 
                 if (cnt > curr)
                 {
-                    memmove(&objects()[dst], &objects()[src], cnt*sizeof(ObjTy));
+                    memmove(&elements()[dst], &elements()[src], cnt*sizeof(Ty));
                 }
                 else
                 {
-                    memcpy(&objects()[dst], &objects()[src], cnt*sizeof(ObjTy));
+                    memcpy(&elements()[dst], &elements()[src], cnt*sizeof(Ty));
                 }
 
                 idx += cnt;
@@ -235,7 +267,7 @@ struct SparseArrayImpl : SparseArrayStorageTy
 
     void zero()
     {
-        memset(objects(), 0, max()*sizeof(ObjTy));
+        memset(elements(), 0, max()*sizeof(Ty));
     }
 
     uint32_t count()
@@ -244,10 +276,10 @@ struct SparseArrayImpl : SparseArrayStorageTy
     }
 };
 
-template <typename ObjTy, uint32_t MaxT>
+template <typename Ty, uint32_t MaxT>
 struct SparseArrayStorageT
 {
-    typedef ObjTy ObjectType;
+    typedef Ty ObjectType;
     typedef HandleAllocT<MaxT> HandleAllocType;
 
     bool isResizable() const
@@ -259,9 +291,9 @@ struct SparseArrayStorageT
     {
     }
 
-    ObjTy* objects()
+    Ty* elements()
     {
-        return m_objects;
+        return m_elements;
     }
 
     HandleAllocType* handles()
@@ -269,19 +301,19 @@ struct SparseArrayStorageT
         return &m_handles;
     }
 
-    uint32_t max()
+    uint32_t max() const
     {
         return MaxT;
     }
 
     HandleAllocType m_handles;
-    ObjTy m_objects[MaxT];
+    Ty m_elements[MaxT];
 };
 
-template <typename ObjTy>
+template <typename Ty>
 struct SparseArrayStorageExt
 {
-    typedef ObjTy ObjectType;
+    typedef Ty ObjectType;
     typedef HandleAllocExt<uint32_t> HandleAllocType;
 
     bool isResizable() const
@@ -295,30 +327,30 @@ struct SparseArrayStorageExt
 
     static uint32_t sizeFor(uint32_t _max)
     {
-        return _max*sizeof(ObjTy) + HandleAllocType::sizeFor(_max);
+        return _max*sizeof(Ty) + HandleAllocType::sizeFor(_max);
     }
 
     SparseArrayStorageExt()
     {
         m_max = 0;
-        m_objects = NULL;
+        m_elements = NULL;
     }
 
     uint8_t* init(uint32_t _max, uint8_t* _mem)
     {
         uint8_t* objBegin   = (uint8_t*)_mem;
-        uint8_t* handleBegin = (uint8_t*)_mem + _max*sizeof(ObjTy);
+        uint8_t* handleBegin = (uint8_t*)_mem + _max*sizeof(Ty);
 
         m_max = _max;
-        m_objects = (ObjTy*)objBegin;
+        m_elements = (Ty*)objBegin;
         uint8_t* end = m_handles.init(_max, handleBegin);
 
         return end;
     }
 
-    ObjTy* objects()
+    Ty* elements()
     {
-        return m_objects;
+        return m_elements;
     }
 
     HandleAllocType* handles()
@@ -326,20 +358,20 @@ struct SparseArrayStorageExt
         return &m_handles;
     }
 
-    uint32_t max()
+    uint32_t max() const
     {
         return m_max;
     }
 
     uint32_t m_max;
-    ObjTy* m_objects;
+    Ty* m_elements;
     HandleAllocType m_handles;
 };
 
-template <typename ObjTy>
+template <typename Ty>
 struct SparseArrayStorage
 {
-    typedef ObjTy ObjectType;
+    typedef Ty ObjectType;
     typedef HandleAllocExt<uint32_t> HandleAllocType;
 
     bool isResizable() const
@@ -353,13 +385,13 @@ struct SparseArrayStorage
 
     static uint32_t sizeFor(uint32_t _max)
     {
-        return _max*sizeof(ObjTy) + HandleAllocType::sizeFor(_max);
+        return _max*sizeof(Ty) + HandleAllocType::sizeFor(_max);
     }
 
     SparseArrayStorage()
     {
         m_max = 0;
-        m_objects = NULL;
+        m_elements = NULL;
     }
 
     void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
@@ -368,10 +400,10 @@ struct SparseArrayStorage
         void* mem = dm_alloc(totalSize, _reallocFn);
 
         uint8_t* objBegin    = (uint8_t*)mem;
-        uint8_t* handleBegin = (uint8_t*)mem + _max*sizeof(ObjTy);
+        uint8_t* handleBegin = (uint8_t*)mem + _max*sizeof(Ty);
 
         m_max = _max;
-        m_objects = (ObjTy*)objBegin;
+        m_elements = (Ty*)objBegin;
         m_handles.init(_max, handleBegin);
 
         m_reallocFn = _reallocFn;
@@ -379,16 +411,16 @@ struct SparseArrayStorage
 
     void destroy()
     {
-        if (NULL != m_objects)
+        if (NULL != m_elements)
         {
-            dm_free(m_objects, m_reallocFn);
-            m_objects = NULL;
+            dm_free(m_elements, m_reallocFn);
+            m_elements = NULL;
         }
     }
 
-    ObjTy* objects()
+    Ty* elements()
     {
-        return m_objects;
+        return m_elements;
     }
 
     HandleAllocType* handles()
@@ -396,35 +428,35 @@ struct SparseArrayStorage
         return &m_handles;
     }
 
-    uint32_t max()
+    uint32_t max() const
     {
         return m_max;
     }
 
     uint32_t m_max;
-    ObjTy* m_objects;
+    Ty* m_elements;
     HandleAllocType m_handles;
     ReallocFn m_reallocFn;
 };
 
-template <typename ObjTy>
+template <typename Ty>
 struct SparseArrayStorageRes
 {
-    typedef ObjTy ObjectType;
+    typedef Ty ObjectType;
     typedef HandleAllocRes<uint32_t> HandleAllocType;
 
     SparseArrayStorageRes()
     {
         m_max = 0;
-        m_objects = NULL;
+        m_elements = NULL;
     }
 
     void init(uint32_t _max, ReallocFn _reallocFn = ::realloc)
     {
-        const uint32_t size = _max*sizeof(ObjTy);
+        const uint32_t size = _max*sizeof(Ty);
 
         m_max = _max;
-        m_objects = (ObjTy*)dm_alloc(size, _reallocFn);
+        m_elements = (Ty*)dm_alloc(size, _reallocFn);
         m_handles.init(_max, _reallocFn);
 
         m_reallocFn = _reallocFn;
@@ -437,24 +469,24 @@ struct SparseArrayStorageRes
 
     void resize(uint32_t _newMax)
     {
-        const uint32_t size = _newMax*sizeof(ObjTy);
+        const uint32_t size = _newMax*sizeof(Ty);
         m_max = _newMax;
-        m_objects = (ObjTy*)dm_realloc(size, m_reallocFn);
+        m_elements = (Ty*)dm_realloc(size, m_reallocFn);
         m_handles.resize(_newMax);
     }
 
     void destroy()
     {
-        if (NULL != m_objects)
+        if (NULL != m_elements)
         {
-            dm_free(m_objects, m_reallocFn);
-            m_objects = NULL;
+            dm_free(m_elements, m_reallocFn);
+            m_elements = NULL;
         }
     }
 
-    ObjTy* objects()
+    Ty* elements()
     {
-        return m_objects;
+        return m_elements;
     }
 
     HandleAllocType* handles()
@@ -462,22 +494,22 @@ struct SparseArrayStorageRes
         return &m_handles;
     }
 
-    uint32_t max()
+    uint32_t max() const
     {
         return m_max;
     }
 
     uint32_t m_max;
-    ObjTy* m_objects;
+    Ty* m_elements;
     HandleAllocType m_handles;
     ReallocFn m_reallocFn;
 };
 
-template <typename ObjTy, uint32_t MaxT> struct SparseArrayT   : SparseArrayImpl< SparseArrayStorageT<ObjTy, MaxT> > { };
-template <typename ObjTy>                struct SparseArrayExt : SparseArrayImpl< SparseArrayStorageExt<ObjTy>     > { };
-template <typename ObjTy>                struct SparseArray    : SparseArrayImpl< SparseArrayStorage<ObjTy>        > { };
-template <typename ObjTy>                struct SparseArrayRes : SparseArrayImpl< SparseArrayStorage<ObjTy>        > { };
-template <typename ObjTy>                struct SparseArrayH   : SparseArrayExt<ObjTy> { ReallocFn m_reallocFn; };
+template <typename Ty, uint32_t MaxT> struct SparseArrayT   : SparseArrayImpl< SparseArrayStorageT<Ty, MaxT> > { };
+template <typename Ty>                struct SparseArrayExt : SparseArrayImpl< SparseArrayStorageExt<Ty>     > { };
+template <typename Ty>                struct SparseArray    : SparseArrayImpl< SparseArrayStorage<Ty>        > { };
+template <typename Ty>                struct SparseArrayRes : SparseArrayImpl< SparseArrayStorage<Ty>        > { };
+template <typename Ty>                struct SparseArrayH   : SparseArrayExt<Ty> { ReallocFn m_reallocFn; };
 
 } //namespace ng
 } //namespace dm
