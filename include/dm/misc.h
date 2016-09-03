@@ -401,6 +401,15 @@ namespace dm
         }
     }
 
+    DM_INLINE size_t strmcpy(char* _dst, size_t _dstSize, const char* _src, size_t _len)
+    {
+        const size_t num = (_dstSize-1 < _len) ? _dstSize-1 : _len;
+        memcpy(_dst, _src, num);
+        _dst[num] = '\0';
+
+        return num;
+    }
+
     template <uint32_t DstSize>
     DM_INLINE void stracpy(char (&_dst)[DstSize], const char* _src)
     {
@@ -408,16 +417,9 @@ namespace dm
     }
 
     template <uint32_t DstSize>
-    DM_INLINE void stracpy(char (&_dst)[DstSize], const char* _src, uint32_t _len)
+    DM_INLINE void strmacpy(char (&_dst)[DstSize], const char* _src, uint32_t _len)
     {
-        strscpy(_dst, _src, dm::min(DstSize, _len));
-    }
-
-    // TODO: remove! Use 'stracpy' instead.
-    template <uint32_t DstSize>
-    DM_INLINE void strscpya(char (&_dst)[DstSize], const char* _src)
-    {
-        strscpy(_dst, _src, DstSize);
+        strmcpy(_dst, DstSize, _src, _len);
     }
 
     DM_INLINE void strscat(char* _dst, const char* _src, size_t _dstSize)
@@ -435,44 +437,38 @@ namespace dm
     }
 
     template <uint32_t CharArraySize>
-    DM_INLINE int strcmpa(char (&_a)[CharArraySize], const char* _b)
+    DM_INLINE int stracmp(char (&_a)[CharArraySize], const char* _b)
     {
         return strncmp(_a, _b, CharArraySize);
     }
 
     template <uint32_t CharArraySize>
-    DM_INLINE int strcmpa(const char* _a, char (&_b)[CharArraySize])
+    DM_INLINE int stracmp(const char* _a, char (&_b)[CharArraySize])
     {
         return strncmp(_a, _b, CharArraySize);
     }
 
     template <uint32_t CharArraySize>
-    DM_INLINE int stricmpa(char (&_a)[CharArraySize], const char* _b)
+    DM_INLINE int striacmp(char (&_a)[CharArraySize], const char* _b)
     {
         return strnicmp(_a, _b, CharArraySize);
     }
 
     template <uint32_t CharArraySize>
-    DM_INLINE int stricmpa(const char* _a, char (&_b)[CharArraySize])
+    DM_INLINE int striacmp(const char* _a, char (&_b)[CharArraySize])
     {
         return strnicmp(_a, _b, CharArraySize);
     }
 
     DM_INLINE void strtolower(char* _out, char* _in)
     {
-        while (*_in)
-        {
-            *_out++ = (char)tolower(*_in++);
-        }
+        while (*_in) { *_out++ = (char)tolower(*_in++); }
         *_out = '\0';
     }
 
     DM_INLINE void strtoupper(char* _out, char* _in)
     {
-        while (*_in)
-        {
-            *_out++ = (char)toupper(*_in++);
-        }
+        while (*_in) { *_out++ = (char)toupper(*_in++); }
         *_out = '\0';
     }
 
