@@ -24,7 +24,8 @@ struct ArrayImpl : ArrayStorageTy
     ///         typedef Ty ElementType;
     ///         bool isResizable();
     ///         bool resize(uint32_t _max);
-    ///         Ty* elements() const;
+    ///         Ty* elements();
+    ///         const Ty* elements() const;
     ///         uint32_t max() const;
     ///     };
     typedef typename ArrayStorageTy::ElementType ElemTy;
@@ -137,7 +138,7 @@ struct ArrayImpl : ArrayStorageTy
         m_count = 0;
     }
 
-    ElemTy last() const
+    ElemTy last()
     {
         return elements()[m_count-1];
     }
@@ -303,7 +304,7 @@ struct ObjArrayImpl : ArrayStorageTy
         m_count = 0;
     }
 
-    ElemTy* last() const
+    ElemTy* last()
     {
         return &elements()[m_count-1];
     }
@@ -345,7 +346,12 @@ struct ArrayStorageT
         return false;
     }
 
-    Ty* elements() const
+    Ty* elements()
+    {
+        return m_elements;
+    }
+
+    const Ty* elements() const
     {
         return m_elements;
     }
@@ -392,7 +398,12 @@ struct ArrayStorageExt
         return false;
     }
 
-    Ty* elements() const
+    Ty* elements()
+    {
+        return m_elements;
+    }
+
+    const Ty* elements() const
     {
         return m_elements;
     }
@@ -462,7 +473,12 @@ struct ArrayStorage
         return true;
     }
 
-    Ty* elements() const
+    Ty* elements()
+    {
+        return m_elements;
+    }
+
+    const Ty* elements() const
     {
         return m_elements;
     }
