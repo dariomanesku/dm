@@ -65,11 +65,11 @@ struct ArrayImpl : ArrayStorageTy
         return elements()[--m_count];
     }
 
-    void pop(uint32_t _cnt)
+    void pop(uint32_t _count)
     {
-        DM_CHECK(_cnt <= m_count, "ArrayImpl::pop(_cnt) | %d %d", _cnt, m_count);
+        DM_CHECK(_count <= m_count, "ArrayImpl::pop(_count) | %d %d", _count, m_count);
 
-        m_count -= _cnt;
+        m_count -= _count;
     }
 
     ElemTy remove(uint32_t _idx)
@@ -137,6 +137,11 @@ struct ArrayImpl : ArrayStorageTy
         m_count = 0;
     }
 
+    ElemTy last() const
+    {
+        return elements()[m_count-1];
+    }
+
     uint32_t count() const
     {
         return m_count;
@@ -173,21 +178,7 @@ struct ObjArrayImpl : ArrayStorageTy
         m_count = 0;
     }
 
-    ElemTy* addNew()
-    {
-        if (isResizable())
-        {
-            expandIfNecessaryToMakeRoomFor(1);
-        }
-
-        DM_CHECK(m_count < max(), "ObjArrayImpl::addNew() | %d, %d", m_count, max());
-
-        ElemTy* elem = &elements()[m_count++];
-        elem = ::new (elem) ElemTy();
-        return elem;
-    }
-
-    ElemTy* addNew(uint32_t _count)
+    ElemTy* addNew(uint32_t _count = 1)
     {
         if (isResizable())
         {
@@ -196,9 +187,32 @@ struct ObjArrayImpl : ArrayStorageTy
 
         DM_CHECK((m_count + _count) < max(), "ObjArrayImpl::addNew(_count) | %d, %d", m_count + _count, max());
 
-        const uint32_t curr = m_count;
-        m_count += _count;
-        return &elements()[curr];
+        const uint32_t beg = m_count;
+        const uint32_t end = beg + _count;
+
+        m_count = end;
+        return &elements()[beg];
+    }
+
+    ElemTy* addInitNew(uint32_t _count = 1)
+    {
+        if (isResizable())
+        {
+            expandIfNecessaryToMakeRoomFor(_count);
+        }
+
+        DM_CHECK((m_count + _count) < max(), "ObjArrayImpl::addInitNew(_count) | %d, %d", m_count + _count, max());
+
+        const uint32_t beg = m_count;
+        const uint32_t end = beg + _count;
+        for (uint32_t ii = beg; ii < beg; ++ii)
+        {
+            ElemTy* elem = &elements()[ii];
+            elem = ::new (elem) ElemTy();
+        }
+
+        m_count = end;
+        return &elements()[beg];
     }
 
     void addCopy(const ElemTy* _obj)
@@ -207,23 +221,16 @@ struct ObjArrayImpl : ArrayStorageTy
         ::new (elem) ElemTy(*_obj);
     }
 
-    void pop()
+    void pop(uint32_t _count = 1)
     {
-        DM_CHECK(0 < m_count, "ObjArrayImpl::pop() | %d", m_count);
+        DM_CHECK(_count <= m_count, "ObjArrayImpl::pop(_count) | %d", m_count);
 
-        elements()[--m_count].~ElemTy();
-    }
-
-    void pop(uint32_t _cnt)
-    {
-        DM_CHECK(_cnt <= m_count, "ObjArrayImpl::pop(_cnt) | %d", m_count);
-
-        const uint32_t newCnt = m_count-_cnt;
-        for (uint32_t ii = newCnt, end = m_count; ii < end; ++ii)
+        const uint32_t newCount = m_count-_count;
+        for (uint32_t ii = newCount, end = m_count; ii < end; ++ii)
         {
             elements()[ii].~ElemTy();
         }
-        m_count = newCnt;
+        m_count = newCount;
     }
 
     void remove(uint32_t _idx)
@@ -294,6 +301,11 @@ struct ObjArrayImpl : ArrayStorageTy
     void reset()
     {
         m_count = 0;
+    }
+
+    ElemTy* last() const
+    {
+        return &elements()[m_count-1];
     }
 
     uint32_t count() const
