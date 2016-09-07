@@ -46,7 +46,7 @@ struct ArrayImpl : ArrayStorageTy
             expandIfNecessaryToMakeRoomFor(_count);
         }
 
-        DM_CHECK(m_count < max(), "ArrayImpl::addNew() | %d, %d", m_count, max());
+        DM_CHECK((m_count+_count) <= max(), "ArrayImpl::addNew() | %d, %d, %d", m_count, _count, max());
 
         const uint32_t curr = m_count;
         m_count += _count;
@@ -186,7 +186,7 @@ struct ObjArrayImpl : ArrayStorageTy
             expandIfNecessaryToMakeRoomFor(_count);
         }
 
-        DM_CHECK((m_count + _count) < max(), "ObjArrayImpl::addNew(_count) | %d, %d", m_count + _count, max());
+        DM_CHECK((m_count+_count) <= max(), "ObjArrayImpl::addNew(_count) | %d, %d, %d", m_count, _count, max());
 
         const uint32_t beg = m_count;
         const uint32_t end = beg + _count;
@@ -202,7 +202,7 @@ struct ObjArrayImpl : ArrayStorageTy
             expandIfNecessaryToMakeRoomFor(_count);
         }
 
-        DM_CHECK((m_count + _count) < max(), "ObjArrayImpl::addInitNew(_count) | %d, %d", m_count + _count, max());
+        DM_CHECK((m_count+_count) <= max(), "ObjArrayImpl::addInitNew(_count) | %d, %d, %d", m_count, _count, max());
 
         const uint32_t beg = m_count;
         const uint32_t end = beg + _count;
