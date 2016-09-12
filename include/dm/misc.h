@@ -34,6 +34,7 @@ namespace dm
 
     #define DM_COUNTOF(_arr) ((int)(sizeof(_arr)/sizeof(*_arr)))
     #define DM_OFFSETOF(type, member) ((size_t)&(((type*)0)->member))
+    #define DM_MASK(_idx) (1UL << _idx)
 
     #define DM_STRINGIZE(_x) DM_STRINGIZE_(_x)
     #define DM_STRINGIZE_(_x) #_x
