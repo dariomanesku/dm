@@ -84,14 +84,14 @@ struct DenseSetImpl : DenseSetStorageTy
         return values()[_idx];
     }
 
-    void remove(ElemTy _val)
+    bool remove(ElemTy _val)
     {
         DM_CHECK(_val < max(), "DenseSetImpl::remove() - 0 | %d, %d", _val, max());
         DM_CHECK(m_num < max(), "DenseSetImpl::remove() - 1 | %d, %d", m_num, max());
 
         if (!contains(_val))
         {
-            return;
+            return false;
         }
 
         const ElemTy index = indices()[_val];
@@ -102,6 +102,8 @@ struct DenseSetImpl : DenseSetStorageTy
 
         values()[index] = last;
         indices()[last] = index;
+
+        return true;
     }
 
     uint32_t count()
