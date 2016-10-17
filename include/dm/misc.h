@@ -44,6 +44,7 @@ namespace dm
 
     #define DM_FILE_LINE "" __FILE__ "(" DM_STRINGIZE(__LINE__) ")"
 
+    //TODO: unused typedef
     #define DM_STATIC_ASSERT(_expr) { typedef int DM_CONCATENATE(dm_compile_time_assert_, __LINE__)[1 - 2*!(_expr)]; }
 
     #define DM_MAKEFOURCC(_a, _b, _c, _d) ( ((uint32_t(_a)&0xff)        \
@@ -68,6 +69,8 @@ namespace dm
     #define DM_MIN(_a, _b) ((_a)<(_b)?(_a):(_b))
     #define DM_MAX(_a, _b) ((_a)>(_b)?(_a):(_b))
     #define DM_CLAMP(_val, _min, _max) (DM_MIN(DM_MAX(_val, _min), _max))
+    #define DM_TOGGLE(_flag) _flag = !_flag
+    #define DM_LAZY_ASSIGN(_field, _value) if (_field != _value) { _field = _value; }
 
     // Return type is typeof(_a).
     template <typename TyA, typename TyB> DM_INLINE TyA mina(TyA _a, TyB _b) { return  _a < _b ? _a : _b; }
@@ -118,6 +121,15 @@ namespace dm
     DM_INLINE void toggle(bool& _flag)
     {
         _flag = !_flag;
+    }
+
+    template <typename Ty0/*arithmetic type*/, typename Ty1/*arithmetic type*/>
+    DM_INLINE void lazyAssign(Ty0& _field, Ty1 _value)
+    {
+        if (_field != _value)
+        {
+            _field = _value;
+        }
     }
 
     // Integer.
@@ -228,12 +240,24 @@ namespace dm
         return (0 != _v);
     }
 
-    DM_INLINE bool inside(int32_t _px, int32_t _py, int32_t _minx, int32_t _miny, int32_t _width, int32_t _height)
+    DM_INLINE bool inside(int32_t _pointX, int32_t _pointY
+                        , int32_t _quadX, int32_t _quadY
+                        , int32_t _quadWidth, int32_t _quadHeight)
     {
-        return (_px > _minx)
-            && (_py > _miny)
-            && (_px < (_minx+_width))
-            && (_py < (_miny+_height));
+        return (_pointX > _quadX)
+            && (_pointY > _quadY)
+            && (_pointX < (_quadX+_quadWidth))
+            && (_pointY < (_quadY+_quadHeight));
+    }
+
+    DM_INLINE bool insidef(float _pointX, float _pointY
+                         , float _quadX, float _quadY
+                         , float _quadWidth, float _quadHeight)
+    {
+        return (_pointX > _quadX)
+            && (_pointY > _quadY)
+            && (_pointX < (_quadX+_quadWidth))
+            && (_pointY < (_quadY+_quadHeight));
     }
 
     // Align.
