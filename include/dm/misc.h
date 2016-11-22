@@ -47,6 +47,8 @@ namespace dm
     //TODO: unused typedef
     #define DM_STATIC_ASSERT(_expr) { typedef int DM_CONCATENATE(dm_compile_time_assert_, __LINE__)[1 - 2*!(_expr)]; }
 
+    #define DM_UNUSED(_expr) for (;;) { (void)(true ? (void)0 : ((void)(_expr))); break; }
+
     #define DM_MAKEFOURCC(_a, _b, _c, _d) ( ((uint32_t(_a)&0xff)        \
                                           | ((uint32_t(_b)&0xff) <<  8) \
                                           | ((uint32_t(_c)&0xff) << 16) \
@@ -643,7 +645,7 @@ namespace dm
             ex02_realpath(_rel, _abs);
         #else // OSX
             char* path = ::realpath(_rel, _abs);
-            BX_UNUSED(path);
+            DM_UNUSED(path);
         #endif // BX_PLATFORM_WINDOWS
     }
 
