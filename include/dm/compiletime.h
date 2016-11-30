@@ -3,15 +3,23 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#ifndef DM_COMPILETIME_H_HEADER_GUARD
-#define DM_COMPILETIME_H_HEADER_GUARD
+#include "dm.h"
 
-#include <stdint.h>
-#include <limits.h>  // CHAR_MAX
+/// Header includes.
+#if (DM_INCL & DM_INCL_HEADER_INCLUDES)
+#   include <stdint.h>
+#   include <limits.h>  // CHAR_MAX
+#   include "platform.h" // DM_CPP11
+#endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
-#include "ng/platform.h" // DM_CPP11
-
-namespace dm
+/// Header body.
+#if (DM_INCL & DM_INCL_HEADER_BODY)
+#   if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#       undef DM_COMPILETIME_H_HEADER_GUARD
+#   endif // if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#   ifndef DM_COMPILETIME_H_HEADER_GUARD
+#   define DM_COMPILETIME_H_HEADER_GUARD
+namespace DM_NAMESPACE
 {
     /// Static assert.
     /// To be used as a statement inside a scope.
@@ -286,8 +294,8 @@ namespace dm
     ///     struct Foo { };
     #define DM_ENABLE_IF(_templateParam, _testFunc) typename dm::enable_if<dm::_testFunc<_templateParam>::value == true, void>::type* = NULL
 
-} // namespace dm
-
-#endif // DM_COMPILETIME_H_HEADER_GUARD
+} // namespace DM_NAMESPACE
+#   endif // DM_COMPILETIME_H_HEADER_GUARD
+#endif // (DM_INCL & DM_INCL_HEADER_BODY)
 
 /* vim: set sw=4 ts=4 expandtab: */

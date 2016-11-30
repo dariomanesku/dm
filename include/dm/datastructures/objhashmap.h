@@ -1,241 +1,483 @@
 /*
- * Copyright 2015 Dario Manesku. All rights reserved.
+ * Copyright 2016 Dario Manesku. All rights reserved.
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#ifndef DM_OBJHASHMAP_H_HEADER_GUARD
-#define DM_OBJHASHMAP_H_HEADER_GUARD
+#include "../dm.h"
 
-#include <stdint.h> // uint32_t
-#include <new>      // placement-new
+/// Header includes.
+#if (DM_INCL & DM_INCL_HEADER_INCLUDES)
+    #include <stdint.h>
+    #include "../check.h"
+    #include "../hash.h"
+    #include "../compiletime.h"
+    #include "../ng/allocatori.h"
+#endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
-#include "../common/common.h" // DM_INLINE
-#include "../check.h"         // DM_CHECK
-#include "../misc.h"          // dm::TyInfo<>
-#include "../hash.h"          // dm::hash
-#include "../misc.h"          // dm::isPowTwo
-#include "../compiletime.h"   // dm_staticAssert(), dm::is_powtwo<>::value
-
-#include "common.h" // Heap alloc utils.
-#include "handlealloc.h"
-#include "hashmap.h"
-
-namespace dm
+/// Header body.
+#if (DM_INCL & DM_INCL_HEADER_BODY)
+#   if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#       undef DM_OBJHASHMAP_H_HEADERGUARD
+#   endif // if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#   ifndef DM_OBJHASHMAP_H_HEADERGUARD
+#   define DM_OBJHASHMAP_H_HEADERGUARD
+namespace DM_NAMESPACE
 {
-    template <uint8_t KeyLen, typename ValTy, uint32_t MaxT_PowTwo, uint8_t EntriesPerSlot_PowTwo=2
-            , DM_ENABLE_IF(MaxT_PowTwo,           is_powtwo)
-            , DM_ENABLE_IF(EntriesPerSlot_PowTwo, is_powtwo)
-            >
-    struct ObjHashMapT
+    template <typename ObjHashMapStorage>
+    struct ObjHashMapImpl : ObjHashMapStorage
     {
-        typedef typename dm::bestfit_type<MaxT_PowTwo*EntriesPerSlot_PowTwo>::type HandleType;
+        /// Expected interface:
+        ///
+        ///     template <uint8_t KeyLength, typename ObjTy>
+        ///     struct ObjHashMapStorageTemplate
+        ///     {
+        ///         typedef ObjTy ObjectType;
+        ///
+        ///         struct UsedKey
+        ///         {
+        ///             uint8_t m_used;
+        ///             uint8_t m_key[KeyLen];
+        ///         };
+        ///
+        ///         UsedKey* uk();
+        ///         ObjTy* objs();
+        ///         uint32_t max();
+        ///         uint32_t keyLen();
+        ///     };
+        typedef typename ObjHashMapStorage::ObjectType ObjTy;
+        typedef typename ObjHashMapStorage::UsedKey Uk;
+        using ObjHashMapStorage::uk;
+        using ObjHashMapStorage::objs;
+        using ObjHashMapStorage::max;
+        using ObjHashMapStorage::keyLen;
 
-        ObjHashMapT()
+        enum
         {
-            dm_staticAssert(is_powtwo<MaxT_PowTwo>::value);
+            Unused   = 0x00,
+            Used     = 0x0f,
+            FirstHit = 0xff,
+            InvalidHandle = UINT32_MAX,
+        };
+
+        ObjHashMapImpl() : ObjHashMapStorage()
+        {
         }
 
-        #include "objhashmap_inline_impl.h"
-
-        uint32_t max() const
+        void init()
         {
-            return MaxT_PowTwo;
+            memset(uk(), Unused, max()*sizeof(Uk));
+        }
+
+        ObjTy* insert(const uint8_t* _key, uint8_t _keyLen)
+        {
+            DM_CHECK(_keyLen <= keyLen(), "ObjHashMapImpl::insert() - Invalid key length | %d, %d", _keyLen, keyLen());
+
+            const uint32_t hash = dm::hash(_key, _keyLen);
+            uint32_t idx = wrapAround(hash);
+            const uint32_t firstHit = idx;
+            for (;;)
+            {
+                if (Unused == uk()[idx].m_used)
+                {
+                    uk()[idx].m_used = (idx == firstHit) ? FirstHit : Used;
+                    memcpy(&uk()[idx].m_key, _key, _keyLen);
+                    return &objs()[idx];
+                }
+
+                idx = wrapAround(idx+1);
+            }
+        }
+
+        ObjTy* insert(const char* _key)
+        {
+            return insert((const uint8_t*)_key, strlen(_key));
+        }
+
+        template <typename Ty>
+        ObjTy* insert(const Ty& _key)
+        {
+            dm_staticAssert(sizeof(Ty) <= ObjHashMapStorage::KeyLen);
+
+            return insert((const uint8_t*)&_key, sizeof(Ty));
+        }
+
+        struct ObjDuplicate
+        {
+            struct
+            {
+                ObjTy* m_obj;
+                bool   m_duplicate;
+            };
+        };
+
+        ObjDuplicate insertHandleDup(const uint8_t* _key, uint8_t _keyLen)
+        {
+            DM_CHECK(_keyLen <= keyLen(), "ObjHashMapImpl::insertHandleDup() - Invalid key length | %d, %d", _keyLen, keyLen());
+
+            const uint32_t hash = dm::hash(_key, _keyLen);
+            uint32_t idx = wrapAround(hash);
+            const uint32_t firstHit = idx;
+            for (;;)
+            {
+                const uint8_t usedFlag = uk()[idx].m_used;
+
+                if (Unused == usedFlag)
+                {
+                    // Insert new entry.
+
+                    uk()[idx].m_used = (idx == firstHit) ? FirstHit : Used;
+                    memcpy(&uk()[idx].m_key, _key, _keyLen);
+
+                    ObjDuplicate result;
+                    result.m_obj = &objs()[idx];
+                    result.m_duplicate = false;
+                    return result;
+                }
+                else if ((Used & usedFlag)                              // Used
+                     &&  0 == memcmp(_key, uk()[idx].m_key, _keyLen))  // && key matches.
+                {
+                    // Item already found.
+
+                    ObjDuplicate result;
+                    result.m_obj = &objs()[idx];
+                    result.m_duplicate = true;
+                    return result;
+                }
+
+                idx = wrapAround(idx+1);
+            }
+        }
+
+        ObjDuplicate insertHandleDup(const char* _key)
+        {
+            return insertHandleDup((const uint8_t*)_key, strlen(_key));
+        }
+
+        template <typename Ty>
+        ObjDuplicate insertHandleDup(const Ty& _key)
+        {
+            dm_staticAssert(sizeof(Ty) <= ObjHashMapStorage::KeyLen);
+            return insertHandleDup((const uint8_t*)&_key, sizeof(Ty));
+        }
+
+        ObjTy* find(const uint8_t* _key, uint8_t _keyLen)
+        {
+            DM_CHECK(_keyLen <= keyLen(), "ObjHashMapImpl::find() - Invalid key length | %d, %d", _keyLen, keyLen());
+
+            const uint32_t hash = dm::hash(_key, _keyLen);
+            for (uint32_t idx = wrapAround(hash); true; idx = wrapAround(idx+1))
+            {
+                const uint8_t usedFlag = uk()[idx].m_used;
+                if ((Used & usedFlag)                               // Used
+                &&  0 == memcmp(&uk()[idx].m_key, _key, _keyLen))   // && key matches.
+                {
+                    return &objs()[idx];                            // Return ptr to objs.
+                }
+                else if (Unused == usedFlag)                        // Unused
+                {
+                    return NULL;                                    // Return NULL.
+                }
+            }
+
+            return NULL;
+        }
+
+        ObjTy* find(const char* _key)
+        {
+            return find((const uint8_t*)_key, strlen(_key));
+        }
+
+        template <typename Ty>
+        ObjTy* find(const Ty& _key)
+        {
+            dm_staticAssert(sizeof(Ty) <= ObjHashMapStorage::KeyLen);
+
+            return find((const uint8_t*)&_key, sizeof(Ty));
+        }
+
+        bool remove(const uint8_t* _key, uint8_t _keyLen)
+        {
+            DM_CHECK(_keyLen <= keyLen(), "ObjHashMapImpl::remove() - Invalid key length | %d, %d", _keyLen, keyLen());
+
+            ObjTy* obj = find(_key, _keyLen);
+            if (NULL != obj)
+            {
+                const uint32_t handle = obj - objs();
+                const uint32_t begin = handle+1;
+                uint32_t end = begin;
+                while (uk()[end].m_used == Used) { end++; }
+                const uint32_t count = end - begin;
+
+                obj->~ObjTy();
+
+                if (0 == count)
+                {
+                    uk()[handle].m_used = Unused;
+                }
+                else
+                {
+                    objs()[handle].~ObjTy();
+
+                    memmove(&uk()[handle],   &uk()[begin],   count*sizeof(Uk));
+                    memmove(&objs()[handle], &objs()[begin], count*sizeof(ObjTy));
+                    uk()[end].m_used = Unused;
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        bool remove(const char* _key)
+        {
+            return remove((const uint8_t*)_key, strlen(_key));
+        }
+
+        template <typename Ty>
+        bool remove(const Ty& _key)
+        {
+            dm_staticAssert(sizeof(Ty) <= ObjHashMapStorage::KeyLen);
+            return remove((const uint8_t*)&_key, sizeof(Ty));
         }
 
     private:
-        enum
+        inline uint32_t wrapAround(uint32_t _v)
         {
-            Unused     = 0xff,
-            Used       = 0x00,
-            InvalidIdx = UINT32_MAX,
-        };
-
-        HashMapT<KeyLen, HandleType, MaxT_PowTwo*EntriesPerSlot_PowTwo> m_hashMap;
-        HandleAllocT<MaxT_PowTwo>                                       m_handleAlloc;
-        ValTy                                                           m_objects[MaxT_PowTwo];
+            return _v&(max()-1);
+        }
     };
 
-    template <uint8_t KeyLen, typename ValTy>
-    struct ObjHashMap
+    template <uint8_t KeyLength, typename ObjTy, uint32_t MaxT_PowTwo>
+    struct ObjHashMapStorageT
     {
-        typedef uint32_t HandleType;
-
-        // Uninitialized state, init() needs to be called !
-        ObjHashMap()
+        enum
         {
-            m_memoryBlock = NULL;
-        }
+            Max = dm::NextPowTwo<MaxT_PowTwo>::value,
+            KeyLen = KeyLength
+        };
+        typedef ObjTy ObjectType;
 
-        ObjHashMap(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, dm::ReallocatorI* _reallocator)
-        {
-            DM_ASSERT(dm::isPowTwo(_maxPowTwo));
-            DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
-
-            init(_maxPowTwo, _entriesPerSlotPowTwo, _reallocator);
-        }
-
-        ObjHashMap(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, dm::AllocatorI* _allocator)
-        {
-            DM_ASSERT(dm::isPowTwo(_maxPowTwo));
-            DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
-
-            init(_maxPowTwo, _entriesPerSlotPowTwo, _mem, _allocator);
-        }
-
-        ~ObjHashMap()
-        {
-            destroy();
-        }
-
-        struct UsedKeyVal
+        struct UsedKey
         {
             uint8_t m_used;
             uint8_t m_key[KeyLen];
-            ValTy   m_val;
         };
 
-        enum
+        UsedKey* uk()
         {
-            SizePerElement = sizeof(ValTy) + HandleAlloc<HandleType>::SizePerElement + HashMap<KeyLen, HandleType>::SizePerElement,
-            SizePerAdditionalEntry = HashMap<KeyLen, HandleType>::SizePerElement,
+            return m_uk;
+        }
+
+        ObjTy* objs()
+        {
+            return m_objs;
+        }
+
+        uint32_t max()
+        {
+            return Max;
+        }
+
+        uint32_t keyLen()
+        {
+            return KeyLen;
+        }
+
+    private:
+        UsedKey m_uk[Max];
+        ObjTy   m_objs[Max];
+    };
+
+    template <uint8_t KeyLength, typename ObjTy>
+    struct ObjHashMapStorageExt
+    {
+        enum { KeyLen = KeyLength };
+        typedef ObjTy ObjectType;
+
+        struct UsedKey
+        {
+            uint8_t m_used;
+            uint8_t m_key[KeyLen];
         };
 
-        static inline uint32_t sizeFor(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo)
+        static uint32_t sizeFor(uint32_t _maxPowTwo)
         {
-            DM_ASSERT(dm::isPowTwo(_maxPowTwo));
-            DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
+            DM_CHECK(dm::isPowTwo(_maxPowTwo), "ObjHashMapStorageExt::sizeFor() - Invalid value | %d", _maxPowTwo);
 
-            return _maxPowTwo*(SizePerElement + SizePerAdditionalEntry*(DM_MAX(0, _entriesPerSlotPowTwo-1)));
+            return _maxPowTwo*(sizeof(UsedKey)+sizeof(ObjTy));
         }
 
-        // Allocates memory internally.
-        void init(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, dm::ReallocatorI* _reallocator)
+        ObjHashMapStorageExt()
         {
-            DM_ASSERT(dm::isPowTwo(_maxPowTwo));
-            DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
+            m_uk = NULL;
+            m_max = 0;
+        }
+
+        uint8_t* initStorage(uint32_t _maxPowTwo, uint8_t* _mem)
+        {
+            DM_CHECK(dm::isPowTwo(_maxPowTwo), "ObjHashMapStorageExt::initStorage() - Invalid value | %d", _maxPowTwo);
 
             m_max = _maxPowTwo;
-            m_entriesPerSlot = _entriesPerSlotPowTwo;
-            m_memoryBlock = (UsedKeyVal*)DM_ALLOC(_reallocator, sizeFor(_maxPowTwo, _entriesPerSlotPowTwo));
-            m_reallocator = _reallocator;
-            m_cleanup = true;
+            m_uk = (UsedKey*)_mem;
+            m_objs = (ObjTy*)((uint8_t*)_mem + _maxPowTwo*sizeof(UsedKey));
 
-            void* ptr = m_memoryBlock;
-            ptr = m_hashMap.init(_maxPowTwo*_entriesPerSlotPowTwo, ptr, (dm::AllocatorI*)_reallocator);
-            ptr = m_handleAlloc.init(_maxPowTwo, ptr, (dm::AllocatorI*)_reallocator);
-            m_objects = (ValTy*)ptr;
+            return (_mem + sizeFor(_maxPowTwo));
         }
 
-        // Uses externally allocated memory.
-        void* init(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, dm::AllocatorI* _allocator = NULL)
+        UsedKey* uk()
         {
-            DM_ASSERT(dm::isPowTwo(_maxPowTwo));
-            DM_ASSERT(dm::isPowTwo(_entriesPerSlotPowTwo));
-
-            m_max = _maxPowTwo;
-            m_entriesPerSlot = _entriesPerSlotPowTwo;
-            m_memoryBlock = _mem;
-            m_allocator = _allocator;
-            m_cleanup = false;
-
-            void* ptr = m_memoryBlock;
-            ptr = m_hashMap.init(_maxPowTwo*_entriesPerSlotPowTwo, ptr);
-            ptr = m_handleAlloc.init(_maxPowTwo, ptr);
-            m_objects = (ValTy*)ptr;
-
-            void* end = (void*)((uint8_t*)_mem + sizeFor(_maxPowTwo, _entriesPerSlotPowTwo));
-            return end;
+            return m_uk;
         }
 
-        bool isInitialized() const
+        ObjTy* objs()
         {
-            return (NULL != m_memoryBlock);
+            return m_objs;
         }
 
-        void reinit(uint32_t _maxPowTwo, dm::ReallocatorI* _reallocator)
-        {
-            DM_ASSERT(dm::isPowTwo(_maxPowTwo));
-
-            if (isInitialized())
-            {
-                destroy();
-            }
-
-            init(_maxPowTwo, _reallocator);
-        }
-
-        void destroy()
-        {
-            if (NULL != m_memoryBlock)
-            {
-                for (uint32_t ii = 0, end = this->count(); ii < end; ++ii)
-                {
-                    ValTy* obj = this->getValueAt(ii);
-                    obj->~ValTy();
-                }
-                m_handleAlloc.destroy();
-                m_hashMap.destroy();
-                if (m_cleanup)
-                {
-                    DM_FREE(m_reallocator, m_memoryBlock);
-                }
-                m_memoryBlock = NULL;
-            }
-        }
-
-        #include "objhashmap_inline_impl.h"
-
-        uint32_t max() const
+        uint32_t max()
         {
             return m_max;
         }
 
-        dm::AllocatorI* allocator()
+        uint32_t keyLen()
         {
-            return m_allocator;
+            return KeyLen;
         }
 
     private:
-        enum //TODO: use these from HashMap.
-        {
-            Unused     = 0xff,
-            Used       = 0x00,
-            InvalidIdx = UINT32_MAX,
-        };
-
+        UsedKey* m_uk;
+        ObjTy*   m_objs;
         uint32_t m_max;
-        uint8_t m_entriesPerSlot;
-        HashMap<KeyLen, HandleType> m_hashMap;
-        HandleAlloc<HandleType> m_handleAlloc;
-        ValTy* m_objects;
-        union
-        {
-            dm::AllocatorI*   m_allocator;
-            dm::ReallocatorI* m_reallocator;
-        };
-        bool m_cleanup;
-        void* m_memoryBlock;
     };
 
-    /// Notice: used only for Ty == ObjHashMap.
-    template <typename Ty>
-    DM_INLINE Ty* create(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, void* _mem, dm::AllocatorI* _memDeallocator)
+    extern CrtAllocator g_crtAllocator;
+
+    template <uint8_t KeyLength, typename ObjTy>
+    struct ObjHashMapStorage
     {
-        return ::new (_mem) Ty(_maxPowTwo, _entriesPerSlotPowTwo, (uint8_t*)_mem + sizeof(Ty), _memDeallocator);
-    }
+        enum { KeyLen = KeyLength };
+        typedef ObjTy ObjectType;
 
-    /// Notice: used only for Ty == ObjHashMap.
-    template <typename Ty>
-    DM_INLINE Ty* create(uint32_t _maxPowTwo, uint8_t _entriesPerSlotPowTwo, dm::AllocatorI* _allocator)
+        struct UsedKey
+        {
+            uint8_t m_used;
+            uint8_t m_key[KeyLen];
+        };
+
+        static uint32_t sizeFor(uint32_t _maxPowTwo)
+        {
+            DM_CHECK(dm::isPowTwo(_maxPowTwo), "ObjHashMapStorage::sizeFor() - Invalid value | %d", _maxPowTwo);
+
+            return _maxPowTwo*(sizeof(UsedKey)+sizeof(ObjTy));
+        }
+
+        ObjHashMapStorage()
+        {
+            m_uk = NULL;
+            m_max = 0;
+        }
+
+        ~ObjHashMapStorage()
+        {
+            destroy();
+        }
+
+        void initStorage(uint32_t _maxPowTwo, AllocatorI* _allocator = &g_crtAllocator)
+        {
+            DM_CHECK(dm::isPowTwo(_maxPowTwo), "ObjHashMapStorage::initStorage() - Invalid value | %d", _maxPowTwo);
+
+            uint8_t* mem = (uint8_t*)dm_alloc(sizeFor(_maxPowTwo), _allocator);
+
+            m_max = _maxPowTwo;
+            m_uk = (UsedKey*)mem;
+            m_objs = (ObjTy*)((uint8_t*)mem + _maxPowTwo*sizeof(UsedKey));
+
+            m_allocator = _allocator;
+        }
+
+        void destroy()
+        {
+            if (NULL != m_uk)
+            {
+                dm_free(m_uk, m_allocator);
+                m_uk = NULL;
+            }
+        }
+
+        UsedKey* uk()
+        {
+            return m_uk;
+        }
+
+        ObjTy* objs()
+        {
+            return m_objs;
+        }
+
+        uint32_t max()
+        {
+            return m_max;
+        }
+
+        uint32_t keyLen()
+        {
+            return KeyLen;
+        }
+
+    private:
+        UsedKey* m_uk;
+        ObjTy* m_objs;
+        uint32_t m_max;
+        AllocatorI* m_allocator;
+    };
+
+    template <uint8_t KeyLength, typename ObjTy, uint32_t MaxT_PowTwo>
+    struct ObjHashMapT : ObjHashMapImpl< ObjHashMapStorageT<KeyLength, ObjTy, MaxT_PowTwo> >
     {
-        uint8_t* ptr = (uint8_t*)DM_ALLOC(_allocator, sizeof(Ty) + Ty::sizeFor(_maxPowTwo, _entriesPerSlotPowTwo));
-        return create<Ty>(_maxPowTwo, _entriesPerSlotPowTwo, ptr, _allocator);
-    }
+        typedef ObjHashMapImpl< ObjHashMapStorageT<KeyLength, ObjTy, MaxT_PowTwo> > Base;
 
-} // namespace dm
+        ObjHashMapT() : Base()
+        {
+            Base::init();
+        }
+    };
 
-#endif // DM_HASHMAP_H_HEADER_GUARD
+    template <uint8_t KeyLength, typename ObjTy>
+    struct ObjHashMapExt : ObjHashMapImpl< ObjHashMapStorageExt<KeyLength, ObjTy> >
+    {
+        typedef ObjHashMapImpl< ObjHashMapStorageExt<KeyLength, ObjTy> > Base;
+
+        uint8_t* init(uint32_t _maxPowTwo, uint8_t* _mem)
+        {
+            uint8_t* ptr = Base::initStorage(_maxPowTwo, _mem);
+            Base::init();
+            return ptr;
+        }
+    };
+
+    template <uint8_t KeyLength, typename ObjTy>
+    struct ObjHashMap : ObjHashMapImpl< ObjHashMapStorage<KeyLength, ObjTy> >
+    {
+        typedef ObjHashMapImpl< ObjHashMapStorage<KeyLength, ObjTy> > Base;
+
+        void init(uint32_t _maxPowTwo, AllocatorI* _allocator = &g_crtAllocator)
+        {
+            Base::initStorage(_maxPowTwo, _allocator);
+            Base::init();
+        }
+    };
+
+    template <uint8_t KeyLength, typename ObjTy>
+    struct ObjHashMapH : ObjHashMapExt<KeyLength, ObjTy>
+    {
+        AllocatorI* m_allocator;
+    };
+
+} // namespace DM_NAMESPACE
+#   endif // DM_OBJHASHMAP_H_HEADERGUARD
+#endif // (DM_INCL & DM_INCL_HEADER_BODY)
 
 /* vim: set sw=4 ts=4 expandtab: */
-
-

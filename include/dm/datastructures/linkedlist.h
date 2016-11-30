@@ -1,172 +1,509 @@
 /*
- * Copyright 2014-2015 Dario Manesku. All rights reserved.
+ * Copyright 2016 Dario Manesku. All rights reserved.
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#ifndef DM_LINKEDLIST_H_HEADER_GUARD
-#define DM_LINKEDLIST_H_HEADER_GUARD
+#include "../dm.h"
 
-#include <stdint.h> // uint32_t
-#include <new>      // placement-new
+/// Header includes.
+#if (DM_INCL & DM_INCL_HEADER_INCLUDES)
+    #include "handlealloc.h"
+    #include "../check.h"
+    #include "../allocatori.h"
 
-#include "common.h" // Heap alloc utils.
+    #ifndef DM_DEBUG_LINKEDLIST
+    #   define DM_DEBUG_LINKEDLIST 0
+    #endif // DM_DEBUG_LINKEDLIST
 
-#include "../common/common.h" // DM_INLINE / BX_UNUSED
-#include "../check.h"         // DM_CHECK
+    #if DM_DEBUG_LINKEDLIST
+    #   include <stdio.h>
+    #   include "../debug.h"
+    #endif //DM_DEBUG_LINKEDLIST
+#endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
-#include "../../../3rdparty/bx/allocator.h" // dm::ReallocatorI
-
-namespace dm
+/// Header body.
+#if (DM_INCL & DM_INCL_HEADER_BODY)
+#   if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#       undef DM_LINKEDLIST_H_HEADERGUARD
+#   endif // if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#   ifndef DM_LINKEDLIST_H_HEADERGUARD
+#   define DM_LINKEDLIST_H_HEADERGUARD
+namespace DM_NAMESPACE
 {
-    template <typename Ty/*obj type*/, uint16_t MaxT>
-    struct LinkedListT
+    template <typename LinkedListStorageTy>
+    struct LinkedListImpl : LinkedListStorageTy
     {
-        typedef LinkedListT<Ty, MaxT> This;
+        /// Expected interface:
+        ///
+        /// template <typename ObjTy>
+        /// struct LinkedListStorageT
+        /// {
+        ///     typedef ObjTy ObjectType;
+        ///     typedef HandleAllocT<MaxT> HandleAllocType;
+        ///
+        ///     struct Node
+        ///     {
+        ///         uint16_t m_prev;
+        ///         uint16_t m_next;
+        ///     };
+        ///     struct Elem : Node, ObjTy { };
+        ///
+        ///     Elem* elements();
+        ///     HandleAllocType* handles();
+        ///     uint16_t max();
+        /// };
+        typedef typename LinkedListStorageTy::ObjectType      ObjTy;
+        typedef typename LinkedListStorageTy::HandleAllocType HandleAllocTy;
+        typedef typename LinkedListStorageTy::Node            NodeTy;
+        typedef typename LinkedListStorageTy::Elem            ElemTy;
+        using LinkedListStorageTy::elements;
+        using LinkedListStorageTy::handles;
+        using LinkedListStorageTy::max;
 
-        LinkedListT()
+        LinkedListImpl() : LinkedListStorageTy()
         {
-            m_elements[0].m_prev = 0;
-            m_elements[0].m_next = 0;
+        }
+
+        void init()
+        {
+            elements()[0].m_prev = 0;
+            elements()[0].m_next = 0;
             m_last = 0;
         }
 
-        #include "linkedlist_inline_impl.h"
-
-        uint16_t count() const
+        ObjTy* addNew()
         {
-            return m_handles.count();
+            ObjTy* elem = insertAfter(m_last);
+            elem = ::new (elem) ObjTy();
+
+            return elem;
         }
 
-        uint16_t max() const
+        ObjTy* insertAfter(uint16_t _handle)
+        {
+            DM_CHECK(_handle < max(), "LinkedListImpl::insertAfter() | %d, %d", _handle, max());
+
+            ElemTy* elem = (ElemTy*)getObj(_handle);
+            return insertAfter(elem);
+        }
+
+        ObjTy* insertAfter(const ObjTy* _obj)
+        {
+            const uint16_t idx = handles()->alloc();
+
+            ElemTy* elem = &elements()[idx];
+            elem = ::new (elem) ElemTy();
+
+            ElemTy* prev = (ElemTy*)_obj;
+            const uint16_t prevHandle = getHandle(prev);
+            ElemTy* next = (ElemTy*)getObj(prev->m_next);
+
+            elem->m_prev = prevHandle;
+            elem->m_next = prev->m_next;
+
+            prev->m_next = idx;
+            next->m_prev = idx;
+
+            if (m_last == prevHandle)
+            {
+                m_last = idx;
+            }
+
+            checkList();
+
+            return elem;
+        }
+
+        ObjTy* next(const ObjTy* _obj)
+        {
+            DM_CHECK(contains(_obj), "LinkedListImpl::next() | Object not from the list.");
+
+            const ElemTy* elem = (const ElemTy*)_obj;
+            return &elements()[elem->m_next];
+        }
+
+        ObjTy* prev(const ObjTy* _obj)
+        {
+            DM_CHECK(contains(_obj), "LinkedListImpl::prev() | Object not from the list.");
+
+            const ElemTy* elem = (const ElemTy*)_obj;
+            return &elements()[elem->m_prev];
+        }
+
+        uint16_t next(uint16_t _handle)
+        {
+            DM_CHECK(_handle < max(), "LinkedListImpl::next() | %d, %d", _handle, max());
+
+            ElemTy* elem = (ElemTy*)getObj(_handle);
+            return elem->m_next;
+        }
+
+        uint16_t prev(uint16_t _handle)
+        {
+            DM_CHECK(_handle < max(), "LinkedListImpl::prev() | %d, %d", _handle, max());
+
+            ElemTy* elem = (ElemTy*)getObj(_handle);
+            return elem->m_prev;
+        }
+
+        ObjTy* lastElem()
+        {
+            return getObj(m_last);
+        }
+
+        ObjTy* firstElem()
+        {
+            ElemTy* last = ((ElemTy*)getObj(m_last));
+            return getObj(last->m_next);
+        }
+
+        uint16_t lastHandle()
+        {
+            return m_last;
+        }
+
+        uint16_t firstHandle()
+        {
+            ElemTy* elem = (ElemTy*)getObj(m_last);
+            return elem->m_next;
+        }
+
+        uint16_t getHandle(const ObjTy* _obj)
+        {
+            DM_CHECK(contains(_obj), "LinkedListImpl::getHandle() | Object not from the list.");
+
+            return (uint16_t)((ElemTy*)_obj - elements());
+        }
+
+        ObjTy* getObj(uint16_t _handle)
+        {
+            DM_CHECK(_handle < max(), "LinkedListImpl::getObj() | %d, %d", _handle, max());
+
+            return &elements()[_handle];
+        }
+
+        private: ObjTy* getObjAt_impl(uint16_t _idx)
+        {
+            DM_CHECK(_idx < max(), "LinkedListImpl::getObjAt() | %d, %d", _idx, max());
+
+            const uint16_t handle = handles()->getHandleAt(_idx);
+            return &elements()[handle];
+        } public:
+
+        ObjTy* getObjAt(uint16_t _idx)
+        {
+            return getObjAt_impl(_idx);
+        }
+
+        ObjTy* operator[](uint16_t _idx)
+        {
+            return getObjAt_impl(_idx);
+        }
+
+        const ObjTy* operator[](uint16_t _idx) const
+        {
+            return getObjAt_impl(_idx);
+        }
+
+        void remove(uint16_t _handle)
+        {
+            DM_CHECK(_handle < max(), "LinkedListImpl::remove() | %d, %d", _handle, max());
+
+            ElemTy* elem = (ElemTy*)getObj(_handle);
+            ElemTy* prev = (ElemTy*)getObj(elem->m_prev);
+            ElemTy* next = (ElemTy*)getObj(elem->m_next);
+
+            prev->m_next = elem->m_next;
+            next->m_prev = elem->m_prev;
+
+            handles()->free(_handle);
+
+            if (_handle == m_last)
+            {
+                m_last = elem->m_prev;
+            }
+
+            checkList();
+        }
+
+        void removeAll()
+        {
+            for (uint16_t ii = handles()->count(); ii--; )
+            {
+                ElemTy* elem = getObj(handles()->getHandleAt(ii));
+                elem->~ElemTy();
+                BX_UNUSED(elem);
+            }
+
+            reset();
+        }
+
+        void reset()
+        {
+            handles()->reset();
+            elements()[0].m_prev = 0;
+            elements()[0].m_next = 0;
+            m_last = 0;
+        }
+
+        bool contains(uint16_t _handle)
+        {
+            return handles()->contains(_handle);
+        }
+
+        bool contains(const ObjTy* _obj)
+        {
+            return (&elements()[0] <= _obj && _obj < &elements()[max()]);
+        }
+
+        uint16_t count()
+        {
+            return handles()->count();
+        }
+
+        #if DM_DEBUG_LINKEDLIST
+        void checkList()
+        {
+            ElemTy* begin = (ElemTy*)firstElem();
+            ElemTy* end   = (ElemTy*)lastElem();
+
+            printf("L |");
+            ElemTy* curr = begin;
+            for (uint16_t ii = count()-1; ii--; )
+            {
+                printf("%d %d %d|", curr->m_prev, getHandle(curr), curr->m_next);
+                curr = (ElemTy*)next(curr);
+            }
+            printf("%d %d %d|\n", curr->m_prev, getHandle(curr), curr->m_next);
+
+            if (curr != end)
+            {
+                debugBreak();
+            }
+        }
+        #else
+        void checkList()
+        {
+        }
+        #endif // DM_DEBUG_LINKEDLIST
+
+    private:
+        uint16_t m_last;
+    };
+
+    template <typename ObjTy, uint16_t MaxT>
+    struct LinkedListStorageT
+    {
+        typedef ObjTy ObjectType;
+        typedef HandleAllocT<MaxT> HandleAllocType;
+
+        struct Node
+        {
+            uint16_t m_prev;
+            uint16_t m_next;
+        };
+
+        struct Elem : Node, ObjTy
+        {
+        };
+
+        Elem* elements()
+        {
+            return m_elements;
+        }
+
+        HandleAllocType* handles()
+        {
+            return &m_handles;
+        }
+
+        uint16_t max()
         {
             return MaxT;
         }
 
-    private:
-        uint16_t m_last;
-        HandleAllocT<MaxT> m_handles;
+        HandleAllocType m_handles;
         Elem m_elements[MaxT];
     };
 
-    template <typename Ty/*obj type*/>
-    struct LinkedList
+    template <typename ObjTy>
+    struct LinkedListStorageExt
     {
-        typedef LinkedList<Ty> This;
+        typedef ObjTy ObjectType;
+        typedef HandleAllocExt<uint16_t> HandleAllocType;
 
-        // Uninitialized state, init() needs to be called !
-        LinkedList()
+        struct Node
         {
-            m_memoryBlock = NULL;
+            uint16_t m_prev;
+            uint16_t m_next;
+        };
+
+        struct Elem : Node, ObjTy
+        {
+        };
+
+        static uint32_t sizeFor(uint32_t _max)
+        {
+            return _max*sizeof(Elem) + HandleAllocType::sizeFor(_max);
         }
 
-        LinkedList(uint16_t _max, dm::ReallocatorI* _reallocator)
+        LinkedListStorageExt()
         {
-            init(_max, _reallocator);
+            m_max = 0;
+            m_elements = NULL;
         }
 
-        LinkedList(uint16_t _max, void* _mem, dm::AllocatorI* _allocator)
+        uint8_t* initStorage(uint32_t _max, uint8_t* _mem)
         {
-            init(_max, _mem, _allocator);
-        }
+            uint8_t* elemBegin   = (uint8_t*)_mem;
+            uint8_t* handleBegin = (uint8_t*)_mem + _max*sizeof(Elem);
 
-        ~LinkedList()
-        {
-            destroy();
-        }
+            m_max = _max;
+            m_elements = (Elem*)elemBegin;
+            uint8_t* end = m_handles.init(_max, handleBegin);
 
-        static inline uint32_t sizeFor(uint16_t _max)
-        {
-            return _max*SizePerElement;
-        }
-
-        // Allocates memory internally.
-        void init(uint16_t _max, dm::ReallocatorI* _reallocator)
-        {
-            m_memoryBlock = DM_ALLOC(_reallocator, sizeFor(_max));
-            m_reallocator = _reallocator;
-            m_cleanup = true;
-
-            void* ptr = m_handles.init(_max, m_memoryBlock);
-            m_elements = (Elem*)ptr;
-
-            m_elements[0].m_prev = 0;
-            m_elements[0].m_next = 0;
-            m_last = 0;
-        }
-
-        // Uses externally allocated memory.
-        void* init(uint16_t _max, void* _mem, dm::AllocatorI* _allocator = NULL)
-        {
-            m_memoryBlock = _mem;
-            m_allocator = _allocator;
-            m_cleanup = false;
-
-            void* ptr = m_handles.init(_max, m_memoryBlock);
-            m_elements = (Elem*)ptr;
-
-            m_elements[0].m_prev = 0;
-            m_elements[0].m_next = 0;
-            m_last = 0;
-
-            uint8_t* end = (uint8_t*)_mem + sizeFor(_max);
             return end;
         }
 
-        bool isInitialized() const
+        Elem* elements()
         {
-            return (NULL != m_memoryBlock);
+            return m_elements;
+        }
+
+        HandleAllocType* handles()
+        {
+            return &m_handles;
+        }
+
+        uint16_t max()
+        {
+            return m_max;
+        }
+
+        uint16_t m_max;
+        Elem* m_elements;
+        HandleAllocType m_handles;
+    };
+
+    extern CrtAllocator g_crtAllocator;
+
+    template <typename ObjTy>
+    struct LinkedListStorage
+    {
+        typedef ObjTy ObjectType;
+        typedef HandleAllocExt<uint16_t> HandleAllocType;
+
+        struct Node
+        {
+            uint16_t m_prev;
+            uint16_t m_next;
+        };
+
+        struct Elem : Node, ObjTy
+        {
+        };
+
+        static uint32_t sizeFor(uint32_t _max)
+        {
+            return _max*sizeof(Elem) + HandleAllocType::sizeFor(_max);
+        }
+
+        LinkedListStorage()
+        {
+            m_max = 0;
+            m_elements = NULL;
+        }
+
+        void initStorage(uint32_t _max, AllocatorI* _allocator = &g_crtAllocator)
+        {
+            const uint32_t totalSize = sizeFor(_max);
+            void* mem = dm_alloc(totalSize, _allocator);
+
+            uint8_t* elemBegin   = (uint8_t*)mem;
+            uint8_t* handleBegin = (uint8_t*)mem + _max*sizeof(Elem);
+
+            m_max = _max;
+            m_elements = (Elem*)elemBegin;
+            m_handles.init(_max, handleBegin);
+
+            m_allocator = _allocator;
         }
 
         void destroy()
         {
-            if (NULL != m_memoryBlock)
+            if (NULL != m_elements)
             {
-                m_handles.destroy();
-                if (m_cleanup)
-                {
-                    DM_FREE(m_reallocator, m_memoryBlock);
-                }
-                m_memoryBlock = NULL;
+                dm_free(m_elements, m_allocator);
+                m_elements = NULL;
             }
         }
 
-        #include "linkedlist_inline_impl.h"
-
-        enum
+        Elem* elements()
         {
-            SizePerElement = sizeof(Elem) + HandleAlloc16::SizePerElement,
-        };
-
-        uint16_t count() const
-        {
-            return m_handles.count();
+            return m_elements;
         }
 
-        uint16_t max() const
+        HandleAllocType* handles()
         {
-            return m_handles.max();
+            return &m_handles;
         }
 
-        dm::AllocatorI* allocator()
+        uint16_t max()
         {
-            return m_allocator;
+            return m_max;
         }
 
-    private:
-        uint16_t m_last;
-        HandleAlloc16 m_handles;
-        void* m_memoryBlock;
-        union
-        {
-            dm::AllocatorI*   m_allocator;
-            dm::ReallocatorI* m_reallocator;
-        };
-        bool m_cleanup;
+        uint16_t m_max;
         Elem* m_elements;
+        HandleAllocType m_handles;
+        AllocatorI* m_allocator;
     };
 
-} // namespace dm
+    template <typename ObjTy, uint16_t MaxT>
+    struct LinkedListT : LinkedListImpl< LinkedListStorageT<ObjTy, MaxT> >
+    {
+        typedef LinkedListImpl< LinkedListStorageT<ObjTy, MaxT> > Base;
 
-#endif // DM_LINKEDLIST_H_HEADER_GUARD
+        LinkedListT() : Base()
+        {
+            Base::init();
+        }
+    };
+
+    template <typename ObjTy>
+    struct LinkedListExt : LinkedListImpl< LinkedListStorageExt<ObjTy> >
+    {
+        typedef LinkedListImpl< LinkedListStorageExt<ObjTy> > Base;
+
+        uint8_t* init(uint32_t _max, uint8_t* _mem)
+        {
+            uint8_t* ptr = Base::initStorage(_max, _mem);
+            Base::init();
+
+            return ptr;
+        }
+    };
+
+    template <typename ObjTy>
+    struct LinkedList : LinkedListImpl< LinkedListStorage<ObjTy> >
+    {
+        typedef LinkedListImpl< LinkedListStorage<ObjTy> > Base;
+
+        void init(uint32_t _max, AllocatorI* _allocator = &g_crtAllocator)
+        {
+            Base::initStorage(_max, _allocator);
+            Base::init();
+        }
+    };
+
+    template <typename ObjTy>
+    struct LinkedListH : LinkedListExt<ObjTy>
+    {
+        AllocatorI* m_allocator;
+    };
+
+} // namespace DM_NAMESPACE
+#   endif // DM_LINKEDLIST_H_HEADERGUARD
+#endif // (DM_INCL & DM_INCL_HEADER_BODY)
 
 /* vim: set sw=4 ts=4 expandtab: */

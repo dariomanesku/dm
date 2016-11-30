@@ -3,31 +3,41 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#ifndef DM_MISC_H_HEADER_GUARD
-#define DM_MISC_H_HEADER_GUARD
+#include "dm.h"
 
-#include <stdint.h>
-#include <stddef.h>  // offsetof()
-#include <stdlib.h>  // _fullpath
-#include <ctype.h>   // toupper()
-#include <math.h>    // logf()
-#include <stdio.h>   // FILE, fopen()
-#include <float.h>   // FLT_EPSILON
-#include <malloc.h>  // alloca()
+/// Header includes.
+#if (DM_INCL & DM_INCL_HEADER_INCLUDES)
+    #include <stdint.h>  // uint32_t
+    #include <stddef.h>  // offsetof()
+    #include <stdlib.h>  // _fullpath
+    #include <ctype.h>   // toupper()
+    #include <math.h>    // logf()
+    #include <stdio.h>   // FILE, fopen()
+    #include <float.h>   // FLT_EPSILON
+    #include <malloc.h>  // alloca()
 
-#include "common/common.h" // DM_INLINE()
-#include "check.h"         // DM_CHECK()
+    #include "dm.h"       // DM_INLINE()
+    #include "check.h"    // DM_CHECK()
+    #include "bitops.h"   // cntlz_u32(), cntlz_u64()
+    #include "platform.h" // DM_COMPILER_MSVC
+    #include "os.h"       // pwd()
 
-#include "../../3rdparty/bx/os.h"       // bx::pwd()
-#include "../../3rdparty/bx/string.h"   // bx::snprintf()
-#include "../../3rdparty/bx/platform.h" // BX_COMPILER_MSVC_COMPATIBLE
-#include "../../3rdparty/bx/uint32_t.h" // bx::uint32_cntlz(), bx::uint64_cntlz()
+    #if DM_PLATFORM_LINUX
+    #   ifndef DM_REALPATH_H_INCLUDE_HEADER_GUARD
+    #   define DM_REALPATH_H_INCLUDE_HEADER_GUARD
+    #       include "../../3rdparty/realpath/realpath.h"
+    #   endif // DM_REALPATH_H_INCLUDE_HEADER_GUARD
+    #endif // DM_PLATFORM_LINUX
+#endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
-#if BX_PLATFORM_LINUX
-#   include "../../3rdparty/realpath/realpath.h"
-#endif // BX_PLATFORM_LINUX
-
-namespace dm
+/// Header body.
+#if (DM_INCL & DM_INCL_HEADER_BODY)
+#   if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#       undef DM_MISC_H_HEADER_GUARD
+#   endif // if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#   ifndef DM_MISC_H_HEADER_GUARD
+#   define DM_MISC_H_HEADER_GUARD
+namespace DM_NAMESPACE
 {
     // Macro helpers.
     //-----
@@ -44,8 +54,17 @@ namespace dm
 
     #define DM_FILE_LINE "" __FILE__ "(" DM_STRINGIZE(__LINE__) ")"
 
-    //TODO: unused typedef
-    #define DM_STATIC_ASSERT(_expr) { typedef int DM_CONCATENATE(dm_compile_time_assert_, __LINE__)[1 - 2*!(_expr)]; }
+    #define DM_UNUSED(_expr) for (;;) { (void)(true ? (void)0 : ((void)(_expr))); break; }
+
+    #if DM_COMPILER_GCC || DM_COMPILER_CLANG
+    #   define DM_ATTRIBUTE(_x) __attribute__((_x))
+    #   define DM_ALIGN_DECL(_align, _decl) _decl __attribute__((aligned(_align)))
+    #elif DM_COMPILER_MSVC
+    #   define DM_ALIGN_DECL(_align, _decl) __declspec(align(_align)) _decl
+    #   define DM_ATTRIBUTE(_x)
+    #endif // DM_COMPILER_*
+
+    #define DM_STATIC_ASSERT(_expr) typedef int DM_CONCATENATE(dm_compile_time_assert_, __LINE__)[1 - 2*!(_expr)] DM_ATTRIBUTE(unused)
 
     #define DM_UNUSED(_expr) for (;;) { (void)(true ? (void)0 : ((void)(_expr))); break; }
 
@@ -144,12 +163,12 @@ namespace dm
 
     DM_INLINE uint32_t log2floor(uint32_t _u32)
     {
-        return (31 - bx::uint32_cntlz(_u32));
+        return (31 - cntlz_u32(_u32));
     }
 
     DM_INLINE uint64_t log2floor(uint64_t _u64)
     {
-        return (63 - bx::uint64_cntlz(_u64));
+        return (63 - cntlz_u64(_u64));
     }
 
     DM_INLINE uint32_t log2ceil(uint32_t _u32)
@@ -176,9 +195,7 @@ namespace dm
         return log2floor(_u64);
     }
 
-    #ifndef DM_IS_POW_TWO
-    #   define DM_IS_POW_TWO(_v) ((0!=(_v)) && (0==((_v)&((_v)-1))))
-    #endif // DM_IS_POW_TWO
+    #define DM_IS_POW_TWO(_v) ((0!=(_v)) && (0==((_v)&((_v)-1))))
 
     DM_INLINE bool isPowTwo(uint32_t _v)
     {
@@ -186,23 +203,43 @@ namespace dm
     }
 
     /// Usage:
-    ///   270 -> 256 /* For a non-power-of-two input, returns expected value. */
+    ///   270 -> 512 /* For a non-power-of-two input, returns expected value. */
     ///   256 -> 256 /* For a power-of-two input, returns the same value. */
-    ///     0 ->   1 /* For 0 input, returns invalid value! */
-    DM_INLINE uint32_t prevPowTwo(uint32_t _u32)
+    DM_INLINE uint32_t nextPowTwo(uint32_t _u32)
     {
-        const uint32_t floor = log2floor(_u32);
-        return (UINT32_C(1)<<floor);
+    #if 0
+        /// 0 -> 1 /* For 0 input, returns 1. */
+        const uint32_t ceil = log2ceil(_u32);
+        return (UINT32_C(1) << ceil);
+    #else
+        /// 0 -> 0 /* For 0 input, returns 0. */
+        uint32_t val = _u32;
+        --val;
+        val |= val >>  1;
+        val |= val >>  2;
+        val |= val >>  4;
+        val |= val >>  8;
+        val |= val >> 16;
+        ++val;
+
+        return val;
+    #endif
     }
 
     /// Usage:
-    ///   270 -> 512 /* For a non-power-of-two input, returns expected value. */
+    ///   270 -> 256 /* For a non-power-of-two input, returns expected value. */
     ///   256 -> 256 /* For a power-of-two input, returns the same value. */
-    ///     0 ->   1 /* For 0 input, returns 1. */
-    DM_INLINE uint32_t nextPowTwo(uint32_t _u32)
+    DM_INLINE uint32_t prevPowTwo(uint32_t _u32)
     {
-        const uint32_t ceil = log2ceil(_u32);
-        return (UINT32_C(1)<<ceil);
+    #if 0
+        /// 0 -> 1 /* For 0 input, returns invalid value! */
+        const uint32_t floor = log2floor(_u32);
+        return (UINT32_C(1) << floor);
+    #else
+        /// 0 -> 0 /* For 0 input, returns 0. */
+        const uint32_t next = nextPowTwo(_u32);
+        return (next >> UINT32_C(1));
+    #endif
     }
 
     /// Example: for input 12780 (12.492KB) returns 12.
@@ -403,20 +440,20 @@ namespace dm
 
     DM_INLINE int32_t stricmp(const char* _a, const char* _b)
     {
-        #if BX_COMPILER_MSVC_COMPATIBLE
+        #if DM_COMPILER_MSVC
             return _stricmp(_a, _b);
         #else
             return strcasecmp(_a, _b);
-        #endif // BX_COMPILER_MSVC_COMPATIBLE
+        #endif // DM_COMPILER_MSVC
     }
 
     DM_INLINE int32_t strnicmp(const char* _a, const char* _b, size_t _count)
     {
-        #if BX_COMPILER_MSVC_COMPATIBLE
+        #if DM_COMPILER_MSVC
             return _strnicmp(_a, _b, _count);
         #else
             return strncasecmp(_a, _b, _count);
-        #endif // BX_COMPILER_MSVC_COMPATIBLE
+        #endif // DM_COMPILER_MSVC
     }
 
     DM_INLINE void strscpy(char* _dst, const char* _src, size_t _dstSize)
@@ -515,6 +552,25 @@ namespace dm
         }
     }
 
+    DM_INLINE int32_t vsnprintf(char* _str, size_t _count, const char* _format, va_list _argList)
+    {
+        #if DM_COMPILER_MSVC
+            int32_t len = ::vsnprintf_s(_str, _count, size_t(-1), _format, _argList);
+            return -1 == len ? ::_vscprintf(_format, _argList) : len;
+        #else
+            return ::vsnprintf(_str, _count, _format, _argList);
+        #endif // DM_COMPILER_MSVC
+    }
+
+    DM_INLINE int32_t snprintf(char* _str, size_t _count, const char* _format, ...)
+    {
+        va_list argList;
+        va_start(argList, _format);
+        int32_t len = vsnprintf(_str, _count, _format, argList);
+        va_end(argList);
+        return len;
+    }
+
     /// Notice: do NOT use return value of this function for memory deallocation!
     DM_INLINE char* trim(char* _str)
     {
@@ -544,7 +600,7 @@ namespace dm
 
     #define DM_PATH_LEN 4096
 
-    #if BX_PLATFORM_WINDOWS
+    #if DM_PLATFORM_WINDOWS
     #   define DM_DIRSLASH "\\"
     #else // OSX and Linux.
     #   define DM_DIRSLASH "/"
@@ -554,11 +610,11 @@ namespace dm
     {
         for (char* ptr = _path; '\0' != *ptr; ++ptr)
         {
-            #if BX_PLATFORM_WINDOWS
+            #if DM_PLATFORM_WINDOWS
                 if ('/' == *ptr) { *ptr = '\\'; }
             #else // OSX and Linux.
                 if ('\\' == *ptr) { *ptr = '/'; }
-            #endif //BX_PLATFORM_WINDOWS
+            #endif //DM_PLATFORM_WINDOWS
         }
     }
 
@@ -597,10 +653,10 @@ namespace dm
         const char* fs       = strrchr(_filePath, '/');
         const char* basename = (bs > fs ? bs : fs);
 
-        #if BX_PLATFORM_WINDOWS
+        #if DM_PLATFORM_WINDOWS
             const char* colon = strrchr(_filePath, ':');
             basename = basename > colon ? basename : colon;
-        #endif //BX_PLATFORM_WINDOWS
+        #endif //DM_PLATFORM_WINDOWS
 
         if (NULL != basename)
         {
@@ -637,21 +693,21 @@ namespace dm
 
     DM_INLINE void realpath(char _abs[DM_PATH_LEN], const char _rel[DM_PATH_LEN])
     {
-        #if BX_PLATFORM_WINDOWS
+        #if DM_PLATFORM_WINDOWS
             _fullpath(_abs, _rel, DM_PATH_LEN);
-        #elif BX_PLATFORM_LINUX
+        #elif DM_PLATFORM_LINUX
             // Notice ::realpath() is broken on Linux.
             // Using a custom implementation instead.
             ex02_realpath(_rel, _abs);
         #else // OSX
             char* path = ::realpath(_rel, _abs);
             DM_UNUSED(path);
-        #endif // BX_PLATFORM_WINDOWS
+        #endif // DM_PLATFORM_WINDOWS
     }
 
     DM_INLINE void homeDir(char _path[DM_PATH_LEN])
     {
-        #if BX_PLATFORM_WINDOWS
+        #if DM_PLATFORM_WINDOWS
             strscpy(_path, getenv("USERPROFILE"), DM_PATH_LEN);
         #else // OSX and Linux.
             strscpy(_path, getenv("HOME"), DM_PATH_LEN);
@@ -660,18 +716,18 @@ namespace dm
 
     DM_INLINE void desktopDir(char _path[DM_PATH_LEN])
     {
-        #if BX_PLATFORM_WINDOWS
-            bx::snprintf(_path, DM_PATH_LEN, "%s" DM_DIRSLASH "Desktop", getenv("USERPROFILE"));
+        #if DM_PLATFORM_WINDOWS
+            snprintf(_path, DM_PATH_LEN, "%s" DM_DIRSLASH "Desktop", getenv("USERPROFILE"));
         #else // OSX and Linux.
-            bx::snprintf(_path, DM_PATH_LEN, "%s" DM_DIRSLASH "Desktop", getenv("HOME"));
+            snprintf(_path, DM_PATH_LEN, "%s" DM_DIRSLASH "Desktop", getenv("HOME"));
         #endif
     }
 
     DM_INLINE void rootDir(char _path[DM_PATH_LEN])
     {
-        #if BX_PLATFORM_WINDOWS
+        #if DM_PLATFORM_WINDOWS
             char currentDir[DM_PATH_LEN];
-            bx::pwd(currentDir, DM_PATH_LEN);
+            pwd(currentDir, DM_PATH_LEN);
             strscpy(_path, currentDir, 4);
         #else // OSX and Linux.
             _path[0] = '/';
@@ -699,11 +755,11 @@ namespace dm
 
     DM_INLINE uint32_t windowsDrives()
     {
-    #if BX_PLATFORM_WINDOWS
+    #if DM_PLATFORM_WINDOWS
         return GetLogicalDrives();
     #else
         return 0;
-    #endif // BX_PLATFORM_WINDOWS
+    #endif // DM_PLATFORM_WINDOWS
     }
 
     DM_INLINE const char* fileExt(const char* _filePath)
@@ -789,8 +845,8 @@ namespace dm
         Ty& m_ptr;
     };
 
-} // namespace dm
-
-#endif // DM_MISC_H_HEADER_GUARD
+} // namespace DM_NAMESPACE
+#   endif // DM_MISC_H_HEADER_GUARD
+#endif // (DM_INCL & DM_INCL_HEADER_BODY)
 
 /* vim: set sw=4 ts=4 expandtab: */

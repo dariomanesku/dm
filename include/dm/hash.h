@@ -1,15 +1,23 @@
 /*
- * Copyright 2015 Dario Manesku. All rights reserved.
+ * Copyright 2014-2016 Dario Manesku. All rights reserved.
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#ifndef DM_HASH_H_HEADER_GUARD
-#define DM_HASH_H_HEADER_GUARD
+#include "dm.h"
 
-#include <stdint.h>
-#include "common/common.h" // DM_INLINE()
+/// Header includes.
+#if (DM_INCL & DM_INCL_HEADER_INCLUDES)
+#   include <stdint.h>
+#endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
-namespace dm
+/// Header body.
+#if (DM_INCL & DM_INCL_HEADER_BODY)
+#   if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#       undef DM_HASH_H_HEADER_GUARD
+#   endif // if (DM_INCL & DM_INCL_HEADER_BODY_OPT_REMOVE_HEADER_GUARD)
+#   ifndef DM_HASH_H_HEADER_GUARD
+#   define DM_HASH_H_HEADER_GUARD
+namespace DM_NAMESPACE
 {
     DM_INLINE uint32_t hashStr(const char _str[]) // Null terminated string.
     {
@@ -41,11 +49,11 @@ namespace dm
     template <typename Ty>
     DM_INLINE uint32_t hash(const Ty& _val)
     {
-        return dm::hash(reinterpret_cast<const uint8_t*>(&_val), sizeof(Ty));
+        return DM_NAMESPACE::hash(reinterpret_cast<const uint8_t*>(&_val), sizeof(Ty));
     }
 
-} // namespace dm
-
-#endif // DM_HASH_H_HEADER_GUARD
+} // namespace DM_NAMESPACE
+#   endif // DM_HASH_H_HEADER_GUARD
+#endif // (DM_INCL & DM_INCL_HEADER_BODY)
 
 /* vim: set sw=4 ts=4 expandtab: */

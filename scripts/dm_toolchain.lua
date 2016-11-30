@@ -1040,7 +1040,7 @@ function strip()
         -- Wall
             "-Waddress"
         .. " -Wc++11-compat"
-        .. " -Wc++11-extenions"
+        .. " -Wc++11-extensions"
         .. " -Wchar-subscripts"
         .. " -Wcomment"
         .. " -Wformat"
@@ -1055,7 +1055,6 @@ function strip()
         .. " -Wstrict-overflow=1"
         .. " -Wswitch"
         .. " -Wtrigraphs"
-        .. " -Wuninitialized"
         .. " -Wunknown-pragmas"
         .. " -Wunused-function"
         .. " -Wunused-label"
@@ -1091,7 +1090,7 @@ function strip()
         .. " -Wsign-compare"
         .. " -Wstrict-aliasing"
         .. " -Wstrict-aliasing=2"
-        .. " -Wshadow"
+        --.. " -Wshadow"
         .. " -Wwrite-strings"
         .. " -Werror=declaration-after-statement"
         .. " -Werror=implicit-function-declaration"
@@ -1107,7 +1106,7 @@ function strip()
         .. " -Wno-inline"
         }
 
-    configuration { "linux-* or mingw-*" }
+    configuration { "*-gcc" }
         buildoptions
         {
             -- Wall
@@ -1117,14 +1116,11 @@ function strip()
             .. " -Wunused-but-set-parameter"
         }
 
-    configuration { "osx or xcode4" }
+    configuration { "*-clang or osx or xcode4" }
         buildoptions
         {
-            -- Wall
-                "-Wuninitialized"
             -- Wextra
-            .. " -Wconsumed"
-            .. " -Wunused-parameter"
+            "-Wconsumed"
         }
 
     configuration {} -- reset configuration

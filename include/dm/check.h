@@ -3,8 +3,12 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#ifndef DM_CHECK_H_HEADER_GUARD
-#define DM_CHECK_H_HEADER_GUARD
+#include "dm.h"
+
+/// Header body.
+#if (DM_INCL & DM_INCL_HEADER_BODY)
+#   ifndef DM_CHECK_H_HEADER_GUARD
+#   define DM_CHECK_H_HEADER_GUARD
 
 // Choose desired config.
 //-----
@@ -45,7 +49,7 @@
         if (!(_condition))                             \
         {                                              \
             fprintf(stderr, "DM ERROR [" DM_CHECK_FILE_LINE "]: "  _format "\n", ##__VA_ARGS__); \
-            dm::ng::debugBreak();                      \
+            DM_NAMESPACE::debugBreak();                \
         }                                              \
     } while(0)
 
@@ -67,7 +71,7 @@
 #   elif (DM_CHECK_CONFIG == DM_CHECK_CONFIG_DEBUG_BREAK)
 #       define DM_CHECK _DM_CHECK_BREAK_IMPL
 #       include <stdio.h> // fprintf()
-#       include "ng/debug.h" // dm::ng::debugBreak()
+#       include "debug.h" // DM_NAMESPACE::debugBreak()
 #   else
 #       define DM_CHECK _DM_CHECK_NOOP_IMPL
 #   endif //(DM_CHECK_CONFIG == DM_CHECK_CONFIG_PRINT)
@@ -77,6 +81,7 @@
 #    define DM_ASSERT(_condition) DM_CHECK(_condition, "Assertion failed!")
 #endif //!defined(DM_ASSERT)
 
-#endif // DM_CHECK_H_HEADER_GUARD
+#   endif // DM_CHECK_H_HEADER_GUARD
+#endif // (DM_INCL & DM_INCL_HEADER_BODY)
 
 /* vim: set sw=4 ts=4 expandtab: */
