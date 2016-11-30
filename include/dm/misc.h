@@ -87,6 +87,14 @@ namespace DM_NAMESPACE
     // Value.
     //-----
 
+    #ifdef max
+    #   undef max
+    #endif // max
+
+    #ifdef min
+    #   undef min
+    #endif // max
+
     #define DM_MIN(_a, _b) ((_a)<(_b)?(_a):(_b))
     #define DM_MAX(_a, _b) ((_a)>(_b)?(_a):(_b))
     #define DM_CLAMP(_val, _min, _max) (DM_MIN(DM_MAX(_val, _min), _max))
