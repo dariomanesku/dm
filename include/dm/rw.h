@@ -238,7 +238,8 @@ namespace DM_NAMESPACE
         {
             offset = int64_t(_rw->m_size) - _offset;
         }
-        offset = CMFT_CLAMP(offset, 0, int64_t(_rw->m_size));
+        offset = offset > 0 ? offset : 0;
+        offset = offset < int64_t(_rw->m_size) ? offset : int64_t(_rw->m_size);
 
         _rw->m_offset = offset;
 
