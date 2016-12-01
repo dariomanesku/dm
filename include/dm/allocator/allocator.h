@@ -13,7 +13,7 @@
     #include "../datastructures/handlealloc.h"
     #include "../datastructures/bitarray.h"
 
-    #include <dm/thread.h> // dm::Mutex //TODO: move this to IMPL INCLUDE.
+    #include <dm/mutex.h> // dm::Mutex //TODO: move this to IMPL INCLUDE.
 #endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
 /// Header body.

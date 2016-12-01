@@ -24,12 +24,6 @@
     #elif DM_PLATFORM_WINDOWS
     #   include <errno.h>
     #endif // DM_PLATFORM_
-
-    #if DM_PLATFORM_LINUX || DM_PLATFORM_APPLE
-    #   include <pthread.h>
-    #elif DM_PLATFORM_WINDOWS
-    #   include <errno.h>
-    #endif // DM_PLATFORM_
 #endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
 /// Header body.
