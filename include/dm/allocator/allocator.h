@@ -2271,7 +2271,7 @@ namespace DM_NAMESPACE
         #if DM_ALLOCATOR
             return s_memory.contains(_ptr);
         #else
-            BX_UNUSED(_ptr);
+            DM_UNUSED(_ptr);
             return true;
         #endif //DM_ALLOCATOR
     }
@@ -2281,7 +2281,7 @@ namespace DM_NAMESPACE
         #if DM_ALLOCATOR
             return s_memory.getSize(_ptr);
         #else
-            BX_UNUSED(_ptr);
+            DM_UNUSED(_ptr);
             return 0;
         #endif //DM_ALLOCATOR
     }
@@ -2315,13 +2315,16 @@ namespace DM_NAMESPACE
         #endif //DM_ALLOCATOR
     }
 
+    extern CrtAllocator      g_crtAllocator;
+    extern CrtStackAllocator g_crtStackAllocator;
+
     StackAllocatorI* allocCreateStack(size_t _size)
     {
         #if DM_ALLOCATOR
             return s_stackList.createFixed(_size);
         #else
-            BX_UNUSED(_size);
-            return &s_crtStackAllocator;
+            DM_UNUSED(_size);
+            return &g_crtStackAllocator;
         #endif //DM_ALLOCATOR
     }
 
@@ -2330,8 +2333,9 @@ namespace DM_NAMESPACE
         #if DM_ALLOCATOR
             return s_stackList.createSplit(_awayFromStackPtr, _preferedSize);
         #else
-            BX_UNUSED(_awayFromStackPtr, _preferedSize);
-            return &s_crtStackAllocator;
+            DM_UNUSED(_awayFromStackPtr);
+            DM_UNUSED(_preferedSize);
+            return &g_crtStackAllocator;
         #endif //DM_ALLOCATOR
     }
 
@@ -2340,12 +2344,9 @@ namespace DM_NAMESPACE
         #if DM_ALLOCATOR
             s_stackList.free(_stackAlloc);
         #else
-            BX_UNUSED(_stackAlloc);
+            DM_UNUSED(_stackAlloc);
         #endif //DM_ALLOCATOR
     }
-
-    extern CrtAllocator      g_crtAllocator;
-    extern CrtStackAllocator g_crtStackAllocator;
 
     #if DM_ALLOCATOR
         AllocatorI*      staticAlloc = &s_staticAllocator;
