@@ -10,6 +10,7 @@
     #include <stdint.h>  // uint32_t
     #include <stddef.h>  // offsetof()
     #include <stdlib.h>  // _fullpath
+    #include <stdarg.h>  // va_start
     #include <ctype.h>   // toupper()
     #include <math.h>    // logf()
     #include <stdio.h>   // FILE, fopen()
