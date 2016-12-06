@@ -358,11 +358,12 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
             "_SCL_SECURE_NO_WARNINGS",
             "_CRT_SECURE_NO_WARNINGS",
             "_CRT_SECURE_NO_DEPRECATE",
-            --"_HAS_EXCEPTIONS=0", // This is perhaps causing "error C3861: '__uncaught_exception': identifier not found".
+            --"_HAS_EXCEPTIONS=0", -- This is perhaps causing "error C3861: '__uncaught_exception': identifier not found".
         }
         buildoptions
         {
-            "/Ob2",    -- The Inline Function Expansion
+            "/Ob2",  -- The Inline Function Expansion
+            "/EHsc", -- Std explicitely wants exception handling :|.
         }
         linkoptions
         {
