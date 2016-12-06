@@ -30,7 +30,7 @@ static char *ex02_sep(char *path)
 static char *ex02_realpath(const char *_path, char *resolved_path)
 {
     int fd = open(".", O_RDONLY), l;
-    char path[PATH_MAX], lnk[PATH_MAX], *tmp = (char *)"";
+    char path[PATH_MAX], lnk[PATH_MAX], *tmp = const_cast<char*>("");
 
     if (fd < 0) {
         return NULL;

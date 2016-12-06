@@ -482,7 +482,7 @@ namespace DM_NAMESPACE
         {
             const uint32_t size = _newMax*sizeof(Ty);
             m_max = _newMax;
-            m_elements = (Ty*)dm_realloc(size, m_allocator);
+            m_elements = (Ty*)DM_REALLOC(m_allocator, m_elements, size);
             m_handles.resize(_newMax);
         }
 
