@@ -114,7 +114,7 @@ namespace DM_NAMESPACE
                 const size_t size = DM_MAX(DM_MEM_MIN_SIZE, customSize);
 
                 // Alloc.
-                m_orig = ::malloc(size);
+                m_orig = ::calloc(1, size);
 
                 DM_PRINT_MEM_STATS("Init: Allocating %u.%uMB - (0x%p)", dm::U_UMB(size), m_orig);
 
@@ -126,9 +126,6 @@ namespace DM_NAMESPACE
                 // Assign.
                 m_memory = alignedPtr;
                 m_size   = alignedSize;
-
-                // Touch every piece of memory, effectively forcing OS to add all memory pages to the process's address space.
-                memset(m_memory, 0, m_size);
 
                 // Init memory regions.
                 void* ptr = m_memory;
