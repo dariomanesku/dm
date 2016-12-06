@@ -1069,7 +1069,7 @@ function strip()
         .. " -Wuninitialized"
         .. " -Wunused-parameter"
         -- Other
-        .. " -Wcast-qual"
+        --.. " -Wcast-qual"
         .. " -Wdisabled-optimization"
         .. " -Wdiv-by-zero"
         .. " -Wendif-labels"
