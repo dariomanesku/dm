@@ -127,7 +127,7 @@ namespace DM_NAMESPACE
     #elif DM_COMPILER_MSVC && DM_ARCH_64BIT
         return __popcnt64(_val);
     #else
-        return cntbits_ref(_val);
+        return cntbits_u64_ref(_val);
     #endif // DM_COMPILER_
     }
 
@@ -140,7 +140,7 @@ namespace DM_NAMESPACE
         _BitScanReverse64(&idx, _val);
         return 63 - idx;
     #else
-        return cntlz_ref(_val);
+        return cntlz_u64_ref(_val);
     #endif // DM_COMPILER_
     }
 
@@ -153,7 +153,7 @@ namespace DM_NAMESPACE
         _BitScanForward64(&idx, _val);
         return idx;
     #else
-        return cnttz_ref(_val);
+        return cnttz_u64_ref(_val);
     #endif // DM_COMPILER_
     }
 
