@@ -1462,7 +1462,7 @@ namespace DM_NAMESPACE
                     {
                         // Shrink.
 
-                        const size_t remainingSize = currTotalSize - reqTotalSize;
+                        const size_t remainingSize = size_t(currTotalSize - reqTotalSize);
                         if (remainingSize > MinimalSlotSize)
                         {
                             // Consume and add leftover.
@@ -1510,7 +1510,7 @@ namespace DM_NAMESPACE
                                     removeBigFreeSpace(rightBeg);
                                 }
 
-                                const size_t remainingSize = rightTotalSize - expandSize;
+                                const size_t remainingSize = size_t(rightTotalSize - expandSize);
                                 if (remainingSize > MinimalSlotSize)
                                 {
                                     // Consume and add leftover.
