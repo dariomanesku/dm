@@ -107,6 +107,28 @@ namespace DM_NAMESPACE
         }
     };
 
+    struct CrtCallocator : AllocatorI
+    {
+        virtual void* realloc(void* _ptr, size_t _size, size_t _align, const char* /*_file*/, size_t /*_line*/)
+        {
+            (void)_align; // Ignoring alignment for now.
+
+            if (0 == _ptr)
+            {
+                return ::calloc(1, _size);
+            }
+            else if (0 == _size)
+            {
+                ::free(_ptr);
+                return NULL;
+            }
+            else
+            {
+                return ::realloc(_ptr, _size);
+            }
+        }
+    };
+
     struct CrtStackAllocator : StackAllocatorI
     {
         virtual void* realloc(void* _ptr, size_t _size, size_t _align, const char* /*_file*/, size_t /*_line*/)
@@ -160,6 +182,7 @@ namespace DM_NAMESPACE
     };
 
     extern CrtAllocator      g_crtAllocator;
+    extern CrtCallocator     g_crtCallocator;
     extern CrtStackAllocator g_crtStackAllocator;
 
 } // namespace DM_NAMESPACE
@@ -178,6 +201,7 @@ namespace DM_NAMESPACE
 namespace DM_NAMESPACE
 {
     CrtAllocator      g_crtAllocator;
+    CrtCallocator     g_crtCallocator;
     CrtStackAllocator g_crtStackAllocator;
 } // namespace DM_NAMESPACE
 #endif // (DM_INCL & DM_INCL_IMPL_BODY)
