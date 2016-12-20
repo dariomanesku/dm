@@ -243,6 +243,18 @@ namespace DM_NAMESPACE
             m_count = newCount;
         }
 
+        bool contains(const ElemTy* _obj)
+        {
+            return (&elements()[0] <= _obj && _obj < &elements()[max()]);
+        }
+
+        uint32_t getIdxOf(const ElemTy* _obj)
+        {
+            DM_CHECK(this->contains(_obj), "ObjArrayImpl::getIdxOf() - Invalid input");
+
+            return _obj - &elements()[0];
+        }
+
         void remove(uint32_t _idx)
         {
             DM_CHECK(0 < m_count && m_count <= max(), "ObjArrayImpl::remove() - 0 | %d, %d", m_count, max());
@@ -271,6 +283,11 @@ namespace DM_NAMESPACE
                 const ElemTy* last = &elements()[m_count];
                 elem = ::new (elem) ElemTy(*last);
             }
+        }
+
+        void removeSwap(ElemTy* _obj)
+        {
+            removeSwap(this->getIdxOf(_obj));
         }
 
         void removeAll()
