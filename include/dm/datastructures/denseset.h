@@ -29,13 +29,13 @@ namespace DM_NAMESPACE
         ///     struct DenseSetStorageTemplate
         ///     {
         ///         typedef typename dm::bestfit_type<MaxElementsT>::type ElementType;
-        ///         ElementType* values();
-        ///         ElementType* indices();
+        ///         ElementType* dense();
+        ///         ElementType* sparse();
         ///         ElementType  max();
         ///     };
         typedef typename DenseSetStorageTy::ElementType ElemTy;
-        using DenseSetStorageTy::values;
-        using DenseSetStorageTy::indices;
+        using DenseSetStorageTy::dense;
+        using DenseSetStorageTy::sparse;
         using DenseSetStorageTy::max;
 
         DenseSetImpl() : DenseSetStorageTy()
@@ -54,8 +54,8 @@ namespace DM_NAMESPACE
             }
 
             const ElemTy index = m_num++;
-            values()[index] = _val;
-            indices()[_val] = index;
+            dense()[index] = _val;
+            sparse()[_val] = index;
 
             return index;
         }
@@ -74,23 +74,23 @@ namespace DM_NAMESPACE
         {
             DM_CHECK(_val < max(), "DenseSetImpl::contains() - 0 | %d, %d", _val, max());
 
-            const ElemTy index = indices()[_val];
+            const ElemTy index = sparse()[_val];
 
-            return (index < m_num && values()[index] == _val);
+            return (index < m_num && dense()[index] == _val);
         }
 
         ElemTy indexOf(ElemTy _val)
         {
             DM_CHECK(_val < max(), "DenseSetImpl::indexOf() | %d, %d", _val, max());
 
-            return indices()[_val];
+            return sparse()[_val];
         }
 
         ElemTy getValueAt(size_t _idx)
         {
             DM_CHECK(_idx < max(), "DenseSetImpl::getValueAt() | %zu, %d", _idx, max());
 
-            return values()[_idx];
+            return dense()[_idx];
         }
 
         bool remove(ElemTy _val)
@@ -103,14 +103,14 @@ namespace DM_NAMESPACE
                 return false;
             }
 
-            const ElemTy index = indices()[_val];
-            const ElemTy last = values()[--m_num];
+            const ElemTy index = sparse()[_val];
+            const ElemTy last = dense()[--m_num];
 
             DM_CHECK(index < max(), "DenseSetImpl::remove() - 2 | %d, %d", index, max());
             DM_CHECK(last < max(), "DenseSetImpl::remove() - 3 | %d, %d", last, max());
 
-            values()[index] = last;
-            indices()[last] = index;
+            dense()[index] = last;
+            sparse()[last] = index;
 
             return true;
         }
@@ -134,14 +134,14 @@ namespace DM_NAMESPACE
     {
         typedef ElemTy ElementType;
 
-        ElemTy* values()
+        ElemTy* dense()
         {
-            return m_values;
+            return m_dense;
         }
 
-        ElemTy* indices()
+        ElemTy* sparse()
         {
-            return m_indices;
+            return m_sparse;
         }
 
         ElemTy max()
@@ -150,8 +150,8 @@ namespace DM_NAMESPACE
         }
 
     private:
-        ElemTy m_values[MaxT];
-        ElemTy m_indices[MaxT];
+        ElemTy m_dense[MaxT];
+        ElemTy m_sparse[MaxT];
     };
 
     template <typename ElemTy>
@@ -172,8 +172,8 @@ namespace DM_NAMESPACE
         DenseSetStorageExt()
         {
             m_max = 0;
-            m_values = NULL;
-            m_indices = NULL;
+            m_dense = NULL;
+            m_sparse = NULL;
         }
 
         uint8_t* init(uint32_t _max, uint8_t* _mem)
@@ -181,20 +181,20 @@ namespace DM_NAMESPACE
             const uint32_t haSize = _max*sizeof(ElemTy);
 
             m_max = _max;
-            m_values  = (ElemTy*)_mem;
-            m_indices = (ElemTy*)((uint8_t*)_mem + haSize);
+            m_dense  = (ElemTy*)_mem;
+            m_sparse = (ElemTy*)((uint8_t*)_mem + haSize);
 
             return ((uint8_t*)_mem + 2*haSize);
         }
 
-        ElemTy* values()
+        ElemTy* dense()
         {
-            return m_values;
+            return m_dense;
         }
 
-        ElemTy* indices()
+        ElemTy* sparse()
         {
-            return m_indices;
+            return m_sparse;
         }
 
         uint32_t max()
@@ -204,11 +204,11 @@ namespace DM_NAMESPACE
 
     private:
         uint32_t m_max;
-        ElemTy* m_values;
-        ElemTy* m_indices;
+        ElemTy* m_dense;
+        ElemTy* m_sparse;
     };
 
-    extern CrtAllocator g_crtAllocator;
+    extern CrtCallocator g_crtCallocator;
 
     template <typename ElemTy>
     struct DenseSetStorage
@@ -228,8 +228,8 @@ namespace DM_NAMESPACE
         DenseSetStorage()
         {
             m_max = 0;
-            m_values = NULL;
-            m_indices = NULL;
+            m_dense = NULL;
+            m_sparse = NULL;
         }
 
         ~DenseSetStorage()
@@ -237,36 +237,36 @@ namespace DM_NAMESPACE
             destroy();
         }
 
-        void init(uint32_t _max, AllocatorI* _allocator = &g_crtAllocator)
+        void init(uint32_t _max, AllocatorI* _allocator = &g_crtCallocator)
         {
             const uint32_t haSize = _max*sizeof(ElemTy);
             void* mem = DM_ALLOC(_allocator, 2*haSize);
 
             m_max = _max;
-            m_values = (ElemTy*)mem;
-            m_indices = (ElemTy*)((uint8_t*)mem + haSize);
+            m_dense = (ElemTy*)mem;
+            m_sparse = (ElemTy*)((uint8_t*)mem + haSize);
 
             m_allocator = _allocator;
         }
 
         void destroy()
         {
-            if (NULL != m_values)
+            if (NULL != m_dense)
             {
-                DM_FREE(m_allocator, m_values);
-                m_values = NULL;
-                m_indices = NULL;
+                DM_FREE(m_allocator, m_dense);
+                m_dense = NULL;
+                m_sparse = NULL;
             }
         }
 
-        ElemTy* values()
+        ElemTy* dense()
         {
-            return m_values;
+            return m_dense;
         }
 
-        ElemTy* indices()
+        ElemTy* sparse()
         {
-            return m_indices;
+            return m_sparse;
         }
 
         uint32_t max()
@@ -276,8 +276,8 @@ namespace DM_NAMESPACE
 
     private:
         uint32_t m_max;
-        ElemTy* m_values;
-        ElemTy* m_indices;
+        ElemTy* m_dense;
+        ElemTy* m_sparse;
         AllocatorI* m_allocator;
     };
 
