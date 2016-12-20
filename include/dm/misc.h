@@ -252,29 +252,29 @@ namespace DM_NAMESPACE
     }
 
     /// Example: for input 12780 (12.492KB) returns 12.
-    DM_INLINE uint32_t asKBInt(uint64_t _dataSize)
+    DM_INLINE unsigned int asKBInt(size_t _dataSize)
     {
-        return uint32_t(_dataSize>>10);
+        return (unsigned int)(_dataSize>>10);
     }
 
     /// Example: for input 12780 (12.492KB) returns 492.
-    DM_INLINE uint32_t asKBDec(uint64_t _dataSize)
+    DM_INLINE unsigned int asKBDec(size_t _dataSize)
     {
-        const uint64_t kb = asKBInt(_dataSize);
-        return uint32_t(_dataSize-(kb<<10));
+        const size_t kb = asKBInt(_dataSize);
+        return (unsigned int)(_dataSize-(kb<<10));
     }
 
     /// Example: for input 13450000 (12.846MB) returns 12.
-    DM_INLINE uint32_t asMBInt(uint64_t _dataSize)
+    DM_INLINE unsigned int asMBInt(size_t _dataSize)
     {
-        return uint32_t(_dataSize>>20);
+        return (unsigned int)(_dataSize>>20);
     }
 
     /// Example: for input 13450000 (12.846MB) returns 826.
-    DM_INLINE uint32_t asMBDec(uint64_t _dataSize)
+    DM_INLINE unsigned int asMBDec(size_t _dataSize)
     {
-        const uint64_t mb = asMBInt(_dataSize);
-        return uint32_t((_dataSize-(mb<<20))>>10);
+        const size_t mb = asMBInt(_dataSize);
+        return (unsigned int)((_dataSize-(mb<<20))>>10);
     }
 
     /// Used for formatted print. Example: printf("Size: %u.%uMB", U_UMB(size));
