@@ -125,7 +125,7 @@ namespace DM_NAMESPACE
     }
 
     template <typename Ty/*arithmetic type*/>
-    DM_INLINE void swap(Ty _a, Ty _b)
+    DM_INLINE void swap(Ty& _a, Ty& _b)
     {
         Ty c = _a;
         _a = _b;
