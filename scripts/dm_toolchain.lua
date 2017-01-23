@@ -524,7 +524,7 @@ function dm_toolchain(_buildDir, _projDir, _libDir, _bxDir)
         }
         buildoptions { "-m64" }
 
-    configuration { "linux-gcc and not linux-clang" }
+    configuration { "*-gcc", "*-clang" }
         buildoptions
         {
             "-mfpmath=sse", -- force SSE to get 32-bit and 64-bit builds deterministic.
