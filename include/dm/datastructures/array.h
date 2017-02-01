@@ -248,9 +248,9 @@ namespace DM_NAMESPACE
             return (&elements()[0] <= _obj && _obj < &elements()[max()]);
         }
 
-        uint32_t getIdxOf(const ElemTy* _obj)
+        uint32_t indexOf(const ElemTy* _obj)
         {
-            DM_CHECK(this->contains(_obj), "ObjArrayImpl::getIdxOf() - Invalid input");
+            DM_CHECK(this->contains(_obj), "ObjArrayImpl::indexOf() - Invalid input");
 
             return _obj - &elements()[0];
         }
@@ -287,7 +287,7 @@ namespace DM_NAMESPACE
 
         void removeSwap(ElemTy* _obj)
         {
-            removeSwap(this->getIdxOf(_obj));
+            removeSwap(this->indexOf(_obj));
         }
 
         void removeAll()

@@ -593,7 +593,7 @@ namespace DM_NAMESPACE
 
                     uint8_t* ptr = (uint8_t*)m_allocsData;
                     #define DM_SMALL_ALLOC_DEF(_idx, _size, _num) \
-                        ptr = m_allocs[_idx].init(Num ## _idx, ptr);
+                        ptr += m_allocs[_idx].init(Num ## _idx, ptr);
                     #include "allocator_config.h"
 
                     m_begin[0] = (uint8_t*)m_mem;

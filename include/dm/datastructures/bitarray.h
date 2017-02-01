@@ -6,10 +6,10 @@
 
 /// Header includes.
 #if (DM_INCL & DM_INCL_HEADER_INCLUDES)
-    #include <stdint.h>
-    #include "../check.h"
-    #include "../allocatori.h"
-    #include "../bitops.h"
+#   include <stdint.h>
+#   include "../check.h"
+#   include "../allocatori.h"
+#   include "../bitops.h"
 #endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
 /// Header body.
@@ -40,7 +40,7 @@ namespace DM_NAMESPACE
         using BitArrayStorageTy::max;
 
         /// Notice: requires zero initialization!
-        /// Either call reset() or use it as static object.
+        /// Either call zero() or use it as static object.
         BitArrayImpl() : BitArrayStorageTy()
         {
         }
@@ -67,7 +67,7 @@ namespace DM_NAMESPACE
         void setRange(uint32_t _begin, uint32_t _end)
         {
             DM_CHECK(_begin < max(), "BitArray::setRange() begin | %d, %d", _begin, max());
-            DM_CHECK(_end < max(), "BitArray::setRange() end | %d, %d", _end, max());
+            DM_CHECK(_end   < max(), "BitArray::setRange() end   | %d, %d", _end,   max());
 
             const size_t bucketBegin = _begin>>6;
             const size_t bucketEnd   = _end>>6;
@@ -104,7 +104,7 @@ namespace DM_NAMESPACE
         void unsetRange(uint32_t _begin, uint32_t _end)
         {
             DM_CHECK(_begin < max(), "BitArray::unsetRange() begin | %d, %d", _begin, max());
-            DM_CHECK(_end < max(), "BitArray::unsetRange() end | %d, %d", _end, max());
+            DM_CHECK(_end   < max(), "BitArray::unsetRange() end   | %d, %d", _end,   max());
 
             const size_t bucketBegin = _begin>>6;
             const size_t bucketEnd   = _end>>6;
@@ -311,13 +311,18 @@ namespace DM_NAMESPACE
             return uint32_t(count);
         }
 
-        void reset(uint32_t _startBucket, uint32_t _endBucket)
+        void zero(uint32_t _startBucket, uint32_t _endBucket)
         {
             m_last = 0;
             memset(bits()+_startBucket, 0, (_endBucket-_startBucket)*sizeof(uint64_t));
         }
 
-        void reset()
+        size_t dataSize()
+        {
+            return numSlots()*sizeof(uint64_t);
+        }
+
+        void zero()
         {
             m_last = 0;
             memset(bits(), 0, numSlots()*sizeof(uint64_t));
@@ -353,7 +358,7 @@ namespace DM_NAMESPACE
     {
         static inline uint32_t numSlotsFor(uint32_t _max)
         {
-            return ((_max-1)>>6) + 1;
+            return (_max + 63)/64;
         }
 
         static inline uint32_t sizeFor(uint32_t _max)
@@ -363,18 +368,29 @@ namespace DM_NAMESPACE
 
         BitArrayStorageExt()
         {
+            m_free = NULL;
             m_bits = NULL;
             m_numSlots = 0;
             m_max = 0;
         }
 
-        uint8_t* init(uint32_t _max, uint8_t* _mem)
+        ~BitArrayStorageExt()
         {
+            if (NULL != m_free)
+            {
+                DM_FREE(m_free, m_bits);
+                m_bits = NULL;
+            }
+        }
+
+        size_t init(uint32_t _max, uint8_t* _mem, AllocatorI* _free = NULL)
+        {
+            m_free = _free;
             m_bits = (uint64_t*)_mem;
             m_numSlots = numSlotsFor(_max);
             m_max = _max;
 
-            return ((uint8_t*)_mem + sizeFor(_max));
+            return sizeFor(_max);
         }
 
         uint64_t* bits()
@@ -392,6 +408,7 @@ namespace DM_NAMESPACE
             return m_max;
         }
 
+        AllocatorI* m_free;
         uint64_t* m_bits;
         uint32_t m_numSlots;
         uint32_t m_max;
@@ -403,7 +420,7 @@ namespace DM_NAMESPACE
     {
         static inline uint32_t numSlotsFor(uint32_t _max)
         {
-            return ((_max-1)>>6) + 1;
+            return (_max + 63)/64;
         }
 
         static inline uint32_t sizeFor(uint32_t _max)
@@ -466,7 +483,7 @@ namespace DM_NAMESPACE
 
         BitArrayT()
         {
-            Base::reset();
+            Base::zero();
         }
     };
 
@@ -474,12 +491,12 @@ namespace DM_NAMESPACE
     {
         typedef BitArrayImpl<BitArrayStorageExt> Base;
 
-        uint8_t* init(uint32_t _max, uint8_t* _mem)
+        size_t init(uint32_t _max, uint8_t* _mem, AllocatorI* _free = NULL)
         {
-            uint8_t* ptr = Base::init(_max, _mem);
-            Base::reset();
+            size_t size = Base::init(_max, _mem, _free);
+            Base::zero();
 
-            return ptr;
+            return size;
         }
     };
 
@@ -490,7 +507,7 @@ namespace DM_NAMESPACE
         void init(uint32_t _max, AllocatorI* _allocator = &g_crtAllocator)
         {
             Base::init(_max, _allocator);
-            Base::reset();
+            Base::zero();
         }
     };
 

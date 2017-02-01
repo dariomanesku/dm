@@ -7,28 +7,28 @@
 
 /// Header includes.
 #if (DM_INCL & DM_INCL_HEADER_INCLUDES)
-    #include <stdint.h>  // uint32_t
-    #include <stddef.h>  // offsetof()
-    #include <stdlib.h>  // _fullpath
-    #include <stdarg.h>  // va_arg
-    #include <ctype.h>   // toupper()
-    #include <math.h>    // logf()
-    #include <stdio.h>   // FILE, fopen()
-    #include <float.h>   // FLT_EPSILON
-    #include <malloc.h>  // alloca()
+#   include <stdint.h>  // uint32_t
+#   include <stddef.h>  // offsetof()
+#   include <stdlib.h>  // _fullpath
+#   include <stdarg.h>  // va_arg
+#   include <ctype.h>   // toupper()
+#   include <math.h>    // logf()
+#   include <stdio.h>   // FILE, fopen()
+#   include <float.h>   // FLT_EPSILON
+#   include <malloc.h>  // alloca()
 
-    #include "dm.h"       // DM_INLINE()
-    #include "check.h"    // DM_CHECK()
-    #include "bitops.h"   // cntlz_u32(), cntlz_u64()
-    #include "platform.h" // DM_COMPILER_MSVC
-    #include "os.h"       // pwd()
+#   include "dm.h"       // DM_INLINE()
+#   include "check.h"    // DM_CHECK()
+#   include "bitops.h"   // cntlz_u32(), cntlz_u64()
+#   include "platform.h" // DM_COMPILER_MSVC
+#   include "os.h"       // pwd()
 
-    #if DM_PLATFORM_LINUX
-    #   ifndef DM_REALPATH_H_INCLUDE_HEADER_GUARD
-    #   define DM_REALPATH_H_INCLUDE_HEADER_GUARD
-    #       include "../../3rdparty/realpath/realpath.h"
-    #   endif // DM_REALPATH_H_INCLUDE_HEADER_GUARD
-    #endif // DM_PLATFORM_LINUX
+#   if DM_PLATFORM_LINUX
+#      ifndef DM_REALPATH_H_INCLUDE_HEADER_GUARD
+#      define DM_REALPATH_H_INCLUDE_HEADER_GUARD
+#          include "../../3rdparty/realpath/realpath.h"
+#      endif // DM_REALPATH_H_INCLUDE_HEADER_GUARD
+#   endif // DM_PLATFORM_LINUX
 #endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
 /// Header body.
