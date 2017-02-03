@@ -383,7 +383,7 @@ namespace DM_NAMESPACE
 
     DM_INLINE bool equals(float _a, float _b, float _epsilon = FLT_EPSILON)
     {
-        return fabsf(_a - _b) < _epsilon;
+        return fabsf(_a - _b) <= _epsilon*max(1.0,max(_a, _b));
     }
 
     /// Example: for input 5.34f returns 5.0f.
