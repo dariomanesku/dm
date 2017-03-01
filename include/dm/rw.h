@@ -201,14 +201,14 @@ namespace DM_NAMESPACE
         _rw->m_error = 0;
     }
 
-    #if CMFT_COMPILER_MSVC
+    #if DM_COMPILER_MSVC
     #   ifndef fseeko64
     #      define fseeko64 _fseeki64
     #   endif // fseeko64
     #   ifndef ftello64
     #      define ftello64 _fseeki64
     #   endif // ftello64
-    #elif CMFT_PLATFORM_APPLE
+    #elif DM_PLATFORM_APPLE
     #   ifndef fseeko64
     #      define fseeko64 fseeko
     #   endif // fseeko64

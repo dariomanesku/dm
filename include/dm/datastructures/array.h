@@ -7,10 +7,10 @@
 
 /// Header includes.
 #if (DM_INCL & DM_INCL_HEADER_INCLUDES)
-    #include <new>
-    #include <string.h> // memmove()
-    #include "../check.h"
-    #include "../allocatori.h"
+#   include <new>
+#   include <string.h> // memmove()
+#   include "../check.h"
+#   include "../allocatori.h"
 #endif // (DM_INCL & DM_INCL_HEADER_INCLUDES)
 
 /// Header body.
@@ -108,6 +108,13 @@ namespace DM_NAMESPACE
             return val;
         }
 
+        void cut(uint32_t _newCount)
+        {
+            DM_CHECK(_newCount <= m_count, "ArrayImpl::cut() - 0 | %d, %d", _newCount, m_count);
+
+            m_count = _newCount;
+        }
+
         ElemTy get(uint32_t _idx)
         {
             DM_CHECK(_idx < max(), "ArrayImpl::get() | %d, %d", _idx, max());
@@ -196,22 +203,6 @@ namespace DM_NAMESPACE
             }
 
             DM_CHECK((m_count+_count) <= max(), "ObjArrayImpl::addNew(_count) | %d, %d, %d", m_count, _count, max());
-
-            const uint32_t beg = m_count;
-            const uint32_t end = beg + _count;
-
-            m_count = end;
-            return &elements()[beg];
-        }
-
-        ElemTy* addInitNew(uint32_t _count = 1)
-        {
-            if (isResizable())
-            {
-                expandIfNecessaryToMakeRoomFor(_count);
-            }
-
-            DM_CHECK((m_count+_count) <= max(), "ObjArrayImpl::addInitNew(_count) | %d, %d, %d", m_count, _count, max());
 
             const uint32_t beg = m_count;
             const uint32_t end = beg + _count;

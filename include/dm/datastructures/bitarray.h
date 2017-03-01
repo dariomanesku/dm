@@ -328,6 +328,12 @@ namespace DM_NAMESPACE
             memset(bits(), 0, numSlots()*sizeof(uint64_t));
         }
 
+        void one()
+        {
+            m_last = 0;
+            memset(bits(), -1, numSlots()*sizeof(uint64_t));
+        }
+
     private:
         uint32_t m_last;
     };
